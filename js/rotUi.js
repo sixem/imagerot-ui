@@ -37,7 +37,7 @@
             },
         },
         anaglyph: {
-            description: 'Adds a anaglyph effect to the image.',
+            description: 'Adds an anaglyph effect (3D effect) to the image.',
             format: 'Anaglyph (3D)',
             config: {
                 redShift: ['object', {
@@ -450,8 +450,16 @@
     populateSelect('select@effectSelect', predefinedEffects);
     populateSelect('select@modeSelect', predefinedModes);
 
+    // Make workflow container focusable
+    $('div@workOrder').setAttribute('tabindex', '0');
+
     // Index for workflow items
     let workFlowIndex = 0;
+
+    // Selected workflow indices for editing/deletion
+    const selectedWorkflowIndices = new Set();
+
+    let anchorDataIndex = null;
 
     // Utility to flatten values for display
     const flattenValues = (val) => {
@@ -516,14 +524,69 @@
         }
     };
 
+    // Load options into the effect config UI
+    const loadOptionsToUI = (options, effectName) => {
+        const config = predefinedEffects[effectName].config;
+        if (!config || !options) return;
+
+        for (const [key, value] of Object.entries(options)) {
+            const def = config[key];
+            if (!def) continue;
+            const type = def[0];
+
+            if (type === 'number') {
+                const transform = def[4];
+                const test = transform(1);
+                let multiplier = 1;
+                if (test === 0.01) multiplier = 100;
+                else if (test === 0.1) multiplier = 10;
+                else multiplier = 1;
+                const uiValue = value * multiplier;
+                const range = $('div.effectConfig input[type="range"][data-key="' + key + '"]', false);
+                if (range) {
+                    range.value = uiValue;
+                    range.dispatchEvent(new Event('input'));
+                }
+            } else if (type === 'string') {
+                const select = $('div.effectConfig select[data-key="' + key + '"]', false);
+                if (select) {
+                    select.value = value;
+                    select.dispatchEvent(new Event('change'));
+                }
+            } else if (type === 'color') {
+                const input = $('div.effectConfig input[data-key="' + key + '"]', false);
+                if (input) {
+                    const rgb = `rgb(${value.join(', ')})`;
+                    input.value = rgb;
+                    input.jscolor.fromString(rgb);
+                    input.dispatchEvent(new Event('input'));
+                }
+            } else if (type === 'object') {
+                for (const [subkey, subvalue] of Object.entries(value)) {
+                    const subdef = def[1][subkey];
+                    const subtransform = subdef[4];
+                    const test = subtransform(1);
+                    let multiplier = 1;
+                    if (test === 0.01) multiplier = 100;
+                    else if (test === 0.1) multiplier = 10;
+                    else multiplier = 1;
+                    const uiValue = subvalue * multiplier;
+                    const range = $('div.effectConfig input[type="range"][data-key="' + key + '.' + subkey + '"]', false);
+                    if (range) {
+                        range.value = uiValue;
+                        range.dispatchEvent(new Event('input'));
+                    }
+                }
+            }
+        }
+    };
+
     // Handle effect selection change and build config UI
     const onEffectSelect = () => {
         const effectName = $('select@effectSelect').value;
         if (!predefinedEffects[effectName]) return;
 
         $('div.effectConfig').innerHTML = '';
-
-        const addButton = createElement('div', 'Add effect to workflow', { class: 'button' });
 
         const config = {
             effect: effectName,
@@ -562,6 +625,7 @@
                         max,
                         value: current,
                         'data-actual': config.options[key],
+                        'data-key': key,
                     });
 
                     range.addEventListener('input', (e) => {
@@ -575,6 +639,7 @@
                     const subconfig = value[1];
                     const groupLabel = createElement('div', `${capitalize(key)}:`, { class: 'configItemHeader group' });
                     const groupContainer = createElement('div', '', { style: 'display: flex; flex-direction: row; gap: 10px;' });
+
                     $('div.effectConfig').append(groupLabel, groupContainer);
 
                     for (const [subkey, subvalue] of Object.entries(subconfig)) {
@@ -599,6 +664,7 @@
                                 max,
                                 value: current,
                                 'data-actual': config.options[key][subkey],
+                                'data-key': `${key}.${subkey}`,
                             });
 
                             range.addEventListener('input', (e) => {
@@ -614,7 +680,7 @@
                         // Add support for other sub-types if needed in the future
                     }
                 } else if (value[0] === 'string' && Array.isArray(value[1])) {
-                    const input = createElement('select', '', { style: 'margin-top: 8px' });
+                    const input = createElement('select', '', { style: 'margin-top: 8px', 'data-key': key });
 
                     value[1].forEach((option) => {
                         if (!config.options[key]) config.options[key] = option;
@@ -633,6 +699,7 @@
                     const input = createElement('input', '', {
                         'data-jscolor': JSON.stringify({ preset: 'dark' }),
                         value: `rgb(${current.join(', ')})`,
+                        'data-key': key,
                     });
 
                     const label = createElement('div', `${capitalize(key)}:`, {
@@ -654,15 +721,92 @@
             }
         }
 
+        let selectedItem = null;
+        let selectedIndex = null;
+        if (selectedWorkflowIndices.size === 1) {
+            selectedIndex = [...selectedWorkflowIndices][0];
+            selectedItem = workFlowStructure[Number(selectedIndex)];
+        }
+
+        if (selectedItem && selectedItem.effect === effectName) {
+            loadOptionsToUI(selectedItem.options, effectName);
+        }
+
+        // Create buttons
+        const buttonContainer = createElement('div', '', { style: 'margin-top: 10px; display: flex; gap: 10px;' });
+
+        const addButton = createElement('div', 'Add effect to workflow', { class: 'button', style: 'flex: 1;' });
         addButton.addEventListener('click', () => {
             workflowAddItem('effect', effectName, config);
+            // Clear selection when adding a new effect
+            document.querySelectorAll('.workItem.selected').forEach(el => el.classList.remove('selected'));
+            selectedWorkflowIndices.clear();
+            anchorDataIndex = null;
+            updateEditFromSelection();
         });
+        buttonContainer.appendChild(addButton);
 
-        $('div.effectConfig').appendChild(addButton);
+        if (selectedItem && selectedItem.effect === effectName) {
+            const updateButton = createElement('div', 'Apply', { class: 'button' });
+            updateButton.addEventListener('click', () => {
+                workFlowStructure[Number(selectedIndex)] = JSON.parse(JSON.stringify(config));
+
+                const itemElem = $(`div.workItem[data-index="${selectedIndex}"]`, false);
+                if (itemElem) {
+                    const span = itemElem.querySelector('span');
+                    span.childNodes[0].nodeValue = capitalize(config.format || config.effect);
+                    let optSpan = span.querySelector('span');
+                    const optsStr = Object.keys(config.options).length > 0 ? Object.values(config.options).map(flattenValues).join(',') : '';
+
+                    if (optsStr) {
+                        if (optSpan) {
+                            optSpan.textContent = `[${optsStr}]`;
+                        } else {
+                            optSpan = createElement('span', `[${optsStr}]`);
+                            span.appendChild(optSpan);
+                        }
+                    } else if (optSpan) {
+                        optSpan.remove();
+                    }
+                }
+            });
+            buttonContainer.appendChild(updateButton);
+        }
+
+        $('div.effectConfig').appendChild(buttonContainer);
+    };
+
+    // Update the edit UI based on current selection
+    const updateEditFromSelection = () => {
+        const num = selectedWorkflowIndices.size;
+        if (num === 0 || num > 1) {
+            onEffectSelect();
+        } else {
+            const single = [...selectedWorkflowIndices][0];
+            const item = workFlowStructure[Number(single)];
+            if (item && item.effect) {
+                $('select@effectSelect').value = item.effect;
+                onEffectSelect();
+            } else {
+                onEffectSelect();
+            }
+        }
     };
 
     // Set up effect select events and default
-    $('select@effectSelect').addEventListener('change', onEffectSelect);
+    $('select@effectSelect').addEventListener('change', () => {
+        const effectName = $('select@effectSelect').value;
+        if (selectedWorkflowIndices.size === 1) {
+            const selectedIndex = [...selectedWorkflowIndices][0];
+            const selectedItem = workFlowStructure[Number(selectedIndex)];
+            if (selectedItem && selectedItem.effect && selectedItem.effect !== effectName) {
+                document.querySelectorAll('.workItem.selected').forEach(el => el.classList.remove('selected'));
+                selectedWorkflowIndices.clear();
+                anchorDataIndex = null;
+            }
+        }
+        onEffectSelect();
+    });
     $('select@effectSelect').value = 'degrade';
     onEffectSelect();
 
@@ -671,21 +815,118 @@
     $('select@modeSelect').value = 'pixelsort';
     onModeSelect();
 
-    // Handle removal of workflow items
+    // Handle removal of workflow items and selection
     $('div@workOrder').addEventListener('click', (e) => {
         if (e.target.classList.contains('remove')) {
             const parent = e.target.parentElement;
             const itemIndex = parent.getAttribute('data-index');
 
-            if (workFlowStructure[itemIndex]) {
-                delete workFlowStructure[itemIndex];
+            if (workFlowStructure[Number(itemIndex)]) {
+                delete workFlowStructure[Number(itemIndex)];
             }
 
             parent.remove();
 
+            if (selectedWorkflowIndices.has(itemIndex)) {
+                selectedWorkflowIndices.delete(itemIndex);
+            }
+
             if (workflowGet().length === 0) {
                 $('div@workOrder').classList.add('workEmpty');
             }
+
+            updateEditFromSelection();
+        } else {
+            const parent = e.target.closest('.workItem');
+            if (!parent) return;
+
+            const index = parent.getAttribute('data-index');
+            const items = [...$('div@workOrder').querySelectorAll('div.workItem')];
+
+            if (e.shiftKey) {
+                if (anchorDataIndex !== null) {
+                    const anchorEl = $(`div.workItem[data-index="${anchorDataIndex}"]`, false);
+                    if (anchorEl) {
+                        document.querySelectorAll('.workItem.selected').forEach(el => el.classList.remove('selected'));
+                        selectedWorkflowIndices.clear();
+
+                        const anchorPos = items.indexOf(anchorEl);
+                        const currentPos = items.indexOf(parent);
+                        const start = Math.min(anchorPos, currentPos);
+                        const end = Math.max(anchorPos, currentPos);
+                        for (let i = start; i <= end; i++) {
+                            const el = items[i];
+                            el.classList.add('selected');
+                            selectedWorkflowIndices.add(el.getAttribute('data-index'));
+                        }
+                    }
+                }
+            } else if (e.ctrlKey) {
+                if (selectedWorkflowIndices.has(index)) {
+                    selectedWorkflowIndices.delete(index);
+                    parent.classList.remove('selected');
+                } else {
+                    selectedWorkflowIndices.add(index);
+                    parent.classList.add('selected');
+                }
+                anchorDataIndex = index;
+            } else {
+                document.querySelectorAll('.workItem.selected').forEach(el => el.classList.remove('selected'));
+                selectedWorkflowIndices.clear();
+                selectedWorkflowIndices.add(index);
+                parent.classList.add('selected');
+                anchorDataIndex = index;
+            }
+
+            updateEditFromSelection();
+        }
+    });
+
+    // Handle delete key for removing selected items and arrow keys for navigation
+    document.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+        const workflowContainer = $('div@workOrder');
+        if (e.key === 'Delete' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            if (document.activeElement !== workflowContainer) return;
+        }
+
+        if (e.key === 'Delete') {
+            for (const idx of [...selectedWorkflowIndices]) {
+                const el = $(`div.workItem[data-index="${idx}"]`, false);
+                if (el) {
+                    delete workFlowStructure[Number(idx)];
+                    el.remove();
+                }
+            }
+            selectedWorkflowIndices.clear();
+            anchorDataIndex = null;
+            if (workflowGet().length === 0) {
+                $('div@workOrder').classList.add('workEmpty');
+            }
+            updateEditFromSelection();
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            if (selectedWorkflowIndices.size !== 1) return;
+            const current = [...selectedWorkflowIndices][0];
+            const items = [...$('div@workOrder').querySelectorAll('div.workItem')];
+            const pos = items.findIndex(el => el.getAttribute('data-index') === current);
+            let newPos = pos + (e.key === 'ArrowDown' ? 1 : -1);
+            if (newPos >= 0 && newPos < items.length) {
+                const newIndex = items[newPos].getAttribute('data-index');
+                const parent = items[newPos];
+                document.querySelectorAll('.workItem.selected').forEach(el => el.classList.remove('selected'));
+                selectedWorkflowIndices.clear();
+                selectedWorkflowIndices.add(newIndex);
+                parent.classList.add('selected');
+                anchorDataIndex = newIndex;
+                updateEditFromSelection();
+                parent.scrollIntoView({ block: 'nearest' });
+                e.preventDefault();
+            }
+        } else if (e.key === 'Escape') {
+            getOverlay().remove();
+        } else if (e.key === 'Enter') {
+            $('div@generate').click();
         }
     });
 
@@ -710,15 +951,6 @@
         });
 
         overlay.appendChild(container);
-    });
-
-    // Keyboard shortcuts: Escape to close overlay, Enter to process
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            getOverlay().remove();
-        } else if (e.key === 'Enter') {
-            $('div@generate').click();
-        }
     });
 
     // Make workflow order sortable

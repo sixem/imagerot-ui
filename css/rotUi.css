@@ -268,7 +268,10 @@ div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem {
     align-items: center;
     position: relative;
     transition: background-color .05s ease-in-out;
-    border-left: 2px solid transparent;
+}
+
+div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem.selected {
+    background-color: #28293e;
 }
 
 div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem:first-child {
@@ -285,12 +288,11 @@ div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem>div.r
     background-color: #20212d;
     position: absolute;
     inset: 0 0 auto auto;
-    border-left: 1px solid #2a2c3f;
     cursor: pointer;
 }
 
 div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem>div.remove:hover {
-    background-color: #292b3b;
+    background-color: #30314b;
 }
 
 div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem>div.remove::before {
@@ -314,12 +316,9 @@ div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem>span 
 }
 
 div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem>span>span {
-    color: #afafaf;
+    color: #8e8ba7;
     padding-left: 6px;
-}
-
-div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem:hover {
-    border-left: 2px solid #fff;
+    font-size: 0.9em;
 }
 
 div.wrapper div.selector div.uiSection.workFlow div.workOrder div.workItem:not(:last-child) {
@@ -381,10 +380,6 @@ div.wrapper div.selector div.description {
 
 div.wrapper div.selector div.effectAdd div.effectConfig {
     text-align: left;
-}
-
-div.wrapper div.selector div.effectAdd div.effectConfig div.button {
-    padding: 4px 0 !important;
 }
 
 div.wrapper div.selector div.effectAdd div.effectConfig div.configItemHeader {
@@ -714,6 +709,7 @@ div.wrapper div.selector div.uiSection.workFlow div.workOrder {
     background-color: #1a1b26;
     border: 1px solid #242535;
     border-radius: 4px;
+    outline: none;
 }
 
 div.wrapper div.selector div.uiSection.workFlow div.workOrder::-webkit-scrollbar {
