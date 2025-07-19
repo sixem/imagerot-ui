@@ -38,14 +38,20 @@
         },
         anaglyph: {
             description: 'Adds a anaglyph effect to the image.',
-            format: 'Anaglyph',
+            format: 'Anaglyph (3D)',
             config: {
-                redShiftX: ['number', -100, 5, 100, (n) => n, null, 'Red channel horizontal shift'],
-                redShiftY: ['number', -100, 0, 100, (n) => n, null, 'Red channel vertical shift'],
-                greenShiftX: ['number', -100, -5, 100, (n) => n, null, 'Green channel horizontal shift'],
-                greenShiftY: ['number', -100, 0, 100, (n) => n, null, 'Green channel vertical shift'],
-                blueShiftX: ['number', -100, 0, 100, (n) => n, null, 'Blue channel horizontal shift'],
-                blueShiftY: ['number', -100, 5, 100, (n) => n, null, 'Blue channel vertical shift'],
+                redShift: ['object', {
+                    x: ['number', -100, 5, 100, (n) => Number(n), null, 'Red channel horizontal shift'],
+                    y: ['number', -100, 0, 100, (n) => Number(n), null, 'Red channel vertical shift'],
+                }],
+                greenShift: ['object', {
+                    x: ['number', -100, -5, 100, (n) => Number(n), null, 'Green channel horizontal shift'],
+                    y: ['number', -100, 0, 100, (n) => Number(n), null, 'Green channel vertical shift'],
+                }],
+                blueShift: ['object', {
+                    x: ['number', -100, 0, 100, (n) => Number(n), null, 'Blue channel horizontal shift'],
+                    y: ['number', -100, 5, 100, (n) => Number(n), null, 'Blue channel vertical shift'],
+                }],
             },
         },
         pixelate: {
@@ -447,6 +453,15 @@
     // Index for workflow items
     let workFlowIndex = 0;
 
+    // Utility to flatten values for display
+    const flattenValues = (val) => {
+        if (Array.isArray(val)) return val.join(',');
+        if (typeof val === 'object' && val !== null) {
+            return Object.values(val).map(flattenValues).join(',');
+        }
+        return val;
+    };
+
     // Add item to workflow UI and structure
     const workflowAddItem = (type, name, config) => {
         const container = createElement('div', '', {
@@ -457,9 +472,8 @@
         const span = createElement('span', capitalize(config.format || name));
 
         if (config.options && Object.keys(config.options).length > 0) {
-            span.appendChild(
-                createElement('span', `[${Object.values(config.options).join(',').replace(', ', '')}]`)
-            );
+            const optsStr = Object.values(config.options).map(flattenValues).join(',');
+            span.appendChild(createElement('span', `[${optsStr}]`));
         }
 
         container.append(span, createElement('div', '', { class: 'remove' }));
@@ -557,6 +571,48 @@
                     });
 
                     $('div.effectConfig').append(label, range);
+                } else if (value[0] === 'object') {
+                    const subconfig = value[1];
+                    const groupLabel = createElement('div', `${capitalize(key)}:`, { class: 'configItemHeader group' });
+                    const groupContainer = createElement('div', '', { style: 'display: flex; flex-direction: row; gap: 10px;' });
+                    $('div.effectConfig').append(groupLabel, groupContainer);
+
+                    for (const [subkey, subvalue] of Object.entries(subconfig)) {
+                        if (subvalue[0] === 'number') {
+                            const [min, current, max, transform, symbol, title] = subvalue.slice(1);
+
+                            if (!config.options[key]) config.options[key] = {};
+                            config.options[key][subkey] = transform(current);
+
+                            const sublabel = createElement(
+                                'div',
+                                `${capitalize(subkey)} (${config.options[key][subkey]}${symbol || ''}):`,
+                                {
+                                    class: 'configItemHeader numeric sub',
+                                    title: title || '',
+                                }
+                            );
+
+                            const range = createElement('input', '', {
+                                type: 'range',
+                                min,
+                                max,
+                                value: current,
+                                'data-actual': config.options[key][subkey],
+                            });
+
+                            range.addEventListener('input', (e) => {
+                                config.options[key][subkey] = transform(e.target.value);
+                                range.setAttribute('data-actual', config.options[key][subkey]);
+                                sublabel.textContent = `${capitalize(subkey)} (${config.options[key][subkey]}${symbol || ''}):`;
+                            });
+
+                            const subContainer = createElement('div', '', { style: 'flex: 1;' });
+                            subContainer.append(sublabel, range);
+                            groupContainer.append(subContainer);
+                        }
+                        // Add support for other sub-types if needed in the future
+                    }
                 } else if (value[0] === 'string' && Array.isArray(value[1])) {
                     const input = createElement('select', '', { style: 'margin-top: 8px' });
 
