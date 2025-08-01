@@ -1,6 +1,6 @@
-import type { TEffectConfigItem } from '@/data/types';
+import type { TEffectConfigItem, TEffectItem, TEffectConfigNumber, TModeItem } from '@/data/types';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Fragment } from 'react';
 import { effects, modes } from '@/data/';
 import { Github } from '@/icons/';
 import { Config } from '@/config';
@@ -37,14 +37,18 @@ const FileInput = () => {
 /**
  * Mode selection
  */
-const SelectionMode = ({ onChange }: { onChange: (string) => void; }) => {
+const SelectionMode = ({ onChange }: { onChange: (mode: string) => void; }) => {
     const selectionRef = useRef<HTMLSelectElement>(null);
-    const [selected, setSelected] = useState<string | null>(null);
+    const [selected, setSelected] = useState<TModeItem | null>(null);
 
     const event = () => {
         if (selectionRef.current) {
-            setSelected(selectionRef.current.value);
-            onChange(selectionRef.current.value);
+            const value  = selectionRef.current.value;
+
+            if (modes[value]) {
+                setSelected(modes[value]);
+                onChange(value);
+            }
         }
     };
 
@@ -56,7 +60,7 @@ const SelectionMode = ({ onChange }: { onChange: (string) => void; }) => {
 
             <div className="selection-buttoned">
                 <select name="mode-select" ref={selectionRef} onChange={event}>
-                    {(Object.keys(modes).map((mode, index) => {
+                    {(Object.keys(modes).map((mode) => {
                         return <option key={mode} value={mode}>{mode}</option>;
                     }))}
                 </select>
@@ -64,22 +68,35 @@ const SelectionMode = ({ onChange }: { onChange: (string) => void; }) => {
             </div>
 
             <div className="description">
-                {modes[selected]?.description || "Adds the selected mode to the workflow."}
+                {selected?.description || "Adds the selected mode to the workflow."}
             </div>
         </div>
     );
 };
 
-const RnageInput = () => {
+const RangeInput = ({ name, item }: { name: string; item: TEffectConfigNumber; }) => {
+    const [type, min, current, max, f, postfix, description] = item as TEffectConfigNumber;
+    const [value, setValue] = useState<number>(current);
+    const ref = useRef<HTMLInputElement>(null);
+
+    const onChange = () => {
+        if (ref.current) {
+            setValue(parseInt(ref.current.value));
+        }
+    };
+
     return (
-        <input type="range" min="0" max="100" value="7" data-actual="0.07" data-key="quality"></input>
+        <Fragment>
+            <div key={type}>{name} ({f(value)}{postfix || ''})</div>
+            <input type="range" {...{ min, max, value, onChange, ref }} data-actual={f(value)} data-key={name} />
+        </Fragment>
     );
 };
 
 /**
  * Effect configuration
  */
-const SelectionEffectConfig = ({ config }: { config: TEffectConfigItem }) => {
+const SelectionEffectConfig = ({ config }: { config: { [key: string]: TEffectConfigItem } }) => {
     useEffect(() => {
         console.log(config);
     });
@@ -87,10 +104,25 @@ const SelectionEffectConfig = ({ config }: { config: TEffectConfigItem }) => {
     return (
         <div className="configuration">
             {Object.keys(config).map((key) => {
-                const item = config[key];
+                const effect = config[key];
+                const type = effect[0];
 
-                return <div key={key}>{key}</div>
-            })}
+                console.log(effect);
+
+                if (type === 'number') {
+                    return (
+                        <div className="config-item" key={key}>
+                            <RangeInput name={key} item={effect} />
+                        </div>
+                    );
+                } else if (type === 'string') {
+                    return <div key={key}>{key} string</div>;
+                } else if (type === 'color') {
+                    return <div key={key}>{key} color</div>;
+                }
+
+                return null;
+            }).filter(_ => _)}
         </div>
     );
 };
@@ -98,17 +130,17 @@ const SelectionEffectConfig = ({ config }: { config: TEffectConfigItem }) => {
 /**
  * Effect selection
  */
-const SelectionEffect = ({ onChange }: { onChange: (string) => void; }) => {
+const SelectionEffect = ({ onChange }: { onChange: (effect: string) => void; }) => {
     const selectionRef = useRef<HTMLSelectElement>(null);
-    const [selected, setSelected] = useState<object | null>(null);
+    const [selected, setSelected] = useState<TEffectItem | null>(null);
 
     const event = () => {
         if (selectionRef.current) {
-            const value  = selectionRef.current.value;
+            const value = selectionRef.current.value;
 
             if (effects[value]) {
                 setSelected(effects[value]);
-                onChange(selectionRef.current.value);
+                onChange(value);
             }
         }
     };
@@ -120,14 +152,14 @@ const SelectionEffect = ({ onChange }: { onChange: (string) => void; }) => {
             <div className="sub-header">Available effects:</div>
 
             <select name="effect-select" ref={selectionRef} onChange={event}>
-                {(Object.keys(effects).map((key, index) => {
+                {(Object.keys(effects).map((key) => {
                     const formated = effects[key]?.format || key;
                     return <option key={key} value={key}>{formated}</option>;
                 }))}
             </select>
 
             <div className="description">
-                {effects[selected]?.description || "Adds the selected effect to the workflow."}
+                {selected?.description || "Adds the selected effect to the workflow."}
             </div>
 
             {selected?.config ? <SelectionEffectConfig config={selected.config} /> : null}

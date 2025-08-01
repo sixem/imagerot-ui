@@ -9,6 +9,19 @@
     scrollbar-width: thin;
 }
 
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #101118;
+}
+
+*::-webkit-scrollbar-track {
+    background: #20212d;
+}
+
 body {
     background: repeating-conic-gradient(#0b0b0b 0 25%, #000 0 50%) 50% / 20px 20px;
 }
@@ -62,6 +75,51 @@ input[type="file"] {
     width: 100%;
     text-align: left;
     padding: 8px;
+}
+
+input[type=range] {
+    margin: 4px 0;
+    appearance: none;
+    height: 5px;
+    border-radius: 4px;
+    background: #1a1b26;
+    outline: none;
+    transition: .2s;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: $thumb-dimensions;
+    height: $thumb-dimensions;
+    background: $thumb-background;
+    box-shadow: $thumb-box-shadow;
+    border-radius: $thumb-border-radius;
+    border: none;
+    cursor: pointer;
+}
+
+@supports (-moz-appearance: none) {
+    input[type=range]::-moz-range-thumb {
+        width: $thumb-dimensions;
+        height: $thumb-dimensions;
+        background: $thumb-background;
+        box-shadow: $thumb-box-shadow;
+        border-radius: $thumb-border-radius;
+        border: none;
+        cursor: pointer;
+    }
+}
+
+@supports (-ms-appearance: none) {
+    input[type=range]::-ms-thumb {
+        width: $thumb-dimensions;
+        height: $thumb-dimensions;
+        background: $thumb-background;
+        box-shadow: $thumb-box-shadow;
+        border-radius: $thumb-border-radius;
+        border: none;
+        cursor: pointer;
+    }
 }
 
 select {

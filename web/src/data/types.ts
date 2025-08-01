@@ -2,19 +2,30 @@ export type TEffects = {
     [key: string]: TEffectItem;
 };
 
-export type TEffectConfigNumber = ['number', number, number, number, (n: number) => n, null, string | null];
-export type TEffectConfigString = ['string', string[]];
-export type TEffectConfigColor  = ['color', [number, number, number]];
+export type TEffectConfigNumber  = ['number', number, number, number, (n: number) => number, (string | null)?, string?];
+export type TEffectConfigString  = ['string', string[]];
+export type TEffectConfigColor   = ['color', [number, number, number]];
+export type TEffectConfigObject  = ['object', { [key: string]: TEffectConfigItem }];
 
 export type TEffectConfigItem =
     TEffectConfigNumber |
     TEffectConfigString |
-    TEffectConfigColor;
+    TEffectConfigColor  |
+    TEffectConfigObject;
 
 export type TEffectItem = {
     description?: string,
     format?: string,
     config: {
         [key: string]: TEffectConfigItem;
-    }
+    } | null
+};
+
+export type TModeItem = {
+    format: string;
+    description: string;
+};
+
+export type TModes = {
+    [key: string]: TModeItem
 };

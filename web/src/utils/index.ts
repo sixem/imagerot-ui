@@ -1,2 +1,2 @@
 export { randomString } from './randomString/';
-export { fileHandle } from './fileHandle';
+export { readFile } from './readFile';

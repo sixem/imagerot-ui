@@ -1,17 +1,22 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Hooks, Triggers } from '@/modules/';
+import { readFile } from '@/utils';
 import coverImage from '@/assets/cover.jpg';
 import './index.scss';
+
+type TOptionsProps = {
+    reset : () => void;
+    open  : () => void;
+    save  : () => void;
+};
+
+type TCurrentFile = { file: File, url: string };
 
 const HOOK_ID = {
     DOCUMENT_PASTE_WATCHER: 'document:paste:watcher',
 };
 
-type TOptionsProps = {
-    reset: () => void;
-    open : () => void;
-    save : () => void;
-};
+const Cache: { currentFile: TCurrentFile | null | null } = { currentFile: null };
 
 const Options = ({ reset, open, save }: TOptionsProps) => {
     return (
@@ -25,6 +30,7 @@ const Options = ({ reset, open, save }: TOptionsProps) => {
 
 const Image = () => {
     const imgRef = useRef<HTMLImageElement>(null);
+    const [currentFile, setFile] = useState<TCurrentFile | null>(null);
 
     useEffect(() => {
         if (imgRef.current) {
@@ -34,17 +40,32 @@ const Image = () => {
         Hooks.watch({
             trigger: Triggers.DOCUMENT_PASTE,
             identifier: HOOK_ID.DOCUMENT_PASTE_WATCHER,
-            callback: (file: DataTransferItem) => {
-                console.debug(file);
+            callback: async (file: DataTransferItem) => {
+                const processed = await readFile(file.getAsFile());
+
+                if (processed) {
+                    setFile({ file: processed.file, url: processed.blob });
+                }
             }
         });
     });
 
+    useEffect(() => {
+        if (currentFile && imgRef.current) {
+            imgRef.current.src = currentFile.url;
+            Cache.currentFile = currentFile;
+        }
+    }, [currentFile]);
+
     return (
         <div className="image">
-            <img id="output" ref={imgRef} src={coverImage} />
+            <img id="output" ref={imgRef} src={coverImage} draggable={false} />
             <Options {...{
-                reset : () => console.debug('reset'),
+                reset : () => {
+                    if (Cache.currentFile) {
+                        setFile(Cache.currentFile);
+                    }
+                },
                 open  : () => console.debug('open'),
                 save  : () => console.debug('save'),
             }}/>

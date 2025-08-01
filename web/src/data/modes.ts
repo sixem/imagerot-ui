@@ -1,4 +1,6 @@
-const modes = {
+import type { TModes } from './types';
+
+const modes: TModes = {
     pixelsort: {
         format: 'Pixel Sort',
         description: 'Adds the pixel sort mode to the image.',

@@ -2,3 +2,8 @@ $color-primary: #13131b;
 $color-primary-standout: #1a1b26;
 $color-primary-standout-brighten: #3d405b;
 $color-primary-text: #adadad;
+
+$thumb-dimensions: 20px;
+$thumb-background: $color-primary-standout-brighten;
+$thumb-box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+$thumb-border-radius: 50%;
