@@ -1,0 +1,19 @@
+{
+    "name": "imagerot-ui",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "private": true,
+    "scripts": {
+        "dev": "concurrently -k \"pnpm --filter web dev\" \"pnpm --filter desktop tauri dev\"",
+        "build:web": "pnpm --filter web build",
+        "build:desktop": "pnpm --filter desktop tauri build"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.14.0",
+    "devDependencies": {
+        "concurrently": "^9.2.0"
+    }
+}
