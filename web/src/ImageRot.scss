@@ -10,7 +10,6 @@
 }
 
 body {
-    background-color: #000;
     background: repeating-conic-gradient(#0b0b0b 0 25%, #000 0 50%) 50% / 20px 20px;
 }
 
@@ -20,6 +19,7 @@ html, body {
     padding: 0;
     overflow: hidden;
     color: #fff;
+    background-color: #000;
 }
 
 a {
@@ -49,12 +49,42 @@ a:hover {
     }
 }
 
+input[type="file"], select {
+    background-color: $color-primary-standout;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 0 4px rgb(14 14 14);
+    outline: none;
+}
+
 input[type="file"] {
     width: 100%;
-    box-sizing: border-box;
     text-align: left;
-    border: none;
-    background-color: $color-primary-standout;
     padding: 8px;
+}
+
+select {
+    text-transform: capitalize;
+    color: #fff;
+    padding: 4px 2px;
+}
+
+div.button {
+    color: white;
+    background-color: $color-primary-standout;
+    padding: 2px 10px 4px 10px;
+    text-align: center;
     border-radius: 4px;
+    user-select: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 0 4px rgb(14 14 14 / 45%);
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+        background-color: $color-primary-standout-brighten;
+    }
 }

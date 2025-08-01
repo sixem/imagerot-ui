@@ -13,8 +13,8 @@
         "windows": [
             {
                 "title": "ImageRot UI",
-                "width": 1000,
-                "height": 600
+                "width": 1280,
+                "height": 720
             }
         ],
         "security": {

@@ -1,6 +1,11 @@
 import { useRef, useEffect } from 'react';
+import { Hooks, Triggers } from '@/modules/';
 import coverImage from '@/assets/cover.jpg';
 import './index.scss';
+
+const HOOK_ID = {
+    DOCUMENT_PASTE_WATCHER: 'document:paste:watcher',
+};
 
 type TOptionsProps = {
     reset: () => void;
@@ -25,12 +30,24 @@ const Image = () => {
         if (imgRef.current) {
             imgRef.current.style.opacity = '1';
         }
+
+        Hooks.watch({
+            trigger: Triggers.DOCUMENT_PASTE,
+            identifier: HOOK_ID.DOCUMENT_PASTE_WATCHER,
+            callback: (file: DataTransferItem) => {
+                console.debug(file);
+            }
+        });
     });
 
     return (
         <div className="image">
             <img id="output" ref={imgRef} src={coverImage} />
-            <Options />
+            <Options {...{
+                reset : () => console.debug('reset'),
+                open  : () => console.debug('open'),
+                save  : () => console.debug('save'),
+            }}/>
         </div>
     );
 };

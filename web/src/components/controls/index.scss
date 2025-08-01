@@ -34,6 +34,28 @@
             flex-direction: column;
             overflow: hidden;
 
+            > div.selection-buttoned {
+                display: flex;
+                gap: 10px;
+
+                > select {
+                    flex-grow: 1;
+                }
+            }
+
+            > div.description {
+                margin-top: 6px;
+                color: $color-primary-text;
+                text-align: right;
+                font-size: 0.9em;
+            }
+
+            &.selection-effect {
+                > div.button {
+                    margin-top: 8px;
+                }
+            }
+
             &.selection-mode {
                 margin-bottom: 10px!important;
                 padding-bottom: 8px!important;
