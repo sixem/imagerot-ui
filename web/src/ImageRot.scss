@@ -1,3 +1,5 @@
+@use '@/sass/variables' as *;
+
 @import url('https://fonts.googleapis.com/css2?family=Faculty+Glyphic&display=swap');
 
 * {
@@ -9,7 +11,24 @@
 
 body {
     background-color: #000;
+    background: repeating-conic-gradient(#0b0b0b 0 25%, #000 0 50%) 50% / 20px 20px;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
     color: #fff;
+}
+
+a {
+    color: #fff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 #root {
@@ -28,4 +47,14 @@ body {
         height: 100%;
         font-size: 0.9em;
     }
+}
+
+input[type="file"] {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    border: none;
+    background-color: $color-primary-standout;
+    padding: 8px;
+    border-radius: 4px;
 }

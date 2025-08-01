@@ -1,0 +1,66 @@
+@use '@/sass/variables' as *;
+
+#root > div.wrapper > div.image {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+
+    > img {
+        max-width: 100%;
+        max-height: 100%;
+        transition: opacity .35s ease-in-out;
+        opacity: 0;
+    }
+
+    > div.options {
+        position: absolute;
+        inset: 10px 10px auto auto;
+        gap: 5px;
+        display: flex;
+
+        > div {
+            padding: 5px;
+            width: 20px;
+            height: 20px;
+            background-color: #161622f2;
+            backdrop-filter: blur(1px);
+            border-radius: 4px;
+            transition: background-color .15s ease-in-out;
+            display: inline-block;
+
+            &:hover {
+                background-color: #272749;
+                cursor: pointer;
+            }
+
+            &::before {
+                content: '';
+                width: 20px;
+                height: 20px;
+                display: block;
+            }
+
+            &.fileReset::before {
+                background-image: url('@/assets/reset.svg');
+                background-size: 16px 16px;
+                background-repeat: no-repeat;
+                background-position: center;
+                filter: invert(100%);
+            }
+
+            &.fileOpen::before {
+                background-image: url('@/assets/open.svg');
+                filter: invert(100%);
+            }
+
+            &.fileSave::before {
+                background-image: url('@/assets/save.svg');
+                filter: invert(100%);
+            }
+        }
+    }
+}
