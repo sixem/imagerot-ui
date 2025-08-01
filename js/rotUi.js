@@ -738,10 +738,13 @@
         const addButton = createElement('div', 'Add effect to workflow', { class: 'button', style: 'flex: 1;' });
         addButton.addEventListener('click', () => {
             workflowAddItem('effect', effectName, config);
-            // Clear selection when adding a new effect
+            const newIndex = (workFlowIndex - 1).toString();
             document.querySelectorAll('.workItem.selected').forEach(el => el.classList.remove('selected'));
             selectedWorkflowIndices.clear();
-            anchorDataIndex = null;
+            selectedWorkflowIndices.add(newIndex);
+            const newElem = $(`div.workItem[data-index="${newIndex}"]`, false);
+            if (newElem) newElem.classList.add('selected');
+            anchorDataIndex = newIndex;
             updateEditFromSelection();
         });
         buttonContainer.appendChild(addButton);

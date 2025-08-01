@@ -464,6 +464,7 @@ div.wrapper div.selector div.mainHeader {
     border-bottom: 1px solid #202a3b;
     padding: 0 0 10px 0;
     margin-bottom: 14px;
+    margin-top: 8px;
 }
 
 div.wrapper div.selector div.mainHeader > div.note {
@@ -674,9 +675,24 @@ input.jscolor:focus {
 
 div.top>div.help {
     margin-top: 0 !important;
-    position: absolute;
-    padding: 4px 8px;
     z-index: 1;
+    padding: 5px;
+    width: 30px;
+    background-color: #1a1b26;
+    border-radius: 4px;
+    transition: background-color .15s ease-in-out;
+    display: inline-block;
+    position: absolute;
+    right: 4px;
+}
+
+div.top>div.help::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    display: block;
+    background-image: url(../assets/help.svg);
+    filter: invert(100%);
 }
 
 * {
