@@ -12,15 +12,18 @@
     flex-direction: column;
     justify-content: space-between;
     position: relative;
+    user-select: none;
 
     > div.top {
         width: 100%;
         overflow-x: hidden;
         position: relative;
         padding-right: 5px;
+        padding-left: 5px;
         display: flex;
         flex-direction: column;
         flex-grow: 1;
+        scrollbar-gutter: stable;
 
         .sub-header {
             width: 100%;
@@ -32,7 +35,6 @@
         > div.section {
             display: flex;
             flex-direction: column;
-            overflow: hidden;
 
             > div.selection-buttoned {
                 display: flex;
@@ -50,6 +52,23 @@
                 font-size: 0.9em;
             }
 
+            &.workflow {
+                > div.work-order {
+                    border: 1px solid #22232d;
+                    border-radius: 4px;
+                    text-align: left;
+
+                    > div.work-item {
+                        background-color: $color-primary-standout;
+                        padding: 2px 8px 4px 8px;
+
+                        &:not(:first-child) {
+                            border-top: 1px solid #22232d;
+                        }
+                    }
+                }
+            }
+
             &.selection-effect {
                 > div.button {
                     margin-top: 14px;
@@ -60,8 +79,46 @@
                         text-transform: capitalize;
                         text-align: left;
 
+                        > select {
+                            width: 100%;
+                            margin-top: 8px;
+                        }
+
                         > input[type="range"] {
                             width: 100%;
+                        }
+
+                        &.color-item {
+                            > div.flex {
+                                display: flex;
+                                gap: 10px;
+                                margin-top: 12px;
+
+                                > div.label {
+                                    padding-bottom: 2px;
+                                }
+
+                                > div.color-indcator {
+                                    background-color: $color-primary-standout;
+                                    min-height: 20px;
+                                    position: relative;
+                                    border-radius: 4px;
+
+                                    cursor: pointer;
+                                    flex-grow: 1;
+
+                                    > div.bg {
+                                        background-color: red;
+                                        position: absolute;
+                                        inset: 4px;
+                                    }
+                                }
+                            }
+
+                            > div.react-colorful {
+                                margin-top: 6px;
+                                width: 100%;
+                            }
                         }
 
                         &:first-child {

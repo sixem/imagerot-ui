@@ -3,8 +3,8 @@ export type TEffects = {
 };
 
 export type TEffectConfigNumber = ['number', number, number, number, (n: number) => number, (string | null)?, string?];
-export type TEffectConfigString = ['string', string[]];
-export type TEffectConfigColor  = ['color', [number, number, number]];
+export type TEffectConfigString = ['string', string[], string?];
+export type TEffectConfigColor  = ['color', [number, number, number], string?];
 export type TEffectConfigObject = ['object', { [key: string]: TEffectConfigItem }];
 
 export type TEffectConfigItem =
