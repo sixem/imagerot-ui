@@ -311,13 +311,15 @@ const Workflow = ({ queue }: { queue: TWorkItem[] }) => {
     return (
         <div className="section workflow">
             <div className="sub-header">Active workflow items:</div>
-            <div className="work-order">
-                {queue.map((item, index) => {
-                    return (
-                        <div key={index} className="work-item">{item.key}</div>
-                    );
-                })}
-            </div>
+            {queue.length > 0 ? (
+                <div className="work-order">
+                    {queue.map((item, index) => {
+                        return (
+                            <div key={index} className="work-item">{item.key}</div>
+                        );
+                    })}
+                </div>
+            ) : <div>Empty</div> }
         </div>
     );
 };

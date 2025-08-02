@@ -8,6 +8,13 @@
     overflow: hidden;
     position: relative;
     user-select: none;
+    cursor: zoom-in;
+
+    &:not(.zooming) {
+        > img {
+            cursor: zoom-out;
+        }
+    }
 
     > img {
         max-width: 100%;

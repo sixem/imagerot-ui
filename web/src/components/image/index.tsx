@@ -2,6 +2,8 @@ import { useRef, useState, useEffect } from 'react';
 import { Hooks, Triggers } from '@/modules/';
 import { readFile } from '@/utils';
 import coverImage from '@/assets/cover.jpg';
+import Drift from 'drift-zoom';
+
 import './index.scss';
 
 type TOptionsProps = {
@@ -31,10 +33,19 @@ const Options = ({ reset, open, save }: TOptionsProps) => {
 const Image = () => {
     const imgRef = useRef<HTMLImageElement>(null);
     const [currentFile, setFile] = useState<TCurrentFile | null>(null);
+    const [isZooming, setZooming] = useState<boolean>(false);
+    
+    let zoomInstance: Drift | null = null;
 
     useEffect(() => {
         if (imgRef.current) {
             imgRef.current.style.opacity = '1';
+
+            zoomInstance = new Drift(imgRef.current, {
+                paneContainer: document.body.querySelector('#root') as HTMLDivElement,
+                sourceAttribute: 'src',
+                handleTouch: false
+            });
         }
 
         Hooks.watch({
@@ -48,6 +59,8 @@ const Image = () => {
                 }
             }
         });
+
+        return () => { if (zoomInstance) zoomInstance.disable(); };
     });
 
     useEffect(() => {
@@ -58,8 +71,27 @@ const Image = () => {
     }, [currentFile]);
 
     return (
-        <div className="image">
-            <img id="output" ref={imgRef} src={coverImage} draggable={false} />
+        <div className={"image" + (isZooming ? " zoom" : "")} onMouseDown={(e) => {
+            setZooming(true);
+
+            if (imgRef.current) {
+                imgRef.current.dispatchEvent(new MouseEvent('mouseenter', {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                }));
+            }
+        }} onMouseUp={() => {
+            setZooming(false);
+
+            if (imgRef.current) {
+                imgRef.current.dispatchEvent(new MouseEvent('mouseleave'));
+            }
+        }} >
+            <img id="output" ref={imgRef} src={coverImage} draggable={false} style={{
+                pointerEvents: isZooming ? 'auto' : 'none'
+            }} />
             <Options {...{
                 reset : () => {
                     if (Cache.currentFile) {

@@ -146,3 +146,17 @@ div.button {
         background-color: $color-primary-standout-brighten;
     }
 }
+
+div.drift-zoom-pane {
+    z-index: 99999;
+
+    position: fixed;
+
+    inset: 6px 6px auto auto;
+
+    border: 2px solid $color-primary-standout;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.75);
+
+    max-width: 330px;
+    max-height: 330px;
+}
