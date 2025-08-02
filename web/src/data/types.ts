@@ -2,10 +2,10 @@ export type TEffects = {
     [key: string]: TEffectItem;
 };
 
-export type TEffectConfigNumber  = ['number', number, number, number, (n: number) => number, (string | null)?, string?];
-export type TEffectConfigString  = ['string', string[]];
-export type TEffectConfigColor   = ['color', [number, number, number]];
-export type TEffectConfigObject  = ['object', { [key: string]: TEffectConfigItem }];
+export type TEffectConfigNumber = ['number', number, number, number, (n: number) => number, (string | null)?, string?];
+export type TEffectConfigString = ['string', string[]];
+export type TEffectConfigColor  = ['color', [number, number, number]];
+export type TEffectConfigObject = ['object', { [key: string]: TEffectConfigItem }];
 
 export type TEffectConfigItem =
     TEffectConfigNumber |
@@ -20,6 +20,8 @@ export type TEffectItem = {
         [key: string]: TEffectConfigItem;
     } | null
 };
+
+export type TEffectValue = number | string | [number, number, number];
 
 export type TModeItem = {
     format: string;

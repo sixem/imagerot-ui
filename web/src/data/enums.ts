@@ -3,3 +3,10 @@ export const MessageType = {
     MSG_WARN: 1,
     MSG_ERROR: 2
 };
+
+export const EffectType = {
+    STRING: 'string',
+    NUMBER: 'number',
+    OBJECT: 'object',
+    COLOR: 'color'
+};

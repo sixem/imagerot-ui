@@ -52,7 +52,26 @@
 
             &.selection-effect {
                 > div.button {
-                    margin-top: 8px;
+                    margin-top: 14px;
+                }
+
+                > div.configuration {
+                    > div.config-item {
+                        text-transform: capitalize;
+                        text-align: left;
+
+                        > input[type="range"] {
+                            width: 100%;
+                        }
+
+                        &:first-child {
+                            margin-top: 8px;
+                        }
+
+                        &:not(:last-child) {
+                            margin-bottom: 8px;
+                        }
+                    }
                 }
             }
 
