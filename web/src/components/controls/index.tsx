@@ -1,29 +1,30 @@
 import type { TEffectConfigItem, TEffectItem, TEffectConfigNumber, TModeItem, TEffectValue, TEffectConfigColor, TEffectConfigString } from '@/data/types';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { RgbColorPicker } from 'react-colorful';
+import { useEffect, useState, useRef } from 'react';
+import { InputString, InputRange, InputColor } from './input/';
+import { Workflow } from './workflow';
 import { effects, modes } from '@/data/';
-import { debounce } from '@/utils/';
 import { EffectType } from '@/data/enums';
 import { Github } from '@/icons/';
 import { Config } from '@/config';
 
 import './index.scss';
 
-const WorkItemType = { Mode: 0, Effect: 1 };
+/** Valid work item types */
+export const WorkItemType = { Mode: 0, Effect: 1 };
 
-type TEffectChangeEvent = {
+export type TEffectChangeEvent = {
     config: { [key: string]: TEffectConfigItem };
     onChange: (name: string, value: TEffectValue) => void;
 };
 
-type TInputSignature<TItem = TEffectConfigNumber> = {
+export type TInputSignature<TItem = TEffectConfigNumber> = {
     name: string;
     item: TItem;
     onChange: TEffectChangeEvent['onChange']
 };
 
-type TWorkItem = {
+export type TWorkItem = {
     key: string;
     type: typeof WorkItemType[keyof typeof WorkItemType];
     config: null | { [key: string]: TEffectValue; };
@@ -38,7 +39,7 @@ const getDefaultValue = (config: TEffectConfigItem) => {
         case EffectType.NUMBER : return b;
         case EffectType.COLOR  : return a;
         case EffectType.STRING : return (a as [number, number, number])[0] || null;
-        case EffectType.OBJECT : return null;
+        case EffectType.OBJECT : return null; // Needs support!
         default                : return null;
     }
 };
@@ -111,126 +112,25 @@ const SelectionMode = ({ onChange }: { onChange: (mode: string) => void; }) => {
 };
 
 /**
- * Range input for number-based effect configurations
- */
-const RangeInput = ({ name, item, onChange }: TInputSignature<TEffectConfigNumber>) => {
-    const [type, min, current, max, f, postfix, description] = item as TEffectConfigNumber;
-    const [value, setValue] = useState<number>(current);
-    const ref = useRef<HTMLInputElement>(null);
-
-    const eventOnChange = () => {
-        if (ref.current) {
-            const current = parseInt(ref.current.value);
-
-            setValue(current);
-            onChange(name, current);
-        }
-    };
-
-    return (
-        <div className="config-item" key={name}>
-            <div title={description} key={type}>{name} ({f(value)}{postfix || ''}):</div>
-            <input type="range" {...{ min, max, value, onChange: eventOnChange, ref }} />
-        </div>
-    );
-};
-
-/**
- * Color input for color-based effect configurations
- */
-const ColorInput = ({ name, item, onChange }: TInputSignature<TEffectConfigColor>) => {
-    const [type, current, description] = item as TEffectConfigColor;
-    const [color, setColor] = useState({ r: current[0], g: current[1], b: current[2] });
-    const [isPicking, setPicking] = useState<boolean>(false);
-
-    const colorRef = useRef(color);
-    const pending = useRef(false);
-    const debouncedOnChange = useCallback(debounce(onChange, 250), [onChange]);
-
-    useEffect(() => {
-        debouncedOnChange(name, [color.r, color.g, color.b]);
-        colorRef.current = color;
-    }, [color]);
-
-    const handleChange = (updated: { r: number; g: number; b: number }) => {
-        colorRef.current = updated;
-        
-        if (!pending.current) {
-            pending.current = true;
-
-            requestAnimationFrame(() => {
-                setColor(colorRef.current);
-                pending.current = false;
-            });
-        }
-    };
-
-    const pad = (n: number) => n.toString().padStart(3, '0');
-
-    return (
-        <div className="config-item color-item" key={name}>
-            <div title={description} key={type} className="flex">
-                <div className="label">
-                    <span>{name} ({`${pad(color.r)}, ${pad(color.g)}, ${pad(color.b)}`}):</span>
-                </div>
-                <div className="color-indcator" onClick={() => setPicking(!isPicking)}>
-                    <div className="bg" style={{
-                        backgroundColor: `rgb(${color.r}, ${color.g}, ${color.b})`
-                    }} />
-                </div>
-            </div>
-            {isPicking ? <RgbColorPicker color={color} onChange={handleChange} onMouseUp={() => {
-                onChange(name, [color.r, color.g, color.b]);
-            }} /> : null}
-        </div>
-    );
-};
-
-/**
- * String selection for string-based effect configurations
- */
-const StringInput = ({ name, item, onChange }: TInputSignature<TEffectConfigString>) => {
-    const [type, values, description] = item as TEffectConfigString;
-    const selectRef = useRef<HTMLSelectElement>(null);
-
-    return (
-        <div className="config-item" key={name}>
-            <div title={description} key={type}>{name}:</div>
-
-            <select ref={selectRef} onChange={() => {
-                if (selectRef.current) {
-                    onChange(name, selectRef.current.value);
-                }
-            }}>
-                {values.map((value) => {
-                    return <option value={value}>{value}</option>;
-                })}
-            </select>
-        </div>
-    );
-};
-
-/**
  * Effect configuration
  */
 const SelectionEffectConfig = ({ config, onChange }: TEffectChangeEvent) => {
     return (
         <div className="configuration">
             {Object.keys(config).map((key) => {
-                const effect = config[key];
-                const type = effect[0];
+                const [type] = config[key];
 
                 switch (type) {
                     case EffectType.NUMBER: {
-                        return <RangeInput key={key} {...{ onChange, name: key }} item={effect as TEffectConfigNumber} />;
+                        return <InputRange key={key} {...{ onChange, name: key }} item={config[key] as TEffectConfigNumber} />;
                     }
 
                     case EffectType.STRING: {
-                        return <StringInput key={key} {...{ onChange, name: key }} item={effect as TEffectConfigString} />;
+                        return <InputString key={key} {...{ onChange, name: key }} item={config[key] as TEffectConfigString} />;
                     }
 
                     case EffectType.COLOR: {
-                        return <ColorInput key={key} {...{ onChange, name: key }} item={effect as TEffectConfigColor} />;
+                        return <InputColor key={key} {...{ onChange, name: key }} item={config[key] as TEffectConfigColor} />;
                     }
 
                     default: return null;
@@ -290,6 +190,7 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
             </div>
 
             {selected?.value?.config ? <SelectionEffectConfig config={selected.value.config} onChange={(name, value) => {
+                // On any input changes, update the config with the set value
                 if (config.hasOwnProperty(name)) {
                     setConfig({...config, [name]: value });
                 }
@@ -298,28 +199,6 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
             <div className="button" onClick={() => {
                 if (selected) onAdd(selected.key, config);
             }}>Add effect to workflow</div>
-        </div>
-    );
-};
-
-/**
- * Workflow component
- * 
- * Contains the active modes and effects that will be used to process the image
- */
-const Workflow = ({ queue }: { queue: TWorkItem[] }) => {
-    return (
-        <div className="section workflow">
-            <div className="sub-header">Active workflow items:</div>
-            {queue.length > 0 ? (
-                <div className="work-order">
-                    {queue.map((item, index) => {
-                        return (
-                            <div key={index} className="work-item">{item.key}</div>
-                        );
-                    })}
-                </div>
-            ) : <div>Empty</div> }
         </div>
     );
 };

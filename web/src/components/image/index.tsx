@@ -23,9 +23,9 @@ const Cache: { currentFile: TCurrentFile | null | null } = { currentFile: null }
 const Options = ({ reset, open, save }: TOptionsProps) => {
     return (
         <div className="options">
-            <div onClick={reset} className="fileReset" title="Reset image"></div>
-            <div onClick={open}  className="fileOpen"  title="Open in new tab"></div>
-            <div onClick={save}  className="fileSave"  title="Save file"></div>
+            <div onClick={reset} className="fileReset" title="Reset image" />
+            <div onClick={open}  className="fileOpen"  title="Open in new tab" />
+            <div onClick={save}  className="fileSave"  title="Save file" />
         </div>
     );
 };
@@ -41,6 +41,7 @@ const Image = () => {
         if (imgRef.current) {
             imgRef.current.style.opacity = '1';
 
+            // Create a new zoom instance on the current image
             zoomInstance = new Drift(imgRef.current, {
                 paneContainer: document.body.querySelector('#root') as HTMLDivElement,
                 sourceAttribute: 'src',
@@ -71,10 +72,10 @@ const Image = () => {
     }, [currentFile]);
 
     return (
-        <div className={"image" + (isZooming ? " zoom" : "")} onMouseDown={(e) => {
+        <div className={"image" + (isZooming ? " zooming" : "")} onMouseDown={(e) => {
             setZooming(true);
 
-            if (imgRef.current) {
+            if (imgRef.current) { // Assures we zoom in straight away on mouse down
                 imgRef.current.dispatchEvent(new MouseEvent('mouseenter', {
                     bubbles: true,
                     cancelable: true,
@@ -85,7 +86,7 @@ const Image = () => {
         }} onMouseUp={() => {
             setZooming(false);
 
-            if (imgRef.current) {
+            if (imgRef.current) { // Trigger zoom exit on mouse up
                 imgRef.current.dispatchEvent(new MouseEvent('mouseleave'));
             }
         }} >

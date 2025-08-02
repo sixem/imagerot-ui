@@ -1,6 +1,6 @@
 @use '@/sass/variables' as *;
 
-#root > div.wrapper > div.controls {
+#root>div.wrapper>div.controls {
     text-align: center;
     order: 2;
     flex: 0 0 325px;
@@ -14,7 +14,7 @@
     position: relative;
     user-select: none;
 
-    > div.top {
+    >div.top {
         width: 100%;
         overflow-x: hidden;
         position: relative;
@@ -32,20 +32,20 @@
             padding-left: 2px;
         }
 
-        > div.section {
+        >div.section {
             display: flex;
             flex-direction: column;
 
-            > div.selection-buttoned {
+            >div.selection-buttoned {
                 display: flex;
                 gap: 10px;
 
-                > select {
+                >select {
                     flex-grow: 1;
                 }
             }
 
-            > div.description {
+            >div.description {
                 margin-top: 6px;
                 color: $color-primary-text;
                 text-align: right;
@@ -53,52 +53,94 @@
             }
 
             &.workflow {
-                > div.work-order {
+                >div.work-order {
                     border: 1px solid #22232d;
                     border-radius: 4px;
-                    text-align: left;
 
-                    > div.work-item {
+                    >div.work-item {
                         background-color: $color-primary-standout;
-                        padding: 2px 8px 4px 8px;
+                        display: flex;
+                        text-align: left;
+                        cursor: pointer;
+                        padding: 6px 6px;
+                        overflow: hidden;
+                        gap: 6px;
+                        line-height: 1;
+                        justify-content: stretch;
+                        align-items: center;
+                        position: relative;
+                        transition: background-color .05s ease-in-out;
+
+                        > div.name {
+                            text-transform: capitalize;
+                        }
+
+                        > div.config {
+                            color: #8e8ba7;
+                            font-size: 0.9em;
+                        }
 
                         &:not(:first-child) {
                             border-top: 1px solid #22232d;
                         }
+
+                        &.type-effect::before,
+                        &.type-mode::before {
+                            display: inline-block;
+                            width: auto;
+                            text-align: center;
+                            border-radius: 3px;
+                            padding: 4px 6px;
+                        }
+
+                        &.type-effect::before {
+                            content: "Effect";
+                            background-color: $work-item-color-type-effect;
+                        }
+
+                        &.type-mode::before {
+                            content: "Mode";
+                            background-color: $work-item-color-type-mode;
+                        }
                     }
+                }
+
+                >div.label-empty {
+                    color: $color-primary-text;
+                    margin-top: 8px;
                 }
             }
 
             &.selection-effect {
-                > div.button {
+                >div.button {
                     margin-top: 14px;
                 }
 
-                > div.configuration {
-                    > div.config-item {
+                >div.configuration {
+                    >div.config-item {
                         text-transform: capitalize;
                         text-align: left;
 
-                        > select {
+                        >select {
                             width: 100%;
                             margin-top: 8px;
                         }
 
-                        > input[type="range"] {
+                        >input[type="range"] {
                             width: 100%;
                         }
 
                         &.color-item {
-                            > div.flex {
+                            >div.flex {
                                 display: flex;
                                 gap: 10px;
                                 margin-top: 12px;
 
-                                > div.label {
+                                >div.label {
                                     padding-bottom: 2px;
                                 }
 
-                                > div.color-indcator {
+                                >div.color-indcator {
                                     background-color: $color-primary-standout;
                                     min-height: 20px;
                                     position: relative;
@@ -107,7 +149,7 @@
                                     cursor: pointer;
                                     flex-grow: 1;
 
-                                    > div.bg {
+                                    >div.bg {
                                         background-color: red;
                                         position: absolute;
                                         inset: 4px;
@@ -115,7 +157,7 @@
                                 }
                             }
 
-                            > div.react-colorful {
+                            >div.react-colorful {
                                 margin-top: 6px;
                                 width: 100%;
                             }
@@ -133,8 +175,8 @@
             }
 
             &.selection-mode {
-                margin-bottom: 10px!important;
-                padding-bottom: 8px!important;
+                margin-bottom: 10px !important;
+                padding-bottom: 8px !important;
             }
 
             &:not(.workflow) {
@@ -148,7 +190,7 @@
             }
         }
 
-        > div.header {
+        >div.header {
             text-align: center;
             margin: 0;
             border-bottom: 1px solid $color-primary-standout;
@@ -156,7 +198,7 @@
             margin-bottom: 14px;
             margin-top: 8px;
 
-            > h2 {
+            >h2 {
                 margin: 0 0 8px 0;
                 z-index: 0;
                 position: relative;
@@ -167,21 +209,21 @@
                 font-style: normal;
             }
 
-            > div.note {
+            >div.note {
                 display: flex;
                 width: 100%;
                 justify-content: center;
                 gap: 8px;
                 margin: 10px 0;
 
-                > svg {
+                >svg {
                     height: 1.25em;
                 }
             }
         }
     }
 
-    > div.bottom {
+    >div.bottom {
         z-index: 1;
     }
 }
