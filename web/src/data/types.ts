@@ -31,3 +31,13 @@ export type TModeItem = {
 export type TModes = {
     [key: string]: TModeItem
 };
+
+export type TCurrentFile = {
+    file: File | null;
+    url: string;
+};
+
+export type TPaneSignature = {
+    currentFile: TCurrentFile | null;
+    setFile: React.Dispatch<React.SetStateAction<TCurrentFile>>;
+};

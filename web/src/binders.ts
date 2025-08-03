@@ -22,6 +22,13 @@ const listen = () => {
             }
         }
     });
+
+    Hooks.listen({
+        pointer: document.body.querySelector('#root') as HTMLElement,
+        events: 'drop',
+        identifier: "TEST",
+        callbacks: (event: any) => console.log(event)
+    });
 };
 
 const unlisten = () => {

@@ -1,6 +1,8 @@
+import type { TCurrentFile, TPaneSignature } from '@/data/types';
+
 import { useRef, useState, useEffect } from 'react';
 import { Hooks, Triggers } from '@/modules/';
-import { readFile } from '@/utils';
+import { readFile, readImgAsFile } from '@/utils';
 import coverImage from '@/assets/cover.jpg';
 import Drift from 'drift-zoom';
 
@@ -12,13 +14,11 @@ type TOptionsProps = {
     save  : () => void;
 };
 
-type TCurrentFile = { file: File, url: string };
-
 const HOOK_ID = {
     DOCUMENT_PASTE_WATCHER: 'document:paste:watcher',
 };
 
-const Cache: { currentFile: TCurrentFile | null | null } = { currentFile: null };
+const Cache: { currentFile: TCurrentFile | null } = { currentFile: null };
 
 const Options = ({ reset, open, save }: TOptionsProps) => {
     return (
@@ -30,9 +30,8 @@ const Options = ({ reset, open, save }: TOptionsProps) => {
     );
 };
 
-const Image = () => {
+const Image = ({ currentFile, setFile }: TPaneSignature) => {
     const imgRef = useRef<HTMLImageElement>(null);
-    const [currentFile, setFile] = useState<TCurrentFile | null>(null);
     const [isZooming, setZooming] = useState<boolean>(false);
     
     let zoomInstance: Drift | null = null;
@@ -54,10 +53,7 @@ const Image = () => {
             identifier: HOOK_ID.DOCUMENT_PASTE_WATCHER,
             callback: async (file: DataTransferItem) => {
                 const processed = await readFile(file.getAsFile());
-
-                if (processed) {
-                    setFile({ file: processed.file, url: processed.blob });
-                }
+                if (processed) setFile(processed);
             }
         });
 
@@ -71,8 +67,17 @@ const Image = () => {
         }
     }, [currentFile]);
 
+    const onImageLoad = async () => {
+        // Read <img/> into a File on load if unset
+        if (currentFile?.file === null && imgRef.current) {
+            const file = await readImgAsFile(imgRef.current) || null;
+            setFile(previous => ({...previous, ...{ file }}))
+        }
+    };
+
     return (
         <div className={"image" + (isZooming ? " zooming" : "")} onMouseDown={(e) => {
+            if (!(e.target as HTMLElement).classList.contains('image')) return;
             setZooming(true);
 
             if (imgRef.current) { // Assures we zoom in straight away on mouse down
@@ -92,7 +97,8 @@ const Image = () => {
         }} >
             <img id="output" ref={imgRef} src={coverImage} draggable={false} style={{
                 pointerEvents: isZooming ? 'auto' : 'none'
-            }} />
+            }} onLoad={onImageLoad}/>
+
             <Options {...{
                 reset : () => {
                     if (Cache.currentFile) {

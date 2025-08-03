@@ -1,4 +1,13 @@
-import type { TEffectConfigItem, TEffectItem, TEffectConfigNumber, TModeItem, TEffectValue, TEffectConfigColor, TEffectConfigString } from '@/data/types';
+import type {
+    TEffectConfigItem,
+    TEffectItem,
+    TEffectConfigNumber,
+    TEffectValue,
+    TEffectConfigColor,
+    TEffectConfigString,
+    TPaneSignature,
+    TModeItem,
+} from '@/data/types';
 
 import { useEffect, useState, useRef } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
@@ -6,7 +15,6 @@ import { Workflow } from './workflow';
 import { effects, modes } from '@/data/';
 import { EffectType } from '@/data/enums';
 import { Github } from '@/icons/';
-import { Config } from '@/config';
 
 import './index.scss';
 
@@ -206,14 +214,19 @@ let workItemId = 0;
  * 
  * Contains file inputs, selections of modes and effects and the workflow
  */
-const Controls = () => {
+const Controls = ({ currentFile, setFile }: TPaneSignature) => {
     const [queue, setQueue] = useState<TWorkItem[]>([]);
+
+    // Handle image processing here somewhere. Remember background workers!
+    // currentFile gets us the current image that we're handling, and then we
+    // update it using setFile after it has processed.
 
     return (
         <div className="controls">
             <div className="top">
                 <Header />
-                <InputFile />
+                
+                <InputFile setFile={setFile}/>
 
                 <SelectionMode onAdd={(mode, _) => {
                     setQueue(previous => [...previous, {
