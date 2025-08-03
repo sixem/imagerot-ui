@@ -5,7 +5,7 @@
     order: 2;
     flex: 0 0 325px;
     margin-left: auto;
-    padding: 10px;
+    padding: 0px 10px;
     border-left: 2px solid #171724;
     background-color: #14141cf5;
     display: flex;
@@ -57,6 +57,12 @@
                     border: 1px solid #22232d;
                     border-radius: 4px;
 
+                    scrollbar-color: #101118 #20212d;
+                    scrollbar-width: thin;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    outline: none;
+
                     >div.work-item {
                         background-color: $color-primary-standout;
                         display: flex;
@@ -91,6 +97,7 @@
                             text-align: center;
                             border-radius: 3px;
                             padding: 4px 6px;
+                            font-size: 0.9em;
                         }
 
                         &.type-effect::before {

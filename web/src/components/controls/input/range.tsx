@@ -1,7 +1,7 @@
 import type { TEffectConfigNumber } from '@/data/types';
 import type { TInputSignature } from '../';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Range input for number-based effect configurations
@@ -19,6 +19,10 @@ export const InputRange = ({ name, item, onChange }: TInputSignature<TEffectConf
             onChange(name, convert(current));
         }
     };
+
+    useEffect(() => {
+        onChange(name, convert(current));
+    }, [item]);
 
     return (
         <div className="config-item" key={name}>

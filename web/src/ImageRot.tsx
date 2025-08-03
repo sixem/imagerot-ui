@@ -7,10 +7,7 @@ import './ImageRot.scss';
 const ImageRot = () => {
     useEffect(() => {
         binders.listen();
-
-        return () => {
-            binders.unlisten();
-        };
+        return () => binders.unlisten();
     });
 
     return (

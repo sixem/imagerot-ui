@@ -19,8 +19,8 @@ export const InputString = ({ name, item, onChange }: TInputSignature<TEffectCon
                     onChange(name, selectRef.current.value);
                 }
             }}>
-                {values.map((value) => {
-                    return <option value={value}>{value}</option>;
+                {values.map((value, index) => {
+                    return <option value={value} key={index}>{value}</option>;
                 })}
             </select>
         </div>

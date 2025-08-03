@@ -1,7 +1,7 @@
 import type { TEffectConfigItem, TEffectItem, TEffectConfigNumber, TModeItem, TEffectValue, TEffectConfigColor, TEffectConfigString } from '@/data/types';
 
 import { useEffect, useState, useRef } from 'react';
-import { InputString, InputRange, InputColor } from './input/';
+import { InputString, InputRange, InputColor, InputFile } from './input/';
 import { Workflow } from './workflow';
 import { effects, modes } from '@/data/';
 import { EffectType } from '@/data/enums';
@@ -28,6 +28,7 @@ export type TWorkItem = {
     key: string;
     type: typeof WorkItemType[keyof typeof WorkItemType];
     config: null | { [key: string]: TEffectValue; };
+    id: number;
 };
 
 const getDefaultValue = (config: TEffectConfigItem) => {
@@ -50,9 +51,9 @@ const getDefaultValue = (config: TEffectConfigItem) => {
 const Header = () => {
     return (
         <div className="header">
-            <h2>{Config.HEADER_LABEL}</h2>
+            <h2>ImageRot UI</h2>
             <div className="note">
-                <span>Check out the project on <a target="_blank" href={Config.HEADER_GIT_URL}>GitHub</a></span>
+                <span>Check out the project on <a target="_blank" href="https://github.com/sixem/imagerot-ui/">GitHub</a></span>
                 <Github />
             </div>
         </div>
@@ -60,31 +61,18 @@ const Header = () => {
 };
 
 /**
- * File input
- */
-const FileInput = () => {
-    return (
-        <div className="section file-input">
-            <div className="sub-header">File selection:</div>
-            <input type="file" accept={Config.ALLOWED_FILETYPES.join(', ')} />
-        </div>
-    );
-};
-
-/**
  * Mode selection
  */
-const SelectionMode = ({ onChange }: { onChange: (mode: string) => void; }) => {
+const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) => void; }) => {
     const selectionRef = useRef<HTMLSelectElement>(null);
-    const [selected, setSelected] = useState<TModeItem | null>(null);
+    const [selected, setSelected] = useState<{ key: string; details: TModeItem; } | null>(null);
 
     const eventOnChange = () => {
         if (selectionRef.current) {
-            const value  = selectionRef.current.value;
+            const value = selectionRef.current.value;
 
             if (modes[value]) {
-                setSelected(modes[value]);
-                onChange(value);
+                setSelected({ key: value, details: modes[value] });
             }
         }
     };
@@ -101,11 +89,13 @@ const SelectionMode = ({ onChange }: { onChange: (mode: string) => void; }) => {
                         return <option key={mode} value={mode}>{mode}</option>;
                     }))}
                 </select>
-                <div className="button">Add</div>
+                <div className="button" onClick={() => {
+                    if (selected) onAdd(selected.key, selected.details);
+                }}>Add</div>
             </div>
 
             <div className="description">
-                <span>{selected?.description || "Adds the selected mode to the workflow."}</span>
+                <span>{selected?.details?.description || "Adds the selected mode to the workflow."}</span>
             </div>
         </div>
     );
@@ -141,6 +131,19 @@ const SelectionEffectConfig = ({ config, onChange }: TEffectChangeEvent) => {
 };
 
 /**
+ * Reads in the default configuration values from an object of `TEffectConfigItem` values
+ */
+const readConfigDefaults = (config: { [key: string]: TEffectConfigItem; }) => {
+    return Object.fromEntries(Object.keys(config || {}).map((key) => {
+        const value = getDefaultValue((config as {
+            [key: string]: TEffectConfigItem;
+        })[key]);
+
+        return value !== null ? [key, value] : null;
+    }).filter((item): item is [string, TEffectValue] => item !== null));
+};
+
+/**
  * Effect selection
  */
 const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: string]: TEffectValue }) => void; }) => {
@@ -161,13 +164,7 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
     useEffect(() => {
         if (selected?.value?.config) {
             // Read in configuration defaults and set as config state
-            setConfig(Object.fromEntries(Object.keys(selected.value.config || {}).map((key) => {
-                const value = getDefaultValue((selected.value.config as {
-                    [key: string]: TEffectConfigItem;
-                })[key]);
-
-                return value !== null ? [key, value] : null;
-            }).filter((item): item is [string, TEffectValue] => item !== null)));
+            setConfig(readConfigDefaults(selected.value.config));
         }
     }, [selected]);
 
@@ -180,8 +177,7 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
 
             <select name="effect-select" ref={selectionRef} onChange={eventOnChange}>
                 {(Object.keys(effects).map((key) => { // Read in available configuration for the effect
-                    const formated = effects[key]?.format || key;
-                    return <option key={key} value={key}>{formated}</option>;
+                    return <option key={key} value={key}>{effects[key]?.format || key}</option>;
                 }))}
             </select>
 
@@ -191,8 +187,8 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
 
             {selected?.value?.config ? <SelectionEffectConfig config={selected.value.config} onChange={(name, value) => {
                 // On any input changes, update the config with the set value
-                if (config.hasOwnProperty(name)) {
-                    setConfig({...config, [name]: value });
+                if (selected?.value?.config?.hasOwnProperty(name)) { // Validating config key can't hurt
+                    setConfig(previous => ({...previous, [name]: value }));
                 }
             }} /> : null}
 
@@ -202,6 +198,8 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
         </div>
     );
 };
+
+let workItemId = 0;
 
 /**
  * Controls container
@@ -215,17 +213,21 @@ const Controls = () => {
         <div className="controls">
             <div className="top">
                 <Header />
-                <FileInput />
+                <InputFile />
 
-                <SelectionMode onChange={(mode) => {
-                    console.log("Mode changed", mode);
+                <SelectionMode onAdd={(mode, _) => {
+                    setQueue(previous => [...previous, {
+                        type: WorkItemType.Mode, id: workItemId++, key: mode, config: null
+                    }]);
                 }} />
 
                 <SelectionEffect onAdd={(effect, config) => {
-                    setQueue([...queue, { type: WorkItemType.Effect, key: effect, config }])
+                    setQueue(previous => [...previous, {
+                        type: WorkItemType.Effect, id: workItemId++, key: effect, config
+                    }]);
                 }} />
 
-                <Workflow {...{ queue }} />
+                <Workflow {...{ queue, updater: setQueue }} />
             </div>
             <div className="bottom"></div>
         </div>
