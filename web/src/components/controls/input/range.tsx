@@ -1,5 +1,4 @@
-import type { TEffectConfigNumber } from '@/data/types';
-import type { TInputSignature } from '../';
+import type { TEffectConfigNumber, TInputSignature } from '@/data/types';
 
 import { useEffect, useRef, useState } from 'react';
 

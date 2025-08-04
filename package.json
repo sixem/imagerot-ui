@@ -7,7 +7,7 @@
     "scripts": {
         "dev": "concurrently -k \"pnpm --filter web dev\" \"pnpm --filter desktop tauri dev\"",
         "build:web": "pnpm --filter web build",
-        "build:desktop": "pnpm --filter desktop tauri build"
+        "build:desktop": "pnpm --filter web build && pnpm --filter desktop tauri build"
     },
     "keywords": [],
     "author": "",

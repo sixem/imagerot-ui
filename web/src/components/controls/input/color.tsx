@@ -1,5 +1,4 @@
-import type { TEffectConfigColor } from '@/data/types';
-import type { TInputSignature } from '../';
+import type { TEffectConfigColor, TInputSignature } from '@/data/types';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { RgbColorPicker } from 'react-colorful';

@@ -1,5 +1,4 @@
-import type { TEffectConfigString } from '@/data/types';
-import type { TInputSignature } from '../';
+import type { TEffectConfigString, TInputSignature } from '@/data/types';
 
 import { useRef } from 'react';
 

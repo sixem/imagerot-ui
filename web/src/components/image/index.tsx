@@ -94,10 +94,12 @@ const Image = ({ current, setters }: TPaneSignature) => {
             <Options {...{
                 reset: current?.loaded ? () => { setters.edit(null); } : null,
                 open: currentUrl ? () => { window.open(currentUrl, '_blank')} : null,
-                save: () => {
-                    const file = current.edited?.file ? current.edited?.file : current.loaded?.file;
-                    if (file) saveAs(file, file.name);
-                },
+                save: (current.edited || current.loaded) ? () => {
+                    const target = (current.edited || current.loaded);
+                    if (target) {
+                        saveAs(target.url, self.crypto.randomUUID() + '.png' || 'image.png');
+                    }
+                } : null,
             }}/>
         </div>
     );
