@@ -11,6 +11,7 @@ import type {
 
 import { useEffect, useState, useRef } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
+import { Actions } from './actions';
 import { Workflow } from './workflow';
 import { effects, modes } from '@/data/';
 import { EffectType } from '@/data/enums';
@@ -242,7 +243,9 @@ const Controls = ({ currentFile, setFile }: TPaneSignature) => {
 
                 <Workflow {...{ queue, updater: setQueue }} />
             </div>
-            <div className="bottom"></div>
+            <div className="bottom">
+                <Actions />
+            </div>
         </div>
     );
 };

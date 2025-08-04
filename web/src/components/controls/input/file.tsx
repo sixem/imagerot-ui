@@ -1,12 +1,14 @@
 import type { TCurrentFile } from '@/data/types';
 
+import { useRef } from 'react';
 import { Config } from '@/config';
 
 /**
  * File input
  */
-
 export const InputFile = ({ setFile }: { setFile: React.Dispatch<React.SetStateAction<TCurrentFile>> }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const eventOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
 
@@ -16,9 +18,11 @@ export const InputFile = ({ setFile }: { setFile: React.Dispatch<React.SetStateA
     };
 
     return (
-        <div className="section file-input">
-            <div className="sub-header">File selection:</div>
-            <input onChange={eventOnChange} type="file" accept={Config.Filetypes.Allowed.join(', ')} />
+        <div className="section file-drop">
+            <input onChange={eventOnChange} ref={inputRef} type="file" accept={Config.Filetypes.Allowed.join(', ')} />
+            <div className="file-drop-target" onClick={() => inputRef?.current?.click() }>
+                <span>Drop files anywhere, or click to select a file.</span>
+            </div>
         </div>
     );
 };

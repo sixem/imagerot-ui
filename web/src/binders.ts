@@ -14,20 +14,13 @@ const listen = () => {
 
             for (const item of items) {
                 if (item.kind === 'file') {
-                    Hooks.trigger({
-                        trigger: Triggers.DOCUMENT_PASTE,
-                        data: item
-                    }); break;
+                    Hooks.trigger({ trigger: Triggers.DOCUMENT_PASTE, data: item });
+                    break;
                 }
             }
-        }
-    });
 
-    Hooks.listen({
-        pointer: document.body.querySelector('#root') as HTMLElement,
-        events: 'drop',
-        identifier: "TEST",
-        callbacks: (event: any) => console.log(event)
+            
+        }
     });
 };
 

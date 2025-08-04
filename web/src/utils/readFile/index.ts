@@ -9,7 +9,7 @@ export const readFile = async (file: File | null = null): Promise<TCurrentFile |
 
     if (!Config.Filetypes.Allowed.includes(file.type)) {
         Hooks.trigger({
-            trigger: Triggers.MESSAGE_RECEIVE,
+            trigger: Triggers.MESSAGE,
             data: {
                 type: MessageType.MSG_ERROR,
                 message: `Type ${file.type} is not a valid format.`
@@ -18,7 +18,7 @@ export const readFile = async (file: File | null = null): Promise<TCurrentFile |
     }
 
     Hooks.trigger({
-        trigger: Triggers.MESSAGE_RECEIVE,
+        trigger: Triggers.MESSAGE,
         data: {
             type: MessageType.MSG_OK,
             message: `Loaded ${file.name} ...`

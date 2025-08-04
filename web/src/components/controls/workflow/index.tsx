@@ -11,13 +11,23 @@ type TWorkflowSignature = {
 /**
  * Holds a single effect or mode item
  */
-const WorkflowItem = ({ item, index }: { item: TWorkItem; index: number; }) => {
-    const itemClass = "work-item type-" + (item.type === WorkItemType.Mode ? "mode" : "effect");
-
+const WorkflowItem = ({ item, index, onRemove }: {
+    item: TWorkItem;
+    index: number;
+    onRemove: (item: TWorkItem, index: number) => void;
+}) => {
     return (
-        <div data-index={index} className={itemClass}>
-            <div className="name">{item.key}</div>
-            {item.config ? <div className="config">[{Object.values(item.config).join(', ')}]</div> : null}
+        <div data-index={index} className={"work-item type-" + (item.type === WorkItemType.Mode ? "mode" : "effect")}>
+            <div className="text">
+                <div>{item.key}</div>
+                {item.config ? <div className="config">
+                    <span>[{Object.values(item.config).join(', ')}]</span>
+                </div> : null}
+            </div>
+
+            <div className="options">
+                <div className="remove" onClick={() => onRemove(item, index)} />
+            </div>
         </div>
     );
 };
@@ -33,13 +43,19 @@ export const Workflow = ({ queue, updater }: TWorkflowSignature) => {
     // TODO: Add reordering.
     // Updater (param) updates the queue and will be needed when we add re-orderable items here
 
+    const onRemove = (item: TWorkItem) => {
+        updater((previous) => previous.filter((current) => {
+            return current !== item;
+        }));
+    };
+
     return (
         <div className="section workflow">
             <div className="sub-header">Active workflow items:</div>
             {queue.length > 0 ? (
                 <div className="work-order" ref={listRef}>
                     {queue.map((item, index) => {
-                        return <WorkflowItem item={item} key={index} index={index} />
+                        return <WorkflowItem {...{ item, index, onRemove }} key={index} />
                     })}
                 </div>
             ) : <div className="label-empty">No workflow items.</div> }

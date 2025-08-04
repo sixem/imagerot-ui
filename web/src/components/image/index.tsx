@@ -100,13 +100,17 @@ const Image = ({ currentFile, setFile }: TPaneSignature) => {
             }} onLoad={onImageLoad}/>
 
             <Options {...{
-                reset : () => {
+                reset: () => {
                     if (Cache.currentFile) {
                         setFile(Cache.currentFile);
                     }
                 },
-                open  : () => console.debug('open'),
-                save  : () => console.debug('save'),
+                open: () => {
+                    if (Cache.currentFile) {
+                        window.open(Cache.currentFile.url, '_blank');
+                    }
+                },
+                save: () => console.debug('save'),
             }}/>
         </div>
     );

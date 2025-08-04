@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@/sass/variables' as *;
 
 #root>div.wrapper>div.controls {
@@ -13,6 +14,7 @@
     justify-content: space-between;
     position: relative;
     user-select: none;
+    max-width: 325px;
 
     >div.top {
         width: 100%;
@@ -52,6 +54,32 @@
                 font-size: 0.9em;
             }
 
+            &.file-drop {
+                > input {
+                    display: none;
+                }
+
+                > div.file-drop-target {
+                    background: repeating-conic-gradient(color.adjust($color-primary, $blackness: 25%) 0 25%, transparent 0 50%) 50% / 20px 20px;
+                    border: 2px dashed $color-primary-standout-brighten;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    display: block;
+                    font-size: .9rem;
+                    padding: 10px 0 12px 0;
+                    text-align: center;
+                    transition: border-color .15s, color .15s;
+                    -webkit-user-select: none;
+                    user-select: none;
+                    color: #8492a3;
+
+                    &:hover {
+                        color: #bcc5d1;
+                        border: 2px dashed color.adjust($color-primary-standout-brighten, $lightness: 25%);
+                    }
+                }
+            }
+
             &.workflow {
                 >div.work-order {
                     border: 1px solid #22232d;
@@ -68,23 +96,68 @@
                         display: flex;
                         text-align: left;
                         cursor: pointer;
-                        padding: 6px 6px;
                         overflow: hidden;
                         gap: 6px;
                         line-height: 1;
-                        justify-content: stretch;
-                        align-items: center;
+                        align-items: stretch;
                         position: relative;
                         transition: background-color .05s ease-in-out;
 
-                        > div.name {
+                        > div.text {
                             text-transform: capitalize;
                             font-size: 0.9em;
+                            display: flex;
+                            align-items: center;
+                            flex: 1 1 0;
+                            min-width: 0;
+                            max-width: 100%;
+
+                            > div {
+                                display: block;
+
+                                &:first-child {
+                                    flex: 0 0 auto;
+                                }
+
+                                &.config {
+                                    flex: 1 1 auto;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    white-space: nowrap;
+                                    color: #8e8ba7;
+                                    font-size: 0.9em;
+                                    margin-left: 4px;
+                                    letter-spacing: 1px;
+                                }
+                            }
                         }
 
-                        > div.config {
-                            color: #8e8ba7;
-                            font-size: 0.9em;
+                        > div.options {
+                            flex-grow: 0;
+                            background-color: #22232d;
+
+                            > div.remove {
+                                height: 100%;
+                                width: 25px;
+                                background-color: #20212d;
+                                cursor: pointer;
+
+                                &:hover {
+                                    background-color: #2e3045;
+                                }
+
+                                &:before {
+                                        content: '';
+                                        background: url('@/assets/cross.svg');
+                                        background-size: 18px 18px;
+                                        display: block;
+                                        filter: invert(100%);
+                                        background-repeat: no-repeat;
+                                        background-position: center;
+                                        width: 100%;
+                                        height: 100%;
+                                }
+                            }
                         }
 
                         &:not(:first-child) {
@@ -94,11 +167,12 @@
                         &.type-effect::before,
                         &.type-mode::before {
                             display: inline-block;
-                            width: auto;
+                            width: 45px;
                             text-align: center;
                             border-radius: 3px;
                             padding: 4px 6px;
                             font-size: 0.9em;
+                            margin: 4px;
                         }
 
                         &.type-effect::before {
@@ -202,19 +276,18 @@
             text-align: center;
             margin: 0;
             border-bottom: 1px solid $color-primary-standout;
-            padding: 0 0 10px 0;
             margin-bottom: 14px;
             margin-top: 8px;
 
             >h2 {
-                margin: 0 0 8px 0;
                 z-index: 0;
                 position: relative;
-                letter-spacing: 2px;
-                font-size: 1.85em;
+                font-weight: bold;
+                letter-spacing: 5px;
+                font-size: 1.9em;
                 font-family: "Faculty Glyphic", sans-serif;
-                font-weight: 400;
                 font-style: normal;
+                margin: 10px 0 14px 0;
             }
 
             >div.note {
