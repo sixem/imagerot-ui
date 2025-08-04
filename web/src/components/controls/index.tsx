@@ -17,6 +17,7 @@ import { effects, modes } from '@/data/';
 import { EffectType } from '@/data/enums';
 import { Github } from '@/icons/';
 
+import * as imagerot from 'imagerot/browser';
 import './index.scss';
 
 /** Valid work item types */
@@ -39,6 +40,9 @@ export type TWorkItem = {
     config: null | { [key: string]: TEffectValue; };
     id: number;
 };
+
+const validEffects = Object.fromEntries(imagerot.listEffects().map((key) => [key, true]));
+const validModes = Object.fromEntries(imagerot.listModes().map((key) => [key, true]));
 
 const getDefaultValue = (config: TEffectConfigItem) => {
     const [type, a, b] = config;
@@ -94,8 +98,10 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
 
             <div className="selection-buttoned">
                 <select name="mode-select" ref={selectionRef} onChange={eventOnChange}>
-                    {(Object.keys(modes).map((mode) => {
-                        return <option key={mode} value={mode}>{mode}</option>;
+                    {(Object.keys(modes).map((key) => {
+                        return validModes[key] ? (
+                            <option key={key} value={key}>{key}</option>
+                        ) : null;
                     }))}
                 </select>
                 <div className="button" onClick={() => {
@@ -186,7 +192,9 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
 
             <select name="effect-select" ref={selectionRef} onChange={eventOnChange}>
                 {(Object.keys(effects).map((key) => { // Read in available configuration for the effect
-                    return <option key={key} value={key}>{effects[key]?.format || key}</option>;
+                    return validEffects[key] ? (
+                        <option key={key} value={key}>{effects[key]?.format || key}</option>
+                    ) : null;
                 }))}
             </select>
 

@@ -21,7 +21,7 @@ const WorkflowItem = ({ item, index, onRemove }: {
             <div className="text">
                 <div>{item.key}</div>
                 {item.config ? <div className="config">
-                    <span>[{Object.values(item.config).join(', ')}]</span>
+                    <span>[{Object.values(item.config).join('; ')}]</span>
                 </div> : null}
             </div>
 

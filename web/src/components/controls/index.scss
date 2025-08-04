@@ -37,6 +37,7 @@
         >div.section {
             display: flex;
             flex-direction: column;
+            padding-bottom: 10px;
 
             >div.selection-buttoned {
                 display: flex;
@@ -120,14 +121,11 @@
                                 }
 
                                 &.config {
-                                    flex: 1 1 auto;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
                                     white-space: nowrap;
                                     color: #8e8ba7;
                                     font-size: 0.9em;
-                                    margin-left: 4px;
                                     letter-spacing: 1px;
+                                    margin-left: 6px;
                                 }
                             }
                         }
@@ -306,5 +304,7 @@
 
     >div.bottom {
         z-index: 1;
+        padding: 10px 0;
+        border-top: 1px solid #171724;
     }
 }
