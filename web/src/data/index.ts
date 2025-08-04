@@ -1,2 +1,2 @@
-export { effects } from './effects';
-export { modes } from './modes';
+export { Effects } from './effects';
+export { Modes } from './modes';

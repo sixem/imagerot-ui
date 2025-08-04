@@ -1,6 +1,6 @@
 import type { TModes } from './types';
 
-const modes: TModes = {
+export const Modes: TModes = {
     pixelsort: {
         format: 'Pixel Sort',
         description: 'Adds the pixel sort mode to the image.',
@@ -34,5 +34,3 @@ const modes: TModes = {
         description: 'Adds the acid mode to the image.',
     },
 };
-
-export { modes };

@@ -10,3 +10,8 @@ export const EffectType = {
     OBJECT: 'object',
     COLOR: 'color'
 };
+
+export const WorkItemType = {
+    MODE: 0,
+    EFFECT: 1
+};

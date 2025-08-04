@@ -1,4 +1,4 @@
-import type { TCurrentFile } from '@/data/types';
+import type { TImageFile } from '@/data/types';
 
 import { useEffect, useState, useRef } from 'react';
 import { Image, Controls } from './components/';
@@ -6,13 +6,14 @@ import { binders } from './binders';
 import { Config } from '@/config';
 import { MessageType } from '@/data/enums';
 import { Hooks, Triggers } from '@/modules/';
-import coverImage from '@/assets/cover.jpg';
 
 import './ImageRot.scss';
 
 const ImageRot = () => {
     const [isDropping, setDropping] = useState<boolean>(false);
-    const [currentFile, setFile] = useState<TCurrentFile>({ file: null, url: coverImage });
+
+    const [currentFile, setFile] = useState<TImageFile | null>(null);
+    const [currentEdit, setEdit] = useState<TImageFile | null>(null);
 
     const dragEnterHandler = useRef<(e: DragEvent) => void>(null);
     const dragOverHandler  = useRef<(e: DragEvent) => void>(null);
@@ -81,13 +82,13 @@ const ImageRot = () => {
     return (
         <div className="wrapper">
             <Image
-                setFile={setFile}
-                currentFile={currentFile}
+                setters={{ file: setFile, edit: setEdit }}
+                current={{ loaded: currentFile, edited: currentEdit }}
             />
 
             <Controls
-                setFile={setFile}
-                currentFile={currentFile}
+                setters={{ file: setFile, edit: setEdit }}
+                current={{ loaded: currentFile, edited: currentEdit }}
             />
 
             {isDropping ? <div className="dropping-overlay" /> : null}

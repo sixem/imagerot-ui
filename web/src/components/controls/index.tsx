@@ -5,44 +5,26 @@ import type {
     TEffectValue,
     TEffectConfigColor,
     TEffectConfigString,
+    TEffectChangeEvent,
     TPaneSignature,
     TModeItem,
+    TWorkItem
 } from '@/data/types';
 
 import { useEffect, useState, useRef } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
 import { Actions } from './actions';
 import { Workflow } from './workflow';
-import { effects, modes } from '@/data/';
-import { EffectType } from '@/data/enums';
+import { Effects, Modes } from '@/data/';
+import { EffectType, WorkItemType } from '@/data/enums';
 import { Github } from '@/icons/';
+import { listEffects, listModes } from 'imagerot/browser';
 
-import * as imagerot from 'imagerot/browser';
 import './index.scss';
 
-/** Valid work item types */
-export const WorkItemType = { Mode: 0, Effect: 1 };
-
-export type TEffectChangeEvent = {
-    config: { [key: string]: TEffectConfigItem };
-    onChange: (name: string, value: TEffectValue) => void;
-};
-
-export type TInputSignature<TItem = TEffectConfigNumber> = {
-    name: string;
-    item: TItem;
-    onChange: TEffectChangeEvent['onChange']
-};
-
-export type TWorkItem = {
-    key: string;
-    type: typeof WorkItemType[keyof typeof WorkItemType];
-    config: null | { [key: string]: TEffectValue; };
-    id: number;
-};
-
-const validEffects = Object.fromEntries(imagerot.listEffects().map((key) => [key, true]));
-const validModes = Object.fromEntries(imagerot.listModes().map((key) => [key, true]));
+/** Get valid modes and effects for our current version */
+const validEffects = Object.fromEntries(listEffects().map((key) => [key, true]));
+const validModes = Object.fromEntries(listModes().map((key) => [key, true]));
 
 const getDefaultValue = (config: TEffectConfigItem) => {
     const [type, a, b] = config;
@@ -66,7 +48,7 @@ const Header = () => {
         <div className="header">
             <h2>ImageRot UI</h2>
             <div className="note">
-                <span>Check out the project on <a target="_blank" href="https://github.com/sixem/imagerot-ui/">GitHub</a></span>
+                <span>Check out the <a target="_blank" href="https://github.com/sixem/imagerot-ui/">project on GitHub</a></span>
                 <Github />
             </div>
         </div>
@@ -84,8 +66,8 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
         if (selectionRef.current) {
             const value = selectionRef.current.value;
 
-            if (modes[value]) {
-                setSelected({ key: value, details: modes[value] });
+            if (Modes[value]) {
+                setSelected({ key: value, details: Modes[value] });
             }
         }
     };
@@ -98,7 +80,7 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
 
             <div className="selection-buttoned">
                 <select name="mode-select" ref={selectionRef} onChange={eventOnChange}>
-                    {(Object.keys(modes).map((key) => {
+                    {(Object.keys(Modes).map((key) => {
                         return validModes[key] ? (
                             <option key={key} value={key}>{key}</option>
                         ) : null;
@@ -170,8 +152,8 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
         if (selectionRef.current) {
             const value = selectionRef.current.value;
 
-            if (effects[value]) {
-                setSelected({ key: value, value: effects[value] });
+            if (Effects[value]) {
+                setSelected({ key: value, value: Effects[value] });
             }
         }
     };
@@ -191,9 +173,9 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
             <div className="sub-header">Available effects:</div>
 
             <select name="effect-select" ref={selectionRef} onChange={eventOnChange}>
-                {(Object.keys(effects).map((key) => { // Read in available configuration for the effect
+                {(Object.keys(Effects).map((key) => { // Read in available configuration for the effect
                     return validEffects[key] ? (
-                        <option key={key} value={key}>{effects[key]?.format || key}</option>
+                        <option key={key} value={key}>{Effects[key]?.format || key}</option>
                     ) : null;
                 }))}
             </select>
@@ -223,36 +205,40 @@ let workItemId = 0;
  * 
  * Contains file inputs, selections of modes and effects and the workflow
  */
-const Controls = ({ currentFile, setFile }: TPaneSignature) => {
-    const [queue, setQueue] = useState<TWorkItem[]>([]);
-
-    // Handle image processing here somewhere. Remember background workers!
-    // currentFile gets us the current image that we're handling, and then we
-    // update it using setFile after it has processed.
+const Controls = ({ current, setters }: TPaneSignature) => {
+    const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
 
     return (
         <div className="controls">
             <div className="top">
                 <Header />
                 
-                <InputFile setFile={setFile}/>
+                <InputFile setter={setters.file} />
 
                 <SelectionMode onAdd={(mode, _) => {
-                    setQueue(previous => [...previous, {
-                        type: WorkItemType.Mode, id: workItemId++, key: mode, config: null
+                    setWorkflow(previous => [...previous, {
+                        type: WorkItemType.MODE,
+                        id: workItemId++,
+                        key: mode,
+                        config: null,
+                        muted: false
                     }]);
                 }} />
 
                 <SelectionEffect onAdd={(effect, config) => {
-                    setQueue(previous => [...previous, {
-                        type: WorkItemType.Effect, id: workItemId++, key: effect, config
+                    setWorkflow(previous => [...previous, {
+                        type: WorkItemType.EFFECT,
+                        id: workItemId++,
+                        key: effect,
+                        config: config,
+                        muted: false
                     }]);
                 }} />
 
-                <Workflow {...{ queue, updater: setQueue }} />
+                <Workflow {...{ workflow, setWorkflow }} />
             </div>
             <div className="bottom">
-                <Actions />
+                <Actions {...{ current, setters }} workflow={workflow} />
             </div>
         </div>
     );

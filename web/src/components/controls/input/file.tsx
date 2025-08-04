@@ -1,4 +1,4 @@
-import type { TCurrentFile } from '@/data/types';
+import type { TImageFile } from '@/data/types';
 
 import { useRef } from 'react';
 import { Config } from '@/config';
@@ -6,14 +6,14 @@ import { Config } from '@/config';
 /**
  * File input
  */
-export const InputFile = ({ setFile }: { setFile: React.Dispatch<React.SetStateAction<TCurrentFile>> }) => {
+export const InputFile = ({ setter }: { setter: React.Dispatch<React.SetStateAction<TImageFile | null>> }) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const eventOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
 
         if (files && files.length > 0 && Config.Filetypes.Allowed.includes(files[0].type)) {
-            setFile({ file: files[0], url: URL.createObjectURL(files[0]) });
+            setter({ file: files[0], url: URL.createObjectURL(files[0]) });
         }
     };
 

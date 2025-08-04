@@ -1,3 +1,5 @@
+import { WorkItemType } from './enums';
+
 export type TEffects = {
     [key: string]: TEffectItem;
 };
@@ -32,12 +34,48 @@ export type TModes = {
     [key: string]: TModeItem
 };
 
-export type TCurrentFile = {
+export type TImageFile = {
     file: File | null;
     url: string;
 };
 
 export type TPaneSignature = {
-    currentFile: TCurrentFile | null;
-    setFile: React.Dispatch<React.SetStateAction<TCurrentFile>>;
+    setters: {
+        file: React.Dispatch<React.SetStateAction<TImageFile | null>>;
+        edit: React.Dispatch<React.SetStateAction<TImageFile | null>>
+    };
+    current: {
+        loaded: TImageFile | null;
+        edited: TImageFile | null;
+    }
+};
+
+export type TEffectChangeEvent = {
+    config: { [key: string]: TEffectConfigItem };
+    onChange: (name: string, value: TEffectValue) => void;
+};
+
+export type TInputSignature<TItem = TEffectConfigNumber> = {
+    name: string;
+    item: TItem;
+    onChange: TEffectChangeEvent['onChange']
+};
+
+export type TWorkItem = {
+    key: string;
+    type: typeof WorkItemType[keyof typeof WorkItemType];
+    config: null | { [key: string]: TEffectValue; };
+    id: number;
+    muted?: boolean;
+};
+
+/** Background worker input and output */
+
+export interface TProcessorInput {
+    image: TImageFile;
+    workflow: TWorkItem[];
+};
+
+export interface TProcessorOutput {
+    image: TImageFile;
 };

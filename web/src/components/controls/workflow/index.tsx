@@ -1,11 +1,11 @@
-import type { TWorkItem } from '../';
+import type { TWorkItem } from '@/data/types';
 
 import { useRef } from 'react';
-import { WorkItemType } from '../';
+import { WorkItemType } from '@/data/enums';
 
 type TWorkflowSignature = {
-    queue: TWorkItem[];
-    updater: React.Dispatch<React.SetStateAction<TWorkItem[]>>
+    workflow: TWorkItem[];
+    setWorkflow: React.Dispatch<React.SetStateAction<TWorkItem[]>>
 };
 
 /**
@@ -17,7 +17,7 @@ const WorkflowItem = ({ item, index, onRemove }: {
     onRemove: (item: TWorkItem, index: number) => void;
 }) => {
     return (
-        <div data-index={index} className={"work-item type-" + (item.type === WorkItemType.Mode ? "mode" : "effect")}>
+        <div data-index={index} className={"work-item type-" + (item.type === WorkItemType.MODE ? "mode" : "effect")}>
             <div className="text">
                 <div>{item.key}</div>
                 {item.config ? <div className="config">
@@ -37,14 +37,14 @@ const WorkflowItem = ({ item, index, onRemove }: {
  * 
  * Contains the active modes and effects that will be used to process the image
  */
-export const Workflow = ({ queue, updater }: TWorkflowSignature) => {
+export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
     const listRef = useRef<HTMLDivElement>(null);
 
     // TODO: Add reordering.
-    // Updater (param) updates the queue and will be needed when we add re-orderable items here
+    // setWorkflow (param) updates the workflow queue and will be needed when we add re-orderable items here
 
     const onRemove = (item: TWorkItem) => {
-        updater((previous) => previous.filter((current) => {
+        setWorkflow((previous) => previous.filter((current) => {
             return current !== item;
         }));
     };
@@ -52,9 +52,9 @@ export const Workflow = ({ queue, updater }: TWorkflowSignature) => {
     return (
         <div className="section workflow">
             <div className="sub-header">Active workflow items:</div>
-            {queue.length > 0 ? (
+            {workflow.length > 0 ? (
                 <div className="work-order" ref={listRef}>
-                    {queue.map((item, index) => {
+                    {workflow.map((item, index) => {
                         return <WorkflowItem {...{ item, index, onRemove }} key={index} />
                     })}
                 </div>

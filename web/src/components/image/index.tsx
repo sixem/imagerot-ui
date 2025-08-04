@@ -1,36 +1,34 @@
-import type { TCurrentFile, TPaneSignature } from '@/data/types';
+import type { TPaneSignature } from '@/data/types';
 
 import { useRef, useState, useEffect } from 'react';
+import { saveAs } from 'file-saver';
 import { Hooks, Triggers } from '@/modules/';
-import { readFile, readImgAsFile } from '@/utils';
-import coverImage from '@/assets/cover.jpg';
+import { readFile } from '@/utils';
 import Drift from 'drift-zoom';
 
 import './index.scss';
 
 type TOptionsProps = {
-    reset : () => void;
-    open  : () => void;
-    save  : () => void;
+    reset : null | (() => void);
+    open  : null | (() => void);
+    save  : null | (() => void);
 };
 
 const HOOK_ID = {
     DOCUMENT_PASTE_WATCHER: 'document:paste:watcher',
 };
 
-const Cache: { currentFile: TCurrentFile | null } = { currentFile: null };
-
 const Options = ({ reset, open, save }: TOptionsProps) => {
     return (
         <div className="options">
-            <div onClick={reset} className="fileReset" title="Reset image" />
-            <div onClick={open}  className="fileOpen"  title="Open in new tab" />
-            <div onClick={save}  className="fileSave"  title="Save file" />
+            {reset ? <div onClick={reset} className="fileReset" title="Reset image" /> : null}
+            {open  ? <div onClick={open}  className="fileOpen"  title="Open in new tab" /> : null}
+            {save  ? <div onClick={save}  className="fileSave"  title="Save file" /> : null}
         </div>
     );
 };
 
-const Image = ({ currentFile, setFile }: TPaneSignature) => {
+const Image = ({ current, setters }: TPaneSignature) => {
     const imgRef = useRef<HTMLImageElement>(null);
     const [isZooming, setZooming] = useState<boolean>(false);
     
@@ -53,7 +51,7 @@ const Image = ({ currentFile, setFile }: TPaneSignature) => {
             identifier: HOOK_ID.DOCUMENT_PASTE_WATCHER,
             callback: async (file: DataTransferItem) => {
                 const processed = await readFile(file.getAsFile());
-                if (processed) setFile(processed);
+                if (processed) setters.file(processed);
             }
         });
 
@@ -61,19 +59,13 @@ const Image = ({ currentFile, setFile }: TPaneSignature) => {
     });
 
     useEffect(() => {
-        if (currentFile && imgRef.current) {
-            imgRef.current.src = currentFile.url;
-            Cache.currentFile = currentFile;
+        if (current.loaded && imgRef.current) {
+            imgRef.current.src = current.loaded.url;
         }
-    }, [currentFile]);
+    }, [current.loaded]);
 
-    const onImageLoad = async () => {
-        // Read <img/> into a File on load if unset
-        if (currentFile?.file === null && imgRef.current) {
-            const file = await readImgAsFile(imgRef.current) || null;
-            setFile(previous => ({...previous, ...{ file }}))
-        }
-    };
+    // Retrieve the current image URL (prioritize showing the edited image)
+    const currentUrl = current.edited?.url ? current.edited.url : (current.loaded?.url || undefined);
 
     return (
         <div className={"image" + (isZooming ? " zooming" : "")} onMouseDown={(e) => {
@@ -95,22 +87,17 @@ const Image = ({ currentFile, setFile }: TPaneSignature) => {
                 imgRef.current.dispatchEvent(new MouseEvent('mouseleave'));
             }
         }} >
-            <img id="output" ref={imgRef} src={coverImage} draggable={false} style={{
+            <img id="output" ref={imgRef} src={currentUrl} draggable={false} style={{
                 pointerEvents: isZooming ? 'auto' : 'none'
-            }} onLoad={onImageLoad}/>
+            }} />
 
             <Options {...{
-                reset: () => {
-                    if (Cache.currentFile) {
-                        setFile(Cache.currentFile);
-                    }
+                reset: current?.loaded ? () => { setters.edit(null); } : null,
+                open: currentUrl ? () => { window.open(currentUrl, '_blank')} : null,
+                save: () => {
+                    const file = current.edited?.file ? current.edited?.file : current.loaded?.file;
+                    if (file) saveAs(file, file.name);
                 },
-                open: () => {
-                    if (Cache.currentFile) {
-                        window.open(Cache.currentFile.url, '_blank');
-                    }
-                },
-                save: () => console.debug('save'),
             }}/>
         </div>
     );

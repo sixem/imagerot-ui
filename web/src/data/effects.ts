@@ -2,7 +2,7 @@
 
 import type { TEffects  } from './types';
 
-const effects: TEffects = {
+export const Effects: TEffects = {
     degrade: {
         description: 'Adds JPEG artifacts to the image.',
         format: 'Degrade (JPEG Artifacting)',
@@ -167,5 +167,3 @@ const effects: TEffects = {
         },
     },
 };
-
-export { effects };
