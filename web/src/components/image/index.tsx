@@ -29,7 +29,15 @@ const Options = ({ reset, open, save }: TOptionsProps) => {
     );
 };
 
-const Image = ({ current, setters }: TPaneSignature) => {
+const Spinner = ({ visible }: { visible: boolean; }) => {
+    return (
+        <div className={"spinner" + (visible ? " visible" : "")}>
+            <div className="icon" />
+        </div>
+    );
+}
+
+const Image = ({ current, setters, busy }: TPaneSignature) => {
     const imgRef = useRef<HTMLImageElement>(null);
     const [isZooming, setZooming] = useState<boolean>(false);
     
@@ -98,6 +106,8 @@ const Image = ({ current, setters }: TPaneSignature) => {
             ) : <img id="output" ref={imgRef} src={currentUrl} draggable={false} style={{
                 pointerEvents: isZooming ? 'auto' : 'none'
             }} />}
+
+            <Spinner visible={busy.state} />
 
             <Options {...{
                 reset: current?.loaded ? () => {

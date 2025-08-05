@@ -1,5 +1,32 @@
 @use '@/sass/variables' as *;
 
+div.spinner {
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+    transition: opacity 0.5s ease-in-out;
+    background-color: #00000040;
+    opacity: 0;
+    backdrop-filter: blur(2px);
+
+    &.visible {
+        opacity: 1;
+    }
+
+    > div.icon {
+        background: url('@/assets/spinner.svg');
+        width: 24px;
+        height: 24px;
+        background-size: 24px 24px;
+        display: block;
+        background-repeat: no-repeat;
+        background-position: center;
+        margin: auto;
+        margin-top: calc(50vh - 12px);
+        opacity: 0.75;
+    }
+}
+
 #root > div.wrapper > div.image {
     flex-grow: 1;
     display: flex;

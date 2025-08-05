@@ -49,6 +49,10 @@ export type TPaneSignature = {
     current: {
         loaded: TImageFile | null;
         edited: TImageFile | null;
+    };
+    busy: {
+        state: boolean;
+        update: (state: boolean) => void;
     }
 };
 

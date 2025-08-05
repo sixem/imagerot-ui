@@ -205,7 +205,7 @@ let workItemId = 0;
  * 
  * Contains file inputs, selections of modes and effects and the workflow
  */
-const Controls = ({ current, setters }: TPaneSignature) => {
+const Controls = ({ current, setters, busy }: TPaneSignature) => {
     const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
 
     return (
@@ -240,7 +240,7 @@ const Controls = ({ current, setters }: TPaneSignature) => {
                 <Workflow {...{ workflow, setWorkflow }} />
             </div>
             <div className="bottom">
-                <Actions {...{ current, setters }} workflow={workflow} />
+                <Actions {...{ current, setters, busy }} workflow={workflow} />
             </div>
         </div>
     );

@@ -12,6 +12,7 @@ import './ImageRot.scss';
 
 const ImageRot = () => {
     const [isDropping, setDropping] = useState<boolean>(false);
+    const [isBusy, setBusy] = useState<boolean>(false);
 
     // Store the loaded file as well as its edited version for restoration etc.
     const [currentFile, setFile] = useState<TImageFile | null>(null); // Base file
@@ -46,7 +47,7 @@ const ImageRot = () => {
                 URL.revokeObjectURL(previous.url);
             } return image;
         });
-    }
+    };
 
     // Notify on file changes
     useEffect(() => {
@@ -118,11 +119,13 @@ const ImageRot = () => {
             <Image
                 setters={{ file: setAndRevokeFile, edit: setAndRevokeEdit }}
                 current={{ loaded: currentFile, edited: currentEdit }}
+                busy={{ state: isBusy, update: (state: boolean) => setBusy(state)}}
             />
 
             <Controls
                 setters={{ file: setAndRevokeFile, edit: setAndRevokeEdit }}
                 current={{ loaded: currentFile, edited: currentEdit }}
+                busy={{ state: isBusy, update: (state: boolean) => setBusy(state)}}
             />
 
             {isDropping ? <div className="dropping-overlay" /> : null}
