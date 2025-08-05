@@ -1,6 +1,6 @@
 import { Hooks, Triggers } from '@/modules/';
 
-const HOOK_ID = {
+const hookId = {
     DOCUMENT_PASTE_LISTENER: 'document:paste:listener',
 };
 
@@ -8,7 +8,7 @@ const listen = () => {
     Hooks.listen({
         pointer: document,
         events: 'paste',
-        identifier: HOOK_ID.DOCUMENT_PASTE_LISTENER,
+        identifier: hookId.DOCUMENT_PASTE_LISTENER,
         callbacks: (event: ClipboardEvent) => {
             const items = event.clipboardData?.items || [];
 
@@ -18,8 +18,6 @@ const listen = () => {
                     break;
                 }
             }
-
-            
         }
     });
 };
@@ -28,7 +26,7 @@ const unlisten = () => {
     Hooks.unlisten({
         pointer: document,
         events: 'paste',
-        identifier: HOOK_ID.DOCUMENT_PASTE_LISTENER
+        identifier: hookId.DOCUMENT_PASTE_LISTENER
     });
 };
 

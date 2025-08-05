@@ -1,29 +1,20 @@
 import type { TImageFile } from '@/data/types';
 
-import { Hooks, Triggers } from '@/modules/';
+import { Hooks } from '@/modules/';
 import { MessageType } from '@/data/enums';
 import { Config } from '@/config';
 
 export const readFile = async (file: File | null = null): Promise<TImageFile | null> => {
     if (!file || !file.name || !file.type) return null;
 
-    if (!Config.Filetypes.Allowed.includes(file.type)) {
-        Hooks.trigger({
-            trigger: Triggers.MESSAGE,
-            data: {
-                type: MessageType.MSG_ERROR,
-                message: `Type ${file.type} is not a valid format.`
-            }
-        }); return null;
+    if (!Config.filetypes.allowed.includes(file.type)) {
+        Hooks.senders.notify(
+            MessageType.ERROR,
+            `Type ${file.type} is not a valid format.`
+        ); return null;
     }
 
-    Hooks.trigger({
-        trigger: Triggers.MESSAGE,
-        data: {
-            type: MessageType.MSG_OK,
-            message: `Loaded ${file.name} ...`
-        }
-    });
+    Hooks.senders.notify(MessageType.OK,`Loaded ${file.name} ...`);
 
     return { file, url: URL.createObjectURL(file) };
 };

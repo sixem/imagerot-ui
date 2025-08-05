@@ -82,9 +82,14 @@
             }
 
             &.workflow {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+
                 >div.work-order {
-                    border: 1px solid #22232d;
-                    border-radius: 4px;
+                    flex-grow: 1;
+                    min-height: 0;
+                    overflow-y: auto;
 
                     scrollbar-color: #101118 #20212d;
                     scrollbar-width: thin;
@@ -103,6 +108,12 @@
                         align-items: stretch;
                         position: relative;
                         transition: background-color .05s ease-in-out;
+
+                        border: 1px solid #22232d;
+                        margin-top: 4px;
+
+                        border-radius: 4px;
+                        box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
 
                         > div.text {
                             text-transform: capitalize;

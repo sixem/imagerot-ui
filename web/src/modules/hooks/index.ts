@@ -1,4 +1,5 @@
-import { randomString } from '../../utils/';
+import { randomString } from '@/utils/';
+import { senders } from './senders';
 
 type TPointer = HTMLElement | Window | Document;
 type TCallback = (...params: any[]) => void;
@@ -132,5 +133,6 @@ export const Hooks = {
     trigger,
     watch,
     unwatch,
+    senders,
     creator
 };

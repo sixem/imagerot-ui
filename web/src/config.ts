@@ -1,11 +1,14 @@
 const Config = {
-    Filetypes: {
-        Allowed: [
+    filetypes: {
+        allowed: [
             'image/png',
             'image/jpeg',
             'image/webp',
             'image/avif'
         ]
+    },
+    notifications: {
+        defaultDuration: 5000
     }
 };
 

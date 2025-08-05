@@ -37,12 +37,13 @@ export type TModes = {
 export type TImageFile = {
     file: File | null;
     url: string;
+    size: number | null;
 };
 
 export type TPaneSignature = {
     setters: {
-        file: React.Dispatch<React.SetStateAction<TImageFile | null>>;
-        edit: React.Dispatch<React.SetStateAction<TImageFile | null>>
+        file: (image: TImageFile | null) => void;
+        edit: (image: TImageFile | null) => void;
     };
     current: {
         loaded: TImageFile | null;
@@ -78,4 +79,12 @@ export interface TProcessorInput {
 
 export interface TProcessorOutput {
     image: TImageFile;
+};
+
+export type TNotifyItem = {
+    type: number;
+    message: string;
+    id: number;
+    visible: boolean;
+    duration?: number;
 };

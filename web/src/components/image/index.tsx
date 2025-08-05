@@ -14,7 +14,7 @@ type TOptionsProps = {
     save  : null | (() => void);
 };
 
-const HOOK_ID = {
+const hookId = {
     DOCUMENT_PASTE_WATCHER: 'document:paste:watcher',
 };
 
@@ -48,7 +48,7 @@ const Image = ({ current, setters }: TPaneSignature) => {
 
         Hooks.watch({
             trigger: Triggers.DOCUMENT_PASTE,
-            identifier: HOOK_ID.DOCUMENT_PASTE_WATCHER,
+            identifier: hookId.DOCUMENT_PASTE_WATCHER,
             callback: async (file: DataTransferItem) => {
                 const processed = await readFile(file.getAsFile());
                 if (processed) setters.file(processed);
@@ -70,6 +70,7 @@ const Image = ({ current, setters }: TPaneSignature) => {
     return (
         <div className={"image" + (isZooming ? " zooming" : "")} onMouseDown={(e) => {
             if (!(e.target as HTMLElement).classList.contains('image')) return;
+
             setZooming(true);
 
             if (imgRef.current) { // Assures we zoom in straight away on mouse down
@@ -92,10 +93,15 @@ const Image = ({ current, setters }: TPaneSignature) => {
             }} />
 
             <Options {...{
-                reset: current?.loaded ? () => { setters.edit(null); } : null,
-                open: currentUrl ? () => { window.open(currentUrl, '_blank')} : null,
+                reset: current?.loaded ? () => {
+                    setters.edit(null);
+                } : null,
+                open: currentUrl ? () => {
+                    window.open(currentUrl, '_blank')
+                } : null,
                 save: (current.edited || current.loaded) ? () => {
                     const target = (current.edited || current.loaded);
+
                     if (target) {
                         saveAs(target.url, self.crypto.randomUUID() + '.png' || 'image.png');
                     }

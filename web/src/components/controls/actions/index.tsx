@@ -1,8 +1,11 @@
 
 import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 
-import Processor from '@/workers/processor?worker';
 import { useEffect } from 'react';
+import { Hooks } from '@/modules';
+
+import Processor from '@/workers/processor?worker';
+import { MessageType } from '@/data/enums';
 
 const processor = new Processor();
 
@@ -13,16 +16,20 @@ export const Actions = ({ current, setters, workflow }: TActionsSignature) => {
         if (current?.loaded) {
             processor.postMessage({ workflow, image: current.loaded });
         } else {
-            console.error("Current isn't loaded", current);
+            Hooks.senders.notify(MessageType.ERROR, 'No image has been loaded — load one before editing.');
         }
     };
 
     useEffect(() => {
-        processor.onmessage = (event: MessageEvent<TProcessorOutput>) => {
-            setters.edit(event.data.image);
+        processor.onmessage = (event: MessageEvent<TProcessorOutput | null>) => {
+            if (event.data) {
+                setters.edit(event.data.image);
+            }
         };
 
-        return () => { processor.onmessage = null; };
+        return () => {
+            processor.onmessage = null;
+        };
     }, []);
 
     return (
