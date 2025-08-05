@@ -3,9 +3,10 @@ import type { TPaneSignature } from '@/data/types';
 import { useRef, useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import { Hooks, Triggers } from '@/modules/';
+import { InputFile } from '@/components/controls/input';
 import { readFile } from '@/utils';
-import Drift from 'drift-zoom';
 
+import Drift from 'drift-zoom';
 import './index.scss';
 
 type TOptionsProps = {
@@ -91,6 +92,14 @@ const Image = ({ current, setters }: TPaneSignature) => {
             <img id="output" ref={imgRef} src={currentUrl} draggable={false} style={{
                 pointerEvents: isZooming ? 'auto' : 'none'
             }} />
+
+            {current?.loaded === null ? (
+                <div className="lander">
+                    <InputFile setter={setters.file} text={
+                        "put my own shit in here"
+                    } />
+                </div>
+            ) : null}
 
             <Options {...{
                 reset: current?.loaded ? () => {

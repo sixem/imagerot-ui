@@ -3,11 +3,14 @@ import type { TImageFile } from '@/data/types';
 import { useRef } from 'react';
 import { Config } from '@/config';
 
+import './file.scss';
+
 /**
  * File input
  */
-export const InputFile = ({ setter }: { setter: React.Dispatch<React.SetStateAction<TImageFile | null>> }) => {
+export const InputFile = ({ setter, text }: { setter: (image: TImageFile | null) => void; text?: string; }) => {
     const inputRef = useRef<HTMLInputElement>(null);
+    const label = text || 'Drop files anywhere, or click to select a file.';
 
     const eventOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -18,10 +21,10 @@ export const InputFile = ({ setter }: { setter: React.Dispatch<React.SetStateAct
     };
 
     return (
-        <div className="section file-drop">
+        <div className="file-drop">
             <input onChange={eventOnChange} ref={inputRef} type="file" accept={Config.filetypes.allowed.join(', ')} />
             <div className="file-drop-target" onClick={() => inputRef?.current?.click() }>
-                <span>Drop files anywhere, or click to select a file.</span>
+                <span>{label}</span>
             </div>
         </div>
     );

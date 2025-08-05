@@ -1,21 +1,21 @@
 import type { TImageFile } from '@/data/types';
 
 import { useEffect, useState, useRef } from 'react';
-import { Image, Controls, Notifications } from './components/';
-import { binders } from './binders';
+import { Image, Controls, Notifications } from '@/components/';
+import { binders } from '@/binders';
 import { Config } from '@/config';
 import { MessageType } from '@/data/enums';
+import { truncateString } from '@/utils';
 import { Hooks } from '@/modules/';
 
 import './ImageRot.scss';
-import { truncateString } from './utils';
 
 const ImageRot = () => {
     const [isDropping, setDropping] = useState<boolean>(false);
 
     // Store the loaded file as well as its edited version for restoration etc.
     const [currentFile, setFile] = useState<TImageFile | null>(null); // Base file
-    const [currentEdit, setEdit] = useState<TImageFile | null>(null); // Result file
+    const [currentEdit, setEdit] = useState<TImageFile | null>(null); // Modified file
 
     // References to drag handlers (for handling of drag and drop)
     const dragEnterHandler = useRef<(e: DragEvent) => void>(null);
@@ -27,17 +27,13 @@ const ImageRot = () => {
     const setAndRevokeFile = (image: TImageFile | null) => {
         setFile(previous => {
             if (previous?.url) {
-                console.log('Revoked URL', previous.url);
                 URL.revokeObjectURL(previous.url);
-            }
-
-            return image;
+            } return image;
         });
 
-        // Clear and invalidate edit file (result file) on new file load
+        // Clear and invalidate edit file (result/modified file) on new file load
         setEdit(previous => {
             if (previous?.url) {
-                console.log('Revoked URL', previous.url);
                 URL.revokeObjectURL(previous.url);
             } return null;
         })
@@ -58,13 +54,6 @@ const ImageRot = () => {
             Hooks.senders.notify(MessageType.OK, `Loaded: ${truncateString(currentFile.file.name)}`);
         }
     }, [currentFile]);
-
-    // Notify on edit changes
-    useEffect(() => {
-        if (currentEdit?.file) {
-            Hooks.senders.notify(MessageType.OK, `Processed file (${currentEdit.size})`);
-        }
-    }, [currentEdit]);
 
     useEffect(() => {
         // Set up listeners and hooks

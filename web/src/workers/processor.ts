@@ -32,7 +32,8 @@ self.onmessage = async (event: MessageEvent<TProcessorInput>) => {
         image: {
             file: new File([blob], image.file.name, { type: image.file.type }),
             url: blob,
-            size: staged.data.length
+            size: staged.data.length,
+            dimensions: [staged.width, staged.height]
         }
     });
 };

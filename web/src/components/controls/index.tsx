@@ -213,7 +213,9 @@ const Controls = ({ current, setters }: TPaneSignature) => {
             <div className="top">
                 <Header />
                 
-                <InputFile setter={setters.file} />
+                <div className="section">
+                    <InputFile setter={setters.file} />
+                </div>
 
                 <SelectionMode onAdd={(mode, _) => {
                     setWorkflow(previous => [...previous, {

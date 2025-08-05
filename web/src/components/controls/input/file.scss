@@ -1,0 +1,28 @@
+@use 'sass:color';
+@use '@/sass/variables' as *;
+
+div.file-drop {
+    >input {
+        display: none;
+    }
+
+    >div.file-drop-target {
+        background: repeating-conic-gradient(color.adjust($color-primary, $blackness: 25%) 0 25%, transparent 0 50%) 50% / 20px 20px;
+        border: 2px dashed $color-primary-standout-brighten;
+        border-radius: 10px;
+        cursor: pointer;
+        display: block;
+        font-size: 0.9em;
+        padding: 10px 12px 12px 12px;
+        text-align: center;
+        transition: border-color .15s, color .15s;
+        -webkit-user-select: none;
+        user-select: none;
+        color: #8492a3;
+
+        &:hover {
+            color: #bcc5d1;
+            border: 2px dashed color.adjust($color-primary-standout-brighten, $lightness: 25%);
+        }
+    }
+}
