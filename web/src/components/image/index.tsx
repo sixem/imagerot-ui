@@ -89,17 +89,15 @@ const Image = ({ current, setters }: TPaneSignature) => {
                 imgRef.current.dispatchEvent(new MouseEvent('mouseleave'));
             }
         }} >
-            <img id="output" ref={imgRef} src={currentUrl} draggable={false} style={{
-                pointerEvents: isZooming ? 'auto' : 'none'
-            }} />
-
             {current?.loaded === null ? (
-                <div className="lander">
+                <div className="lander" style={{ margin: '10px' }}>
                     <InputFile setter={setters.file} text={
-                        "put my own shit in here"
+                        "To get started, click here to select an image, or drop a file anywhere."
                     } />
                 </div>
-            ) : null}
+            ) : <img id="output" ref={imgRef} src={currentUrl} draggable={false} style={{
+                pointerEvents: isZooming ? 'auto' : 'none'
+            }} />}
 
             <Options {...{
                 reset: current?.loaded ? () => {
