@@ -27,6 +27,16 @@
         flex-grow: 1;
         scrollbar-gutter: stable;
 
+        &::after {
+            content: "";
+            min-height: 1px;
+            position: sticky;
+            inset: auto 10px 0px 10px;
+            box-shadow: 0 0 8px #000;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .sub-header {
             width: 100%;
             text-align: left;

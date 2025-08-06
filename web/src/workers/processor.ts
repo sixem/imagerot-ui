@@ -6,9 +6,14 @@ import * as imagerot from 'imagerot/browser';
 self.onmessage = async (event: MessageEvent<TProcessorInput>) => {
     const { image, workflow } = event.data;
 
-    // Return original image on empty input
-    if (workflow.length === 0 || image.file === null) {
+    // Bad image data
+    if (image.file === null) {
         return self.postMessage(null);
+    }
+
+    // Nothing is applied, return original image
+    if (workflow.length === 0) {
+        return self.postMessage(image);
     }
 
     // Prepare image file

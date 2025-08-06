@@ -13,9 +13,7 @@ type TActionsSignature = { workflow: TWorkItem[]; } & TPaneSignature;
 
 export const Actions = ({ current, setters, workflow, busy }: TActionsSignature) => {
     const onProcess = () => {
-        if (busy.state) {
-            return;
-        }
+        if (busy.state) return;
 
         if (current?.loaded) {
             busy.update(true);
@@ -39,7 +37,7 @@ export const Actions = ({ current, setters, workflow, busy }: TActionsSignature)
 
     return (
         <div className="">
-            <div className="button" onClick={onProcess}>
+            <div className={"button" + (busy.state ? " disabled" : "")} onClick={onProcess}>
                 <span>Process image</span>
             </div>
 

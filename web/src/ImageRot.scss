@@ -167,8 +167,12 @@ div.button {
     box-sizing: border-box;
     box-shadow: 0 0 4px rgb(14 14 14 / 45%);
 
-    &:hover {
+    &:not(.disabled):hover {
         background-color: $color-primary-standout-brighten;
+    }
+
+    &.disabled {
+        cursor: not-allowed;
     }
 }
 
