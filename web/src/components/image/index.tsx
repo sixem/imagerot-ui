@@ -3,6 +3,7 @@ import type { TPaneSignature } from '@/data/types';
 import { useRef, useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import { Hooks, Triggers } from '@/modules/';
+import { Tooltip } from '@/components/tooltips/';
 import { InputFile } from '@/components/controls/input';
 import { readFile } from '@/utils';
 
@@ -11,6 +12,7 @@ import './index.scss';
 
 type TOptionsProps = {
     reset : null | (() => void);
+    trash : null | (() => void);
     open  : null | (() => void);
     save  : null | (() => void);
 };
@@ -19,12 +21,29 @@ const hookId = {
     DOCUMENT_PASTE_WATCHER: 'document:paste:watcher',
 };
 
-const Options = ({ reset, open, save }: TOptionsProps) => {
+const Options = ({ reset, open, save, trash }: TOptionsProps) => {
     return (
         <div className="options">
-            {reset ? <div onClick={reset} className="fileReset" title="Reset image" /> : null}
-            {open  ? <div onClick={open}  className="fileOpen"  title="Open in new tab" /> : null}
-            {save  ? <div onClick={save}  className="fileSave"  title="Save file" /> : null}
+            {trash ? (
+                <Tooltip text="Clear the entire canvas">
+                    <div onClick={trash} className="file-trash" />
+                </Tooltip>
+            ) : null}
+            {open ? (
+                <Tooltip text="Open the image in a new tab or window">
+                    <div onClick={open} className="file-open"  />
+                </Tooltip>
+            ) : null}
+            {reset ? (
+                <Tooltip text="Reset the image back to its unmodified state">
+                    <div onClick={reset} className="file-reset" />
+                </Tooltip>
+            ) : null}
+            {save ? (
+                <Tooltip text="Save the image to the computer">
+                    <div onClick={save} className="file-save" />
+                </Tooltip>
+            ) : null}
         </div>
     );
 };
@@ -123,6 +142,10 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
                         saveAs(target.url, self.crypto.randomUUID() + '.png' || 'image.png');
                     }
                 } : null,
+                trash: current.loaded ? () => {
+                    setters.edit(null);
+                    setters.file(null);
+                } : null
             }}/>
         </div>
     );

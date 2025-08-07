@@ -67,7 +67,7 @@ div.spinner {
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
 
             &:hover {
-                background-color: $color-primary;
+                background-color: rgb(16, 16, 35, 0.7);
                 cursor: pointer;
             }
 
@@ -78,7 +78,7 @@ div.spinner {
                 display: block;
             }
 
-            &.fileReset::before {
+            &.file-reset::before {
                 background-image: url('@/assets/reset.svg');
                 background-size: 16px 16px;
                 background-repeat: no-repeat;
@@ -86,13 +86,21 @@ div.spinner {
                 filter: invert(100%);
             }
 
-            &.fileOpen::before {
+            &.file-open::before {
                 background-image: url('@/assets/open.svg');
                 filter: invert(100%);
             }
 
-            &.fileSave::before {
+            &.file-save::before {
                 background-image: url('@/assets/save.svg');
+                filter: invert(100%);
+            }
+
+            &.file-trash::before {
+                background-image: url('@/assets/trash.svg');
+                background-size: 16px 16px;
+                background-repeat: no-repeat;
+                background-position: center;
                 filter: invert(100%);
             }
         }

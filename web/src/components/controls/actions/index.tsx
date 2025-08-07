@@ -2,10 +2,8 @@
 import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 
 import { useEffect } from 'react';
-import { Hooks } from '@/modules';
 
 import Processor from '@/workers/processor?worker';
-import { MessageType } from '@/data/enums';
 
 const processor = new Processor();
 
@@ -13,14 +11,9 @@ type TActionsSignature = { workflow: TWorkItem[]; } & TPaneSignature;
 
 export const Actions = ({ current, setters, workflow, busy }: TActionsSignature) => {
     const onProcess = () => {
-        if (busy.state) return;
-
-        if (current?.loaded) {
-            busy.update(true);
-            processor.postMessage({ workflow, image: current.loaded });
-        } else {
-            Hooks.senders.notify(MessageType.ERROR, 'No image has been loaded — load one before editing.');
-        }
+        if (!current.loaded || busy.state) return;
+        busy.update(true);
+        processor.postMessage({ workflow, image: current.loaded });
     };
 
     useEffect(() => {
@@ -32,17 +25,20 @@ export const Actions = ({ current, setters, workflow, busy }: TActionsSignature)
             }
         };
 
-        return () => { processor.onmessage = null; };
+        return () => {
+            busy.update(false);
+            processor.onmessage = null;
+        };
     }, []);
 
     return (
         <div className="">
-            <div className={"button" + (busy.state ? " disabled" : "")} onClick={onProcess}>
+            <div className={"button" + (!current.loaded || busy.state ? " disabled" : "")} onClick={onProcess}>
                 <span>Process image</span>
             </div>
 
             <div className="button-set" style={{ marginTop: '10px' }}>
-                <div className="button">Export workflow</div>
+                <div className={"button" + (workflow.length === 0 ? " disabled" : "")}>Export workflow</div>
                 <div className="button">Import workflow</div>
             </div>
         </div>
