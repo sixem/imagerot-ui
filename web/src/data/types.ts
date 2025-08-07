@@ -76,8 +76,6 @@ export type TWorkItem = {
     muted?: boolean;
 };
 
-/** Background worker input and output */
-
 export interface TProcessorInput {
     image: TImageFile;
     workflow: TWorkItem[];

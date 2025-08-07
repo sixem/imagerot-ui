@@ -65,9 +65,11 @@ const Options = ({ pin, reset, open, save, trash }: TOptionsProps) => {
             ) : null}
 
             {(pin || reset || open || save || trash) ? (
-                <div onClick={() => setToggled((p) => !p)} className={
-                    "file-toggle" + (isToggled ? " expanded" : "")
-                } />
+                <Tooltip text={"Toggle the collapsed state of the toolbar"}>
+                    <div onClick={() => setToggled((p) => !p)} className={
+                        "file-toggle" + (isToggled ? " expanded" : "")
+                    } />
+                </Tooltip>
             ) : null}
         </div>
     );

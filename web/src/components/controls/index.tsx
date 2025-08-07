@@ -27,12 +27,15 @@ const validEffects = Object.fromEntries(listEffects().map((key) => [key, true]))
 const validModes = Object.fromEntries(listModes().map((key) => [key, true]));
 
 const getDefaultValue = (config: TEffectConfigItem) => {
-    const [type, a, b] = config;
+    const [type, a, b,, f] = config;
+
+    console.log(config, type, a, b);
+    console.log(f ? f(b as number) : b);
 
     // This is awful, and I hate it.
     // A rewrite of the data structure is needed.
     switch (type) {
-        case EffectType.NUMBER : return b;
+        case EffectType.NUMBER : return f ? f(b as number) : b;
         case EffectType.COLOR  : return a;
         case EffectType.STRING : return (a as [number, number, number])[0] || null;
         case EffectType.OBJECT : return null; // Needs support!
