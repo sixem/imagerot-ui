@@ -39,6 +39,7 @@ export type TImageFile = {
     url: string;
     size: number | null;
     dimensions?: [number, number];
+    id: string;
 };
 
 export type TPaneSignature = {

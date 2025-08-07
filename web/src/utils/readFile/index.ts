@@ -11,10 +11,13 @@ export const readFile = async (file: File | null = null): Promise<TImageFile | n
         Hooks.senders.notify(
             MessageType.ERROR,
             `Type ${file.type} is not a valid format.`
-        ); return null;
+        );
+        
+        return null;
     }
 
-    Hooks.senders.notify(MessageType.OK,`Loaded ${file.name} ...`);
+    const id = self.crypto.randomUUID();
+    const size = file.size;
 
-    return { file, url: URL.createObjectURL(file) };
+    return { file, id, size, url: URL.createObjectURL(file) };
 };

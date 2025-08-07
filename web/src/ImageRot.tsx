@@ -24,35 +24,41 @@ const ImageRot = () => {
     const dragLeaveHandler = useRef<(e: DragEvent) => void>(null);
     const dropHandler      = useRef<(e: DragEvent) => void>(null);
 
-    // Set current file (base file) and revoke any blobs
+    // Set current file (base file); revokes are handled in effects now
     const setAndRevokeFile = (image: TImageFile | null) => {
-        setFile(previous => {
-            if (previous?.url) {
-                URL.revokeObjectURL(previous.url);
-            } return image;
-        });
+        setFile(image);
 
         // Clear and invalidate edit file (result/modified file) on new file load
-        setEdit(previous => {
-            if (previous?.url) {
-                URL.revokeObjectURL(previous.url);
-            } return null;
-        })
+        setEdit(null);
     };
 
-    // Set current edit and revoke any blobs
+    // Set current edit; revokes are handled in effects now
     const setAndRevokeEdit = (image: TImageFile | null) => {
-        setEdit(previous => {
-            if (previous?.url) {
-                URL.revokeObjectURL(previous.url);
-            } return image;
-        });
+        setEdit(image);
     };
 
-    // Notify on file changes
+    // Revoke previous file URL on change or unmount
+    useEffect(() => {
+        return () => {
+            if (currentFile?.url) {
+                URL.revokeObjectURL(currentFile.url);
+            }
+        };
+    }, [currentFile]);
+
+    // Revoke previous edit URL on change or unmount
+    useEffect(() => {
+        return () => {
+            if (currentEdit?.url) {
+                URL.revokeObjectURL(currentEdit.url);
+            }
+        };
+    }, [currentEdit]);
+
+    // Notify on new file load
     useEffect(() => {
         if (currentFile?.file) {
-            Hooks.senders.notify(MessageType.OK, `Loaded: ${truncateString(currentFile.file.name)}`);
+            Hooks.senders.notify(MessageType.OK, `Loaded ${truncateString(currentFile.file.name)} ...`);
         }
     }, [currentFile]);
 
@@ -87,7 +93,8 @@ const ImageRot = () => {
                 const validated = Config.filetypes.allowed.includes(file.type);
 
                 if (validated) {
-                    setAndRevokeFile({ file, url: URL.createObjectURL(file), size: file.size });
+                    const id = self.crypto.randomUUID();
+                    setAndRevokeFile({file, id, url: URL.createObjectURL(file), size: file.size});
                 } else {
                     Hooks.senders.notify(
                         MessageType.ERROR,

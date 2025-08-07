@@ -36,6 +36,11 @@ div.spinner {
     position: relative;
     user-select: none;
 
+    > div.lander > div.file-drop > div.file-drop-target {
+        font-size: 1em;
+        font-weight: 500;
+    }
+
     &.zooming {
         > img {
             cursor: zoom-out;

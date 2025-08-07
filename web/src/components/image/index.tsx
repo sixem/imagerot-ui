@@ -34,15 +34,15 @@ const Options = ({ pin, reset, open, save, trash }: TOptionsProps) => {
 
     return (
         <div className="options">
-            {(pin || reset || open || save || trash) ? (
-                <div onClick={() => setToggled((p) => !p)} className={
-                    "file-toggle" + (isToggled ? " expanded" : "")
-                } />
-            ) : null}
-
             {isToggled && pin ? (
                 <Tooltip text="Pin the current canvas as the unmodified image">
                     <div onClick={pin} className="file-pin" />
+                </Tooltip>
+            ) : null}
+
+            {isToggled && reset ? (
+                <Tooltip text="Reset the image back to its unmodified state">
+                    <div onClick={reset} className="file-reset" />
                 </Tooltip>
             ) : null}
 
@@ -58,16 +58,16 @@ const Options = ({ pin, reset, open, save, trash }: TOptionsProps) => {
                 </Tooltip>
             ) : null}
 
-            {isToggled && reset ? (
-                <Tooltip text="Reset the image back to its unmodified state">
-                    <div onClick={reset} className="file-reset" />
-                </Tooltip>
-            ) : null}
-
             {isToggled && save ? (
                 <Tooltip text="Save the current canvas locally">
                     <div onClick={save} className="file-save" />
                 </Tooltip>
+            ) : null}
+
+            {(pin || reset || open || save || trash) ? (
+                <div onClick={() => setToggled((p) => !p)} className={
+                    "file-toggle" + (isToggled ? " expanded" : "")
+                } />
             ) : null}
         </div>
     );
@@ -128,9 +128,14 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
         Hooks.watch({
             trigger: Triggers.DOCUMENT_PASTE,
             identifier: hookId.DOCUMENT_PASTE_WATCHER,
-            callback: async (file: DataTransferItem) => {
-                const processed = await readFile(file.getAsFile());
-                if (processed) setters.file(processed);
+            callback: (file: DataTransferItem) => {
+                readFile(file.getAsFile()).then((processed) => {
+                    if (processed) {
+                        setters.file(processed);
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                })
             }
         });
 
@@ -144,7 +149,9 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
     }, [current.loaded]);
 
     // Retrieve the current image URL (prioritize showing the edited image)
-    const currentUrl = current.edited?.url ? current.edited.url : (current.loaded?.url || undefined);
+    const currentUrl = current.edited?.url
+        ? current.edited.url
+        : current.loaded?.url || undefined;
 
     return (
         <div className={"image" + (isZooming ? " zooming" : "")} onMouseDown={(e) => {
@@ -170,7 +177,7 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
             {current?.loaded === null ? (
                 <div className="lander" style={{ margin: '10px' }}>
                     <InputFile setter={setters.file} text={
-                        "To get started, click here to select an image, or drop a file anywhere."
+                        "To get started, click here to select an image or drop an image anywhere."
                     } />
                 </div>
             ) : <img id="output" ref={imgRef} src={currentUrl} draggable={false} style={{
@@ -181,7 +188,7 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
 
             <Options {...{
                 trash  : current.loaded ? () => { setters.edit(null); setters.file(null); } : null,
-                reset  : current.loaded ? () => { setters.edit(null); } : null,
+                reset  : current.edited ? () => { setters.edit(null); } : null,
                 pin    : current.edited ? () => onImagePin(current, setters) : null,
                 save   : current.edited || current.loaded ? () => { onImageSave(current); } : null,
                 open   : currentUrl ? () => { window.open(currentUrl, '_blank'); } : null
