@@ -9,6 +9,7 @@ export type TTooltipProps = {
 export type TTooltipHandlers = {
     onMouseEnter: (rect: DOMRect, text: string) => void;
     onMouseLeave: () => void;
+    onClick: () => void;
 };
 
 export type TTooltipPosition = {

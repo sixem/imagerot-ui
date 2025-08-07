@@ -17,6 +17,12 @@ const handlers: TTooltipHandlers = {
             trigger: Triggers.TOOLTIP,
             data: { visible: false } as TTooltipData
         });
+    },
+    onClick: () => {
+        Hooks.trigger({
+            trigger: Triggers.TOOLTIP,
+            data: { visible: false } as TTooltipData
+        });
     }
 };
 
@@ -52,13 +58,13 @@ export const Tooltip = ({ children, text, indicator = false }: TTooltipProps) =>
         return () => { // Clear any lingering tooltips on unmount
             Hooks.trigger({ trigger: Triggers.TOOLTIP, data: { visible: false } });
         };
-    }, [])
+    }, []);
 
-return isValidElement(children)
-    ? cloneElement(children as ReactElement<{ ref?: Ref<HTMLElement>; style: CSSProperties }>, {
-        ref: setAnchorRef, ...propsCurrent, style: {
-            ...(propsChildren.style || {}), ...(indicator ? { cursor: 'help' } : {})
-        }
-    })
-    : children;
+    return isValidElement(children)
+        ? cloneElement(children as ReactElement<{ ref?: Ref<HTMLElement>; style: CSSProperties }>, {
+            ref: setAnchorRef, ...propsCurrent, style: {
+                ...(propsChildren.style || {}), ...(indicator ? { cursor: 'help' } : {})
+            }
+        })
+        : children;
 };

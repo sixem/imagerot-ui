@@ -1,0 +1,167 @@
+@use 'sass:color';
+@use '@/sass/variables' as *;
+
+#root>div.wrapper>div.controls>div.top>div.section {
+    &.workflow {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+
+        >div.work-order {
+            flex-grow: 1;
+            min-height: 0;
+            overflow-y: auto;
+
+            scrollbar-color: #101118 #20212d;
+            scrollbar-width: thin;
+            overflow-y: auto;
+            overflow-x: hidden;
+            outline: none;
+
+            >div.work-item {
+                background-color: $color-primary-standout;
+                display: flex;
+                text-align: left;
+                cursor: pointer;
+                overflow: hidden;
+                gap: 6px;
+                line-height: 1;
+                align-items: stretch;
+                position: relative;
+                transition: background-color .05s ease-in-out;
+
+                border: 1px solid #22232d;
+                margin-top: 4px;
+
+                border-radius: 4px;
+                box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+
+                &.dimmed {
+                    opacity: 0.325;
+                }
+
+                >div.text {
+                    text-transform: capitalize;
+                    font-size: 0.9em;
+                    display: flex;
+                    align-items: center;
+                    flex: 1 1 0;
+                    min-width: 0;
+                    max-width: 100%;
+
+                    >div {
+                        display: block;
+
+                        &:first-child {
+                            flex: 0 0 auto;
+                        }
+
+                        &.config {
+                            white-space: nowrap;
+                            color: #8e8ba7;
+                            font-size: 0.9em;
+                            letter-spacing: 1px;
+                            margin-left: 6px;
+                        }
+                    }
+                }
+
+                >div.options {
+                    flex-grow: 0;
+                    background-color: #22232d;
+                    display: flex;
+                    flex-direction: row;
+
+                    > div {
+                        height: 100%;
+                        width: 25px;
+                        background-color: #20212d;
+                        cursor: pointer;
+
+                        &:not(:last-child) {
+                            border-right: 2px solid #22232d;
+                        }
+
+                        &:hover {
+                            background-color: #2e3045;
+                        }
+
+                        &:before {
+                            content: '';
+                            display: block;
+                            filter: invert(100%);
+                            width: 100%;
+                            height: 100%;
+                            margin-top: 1px;
+                        }
+                    }
+
+                    >div.toggle {
+                        &.toggled {
+                            &:before {
+                                background: url('@/assets/visible.svg');
+                                background-size: 20px 20px;
+                                background-repeat: no-repeat;
+                                background-position: center;
+                            }
+                        }
+                    
+                        &:not(.toggled) {
+                            &:before {
+                                background: url('@/assets/hidden.svg');
+                                background-size: 20px 20px;
+                                background-repeat: no-repeat;
+                                background-position: center;
+                            }
+                        }
+                    }
+
+                    >div.remove {
+                        &:before {
+                            background: url('@/assets/cross.svg');
+                            background-size: 20px 20px;
+                            background-repeat: no-repeat;
+                            background-position: center;
+                        }
+                    }
+                }
+
+                &:not(:first-child) {
+                    border-top: 1px solid #22232d;
+                }
+
+                &.type-effect::before,
+                &.type-mode::before {
+                    display: inline-block;
+                    width: 45px;
+                    text-align: center;
+                    border-radius: 3px;
+                    padding: 4px 6px;
+                    font-size: 0.9em;
+                    margin: 4px;
+                }
+
+                &.type-effect::before {
+                    content: "Effect";
+                    background-color: $work-item-color-type-effect;
+                }
+
+                &.type-mode::before {
+                    content: "Mode";
+                    background-color: $work-item-color-type-mode;
+                }
+            }
+        }
+
+        >div.label-empty {
+            color: $color-primary-text;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+    }
+
+
+    &:not(.workflow) {
+        flex: 0 0 auto;
+    }
+}

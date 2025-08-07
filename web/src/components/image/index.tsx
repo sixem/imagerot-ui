@@ -10,37 +10,62 @@ import { readFile } from '@/utils';
 import Drift from 'drift-zoom';
 import './index.scss';
 
-type TOptionsProps = {
-    reset : null | (() => void);
-    trash : null | (() => void);
-    open  : null | (() => void);
-    save  : null | (() => void);
-};
+type TOptionFun = (() => void) | null;
+
+type TOptionsProps = Record<
+    'pin' | 'reset' | 'trash' | 'open' | 'save',
+    TOptionFun
+>;
+
+type TOptionSignature = (
+    current: TPaneSignature["current"],
+    setters: TPaneSignature["setters"]
+) => void;
 
 const hookId = {
-    DOCUMENT_PASTE_WATCHER: 'document:paste:watcher',
+    DOCUMENT_PASTE_WATCHER: 'document:paste:watcher'
 };
 
-const Options = ({ reset, open, save, trash }: TOptionsProps) => {
+/**
+ * General option buttons
+ */
+const Options = ({ pin, reset, open, save, trash }: TOptionsProps) => {
+    const [isToggled, setToggled] = useState<boolean>(true);
+
     return (
         <div className="options">
-            {trash ? (
+            {(pin || reset || open || save || trash) ? (
+                <div onClick={() => setToggled((p) => !p)} className={
+                    "file-toggle" + (isToggled ? " expanded" : "")
+                } />
+            ) : null}
+
+            {isToggled && pin ? (
+                <Tooltip text="Pin the current canvas as the unmodified image">
+                    <div onClick={pin} className="file-pin" />
+                </Tooltip>
+            ) : null}
+
+            {isToggled && trash ? (
                 <Tooltip text="Clear the entire canvas">
                     <div onClick={trash} className="file-trash" />
                 </Tooltip>
             ) : null}
-            {open ? (
+
+            {isToggled && open ? (
                 <Tooltip text="Open the image in a new tab or window">
                     <div onClick={open} className="file-open"  />
                 </Tooltip>
             ) : null}
-            {reset ? (
+
+            {isToggled && reset ? (
                 <Tooltip text="Reset the image back to its unmodified state">
                     <div onClick={reset} className="file-reset" />
                 </Tooltip>
             ) : null}
-            {save ? (
-                <Tooltip text="Save the image to the computer">
+
+            {isToggled && save ? (
+                <Tooltip text="Save the current canvas locally">
                     <div onClick={save} className="file-save" />
                 </Tooltip>
             ) : null}
@@ -48,13 +73,39 @@ const Options = ({ reset, open, save, trash }: TOptionsProps) => {
     );
 };
 
+/**
+ * Simple loading indicator
+ */
 const Spinner = ({ visible }: { visible: boolean; }) => {
     return (
         <div className={"spinner" + (visible ? " visible" : "")}>
             <div className="icon" />
         </div>
     );
-}
+};
+
+const onImagePin: TOptionSignature = async (current, setters) => {
+    if (current.edited) {
+        // Fetch blob data, create a new file, and update the blob URL
+        const blob = await fetch(current.edited.url).then((res) => res.blob());
+        const file = new File([blob], current.edited?.file?.name || 'image.png', { type: blob.type });
+        const url  = URL.createObjectURL(file);
+
+        // Update current and clear edited canvas
+        setters.file({ ...current.edited, file, url });
+        setters.edit(null);
+    }
+};
+
+const onImageSave: (current: TPaneSignature["current"]) => void = async (current) => {
+    if (current.edited || current.loaded) {
+        const target = (current.edited || current.loaded);
+
+        if (target) {
+            saveAs(target.url, self.crypto.randomUUID() + '.png' || 'image.png');
+        }
+    }
+};
 
 const Image = ({ current, setters, busy }: TPaneSignature) => {
     const imgRef = useRef<HTMLImageElement>(null);
@@ -129,23 +180,11 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
             <Spinner visible={busy.state} />
 
             <Options {...{
-                reset: current?.loaded ? () => {
-                    setters.edit(null);
-                } : null,
-                open: currentUrl ? () => {
-                    window.open(currentUrl, '_blank')
-                } : null,
-                save: (current.edited || current.loaded) ? () => {
-                    const target = (current.edited || current.loaded);
-
-                    if (target) {
-                        saveAs(target.url, self.crypto.randomUUID() + '.png' || 'image.png');
-                    }
-                } : null,
-                trash: current.loaded ? () => {
-                    setters.edit(null);
-                    setters.file(null);
-                } : null
+                trash  : current.loaded ? () => { setters.edit(null); setters.file(null); } : null,
+                reset  : current.loaded ? () => { setters.edit(null); } : null,
+                pin    : current.edited ? () => onImagePin(current, setters) : null,
+                save   : current.edited || current.loaded ? () => { onImageSave(current); } : null,
+                open   : currentUrl ? () => { window.open(currentUrl, '_blank'); } : null
             }}/>
         </div>
     );

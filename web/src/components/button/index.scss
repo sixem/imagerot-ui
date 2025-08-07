@@ -1,0 +1,43 @@
+@use '@/sass/variables' as *;
+
+div.button {
+    color: white;
+    background-color: $color-primary-standout;
+    padding: 4px 10px 6px 10px;
+    text-align: center;
+    border-radius: 4px;
+    user-select: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 0 4px rgb(14 14 14 / 45%);
+
+    &:not([data-disabled="true"]):hover {
+        background-color: $color-primary-standout-brighten;
+    }
+
+    &[data-disabled="true"] {
+        cursor: not-allowed;
+    }
+}
+
+div.button-set {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+
+    > div.button {
+        flex-grow: 1;
+        flex-basis: 0;
+        border-radius: 0;
+
+        &:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        &:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+    }
+}

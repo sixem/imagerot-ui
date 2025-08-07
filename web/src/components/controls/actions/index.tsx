@@ -2,6 +2,7 @@
 import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 
 import { useEffect } from 'react';
+import { Button, ButtonSet } from '@/components/';
 
 import Processor from '@/workers/processor?worker';
 
@@ -33,14 +34,16 @@ export const Actions = ({ current, setters, workflow, busy }: TActionsSignature)
 
     return (
         <div className="">
-            <div className={"button" + (!current.loaded || busy.state ? " disabled" : "")} onClick={onProcess}>
-                <span>Process image</span>
-            </div>
+            <Button {...{
+                text: 'Process image',
+                disabled: !current.loaded || busy.state,
+                onClick: onProcess
+            }} />
 
-            <div className="button-set" style={{ marginTop: '10px' }}>
-                <div className={"button" + (workflow.length === 0 ? " disabled" : "")}>Export workflow</div>
-                <div className="button">Import workflow</div>
-            </div>
+            <ButtonSet style={{ marginTop: '10px' }} items={[
+                { text: 'Export workflow', disabled: workflow.length === 0 },
+                { text: 'Import workflow' }
+            ]}/>
         </div>
     );
 };

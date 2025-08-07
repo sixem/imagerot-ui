@@ -1,27 +1,37 @@
+import type { CSSProperties } from 'react';
 
-
-
-
+import './index.scss';
 
 type TButtonProps = {
-    disabled: boolean;
+    text: string;
+    disabled?: boolean;
     onClick?: (...args: any) => any;
+    style?: CSSProperties;
 };
 
-export const Button = ({ disabled, onClick }: TButtonProps) => {
-    const handlers = {
-        onClick: () => { if (onClick) onClick(); },
-        onMouseEnter: (e: any) => { console.log('onMouseEnter', e); },
-        onMouseLeave: (e: any) => { console.log('onMouseLeave', e); }
-    };
+type TButtonSetProps = {
+    items: TButtonProps[];
+    style?: CSSProperties | null;
+}
 
+export const Button = ({ text, style, onClick, disabled = false }: TButtonProps) => {
     return (
-        <div className="button" data-disabled={disabled} {...handlers}>
-            <span>Process image</span>
+        <div className="button" data-disabled={disabled} onClick={() => {
+            if (typeof onClick === 'function') {
+                onClick();
+            }
+        }} style={style || {}}>
+            <span>{text}</span>
         </div>
     );
 };
 
-export const ButtonSet = () => {
-    return null;
+export const ButtonSet = ({ items, style = {} }: TButtonSetProps) => {
+    return (
+        <div className="button-set" style={style || {}}>
+            {items.map((item, index) => {
+                return <Button key={index} {...(({ style, ...rest }) => rest)(item)} />;
+            })}
+        </div>
+    );
 };

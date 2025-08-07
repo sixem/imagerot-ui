@@ -62,13 +62,17 @@ div.spinner {
             background-color: rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(3px);
             border-radius: 4px;
-            transition: background-color 0.15s ease-in-out;
+            transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
             display: inline-block;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
 
             &:hover {
                 background-color: rgb(16, 16, 35, 0.7);
                 cursor: pointer;
+
+                &::before {
+                    opacity: 1;
+                }
             }
 
             &::before {
@@ -76,6 +80,7 @@ div.spinner {
                 width: 20px;
                 height: 20px;
                 display: block;
+                opacity: 0.75;
             }
 
             &.file-reset::before {
@@ -96,12 +101,38 @@ div.spinner {
                 filter: invert(100%);
             }
 
+            &.file-pin::before {
+                background-image: url('@/assets/pin.svg');
+                background-size: 15px 15px;
+                background-repeat: no-repeat;
+                background-position: center;
+                filter: invert(100%);
+            }
+
             &.file-trash::before {
                 background-image: url('@/assets/trash.svg');
                 background-size: 16px 16px;
                 background-repeat: no-repeat;
                 background-position: center;
                 filter: invert(100%);
+            }
+
+            &.file-toggle {
+                &.expanded::before {
+                    background-image: url('@/assets/scale-down.svg');
+                    background-size: 20px 20px;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    filter: invert(100%);
+                }
+
+                &:not(.expanded)::before {
+                    background-image: url('@/assets/scale-up.svg');
+                    background-size: 20px 20px;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    filter: invert(100%);
+                }
             }
         }
     }

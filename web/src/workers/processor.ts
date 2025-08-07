@@ -21,6 +21,7 @@ self.onmessage = async (event: MessageEvent<TProcessorInput>) => {
 
     // Apply every item in the workflow to the staged variable
     for (const item of workflow) {
+        if (item.muted) continue;
         if (item.type === WorkItemType.EFFECT) {
             staged = await imagerot.useEffect(staged, item.key, item.config as {
                 [key: string]: string | number;

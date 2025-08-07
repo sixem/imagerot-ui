@@ -228,7 +228,7 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
                 }} />
 
                 <SelectionEffect onAdd={(effect, config) => {
-                    setWorkflow(previous => [...previous, {
+                    setWorkflow((previous) => [...previous, {
                         type: WorkItemType.EFFECT,
                         id: workItemId++,
                         key: effect,
