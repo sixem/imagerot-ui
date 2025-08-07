@@ -1,7 +1,7 @@
 import type { TImageFile } from '@/data/types';
 
 import { useEffect, useState, useRef } from 'react';
-import { Image, Controls, Notifications } from '@/components/';
+import { Image, Controls, Notifications, TooltipDisplay } from '@/components/';
 import { binders } from '@/binders';
 import { Config } from '@/config';
 import { MessageType } from '@/data/enums';
@@ -131,6 +131,7 @@ const ImageRot = () => {
             {isDropping ? <div className="dropping-overlay" /> : null}
 
             <Notifications />
+            <TooltipDisplay />
         </div>
     );
 };

@@ -9,6 +9,9 @@ const Config = {
     },
     notifications: {
         defaultDuration: 5000
+    },
+    tooltips: {
+        delay: 250
     }
 };
 

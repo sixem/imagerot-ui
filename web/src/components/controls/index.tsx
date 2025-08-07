@@ -80,7 +80,7 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
 
             <div className="selection-buttoned">
                 <select name="mode-select" ref={selectionRef} onChange={eventOnChange}>
-                    {(Object.keys(Modes).map((key) => {
+                    {(Object.keys(Modes).sort().map((key) => {
                         return validModes[key] ? (
                             <option key={key} value={key}>{key}</option>
                         ) : null;
@@ -173,7 +173,7 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
             <div className="sub-header">Available effects:</div>
 
             <select name="effect-select" ref={selectionRef} onChange={eventOnChange}>
-                {(Object.keys(Effects).map((key) => { // Read in available configuration for the effect
+                {(Object.keys(Effects).sort().map((key) => { // Read in available configuration for the effect
                     return validEffects[key] ? (
                         <option key={key} value={key}>{Effects[key]?.format || key}</option>
                     ) : null;
