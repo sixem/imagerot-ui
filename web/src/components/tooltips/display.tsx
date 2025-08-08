@@ -35,7 +35,7 @@ export const TooltipDisplay = () => {
     const [currentText, setText] = useState<string>("");
     const [currentInset, setInset] = useState<TTooltipInset | null>(null);
 
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const timerRef = useRef<any>(null);
 
     useEffect(() => {
         Hooks.watch({

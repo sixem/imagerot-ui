@@ -84,7 +84,7 @@ const ImageRot = () => {
             }
         };
 
-        dropHandler.current = (e: DragEvent) => {
+        dropHandler.current = async (e: DragEvent) => {
             e.preventDefault();
             setDropping(false);
 

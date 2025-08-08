@@ -16,7 +16,10 @@ export const InputFile = ({ setter, text }: { setter: (image: TImageFile | null)
         const files = event.target.files;
 
         if (files && files.length > 0 && Config.filetypes.allowed.includes(files[0].type)) {
-            setter({ file: files[0], url: URL.createObjectURL(files[0]), size: files[0].size });
+            const file = files[0];
+            const id = self.crypto.randomUUID();
+            
+            setter({ file, id, url: URL.createObjectURL(file), size: file.size });
         }
     };
 

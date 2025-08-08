@@ -1,6 +1,6 @@
 
 
-import type { TEffects  } from './types';
+import type { TEffects } from './types';
 
 export const Effects: TEffects = {
     degrade: {

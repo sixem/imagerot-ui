@@ -1,6 +1,6 @@
 import type { TWorkItem } from '@/data/types';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { WorkItemType } from '@/data/enums';
 
 import './index.scss';
