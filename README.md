@@ -61,7 +61,9 @@ There are two build scripts available: `build:web` and `build:desktop`.
 
 ## Roadmap
 
-This is a new project, and additional features are expected to be added over time. There is no current timeline for this. As for now, here are some potential features that may be implemented in the future:
+This is a new project, and additional features are expected to be added over time, but there is no current timeline for when this might happen.
+
+As for now, here are some potential features that may be implemented in the future:
 
 - Locally stored presets
 - More advanced saving options (conversion to other image types etc.)

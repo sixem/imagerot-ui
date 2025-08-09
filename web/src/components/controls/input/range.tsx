@@ -1,31 +1,36 @@
+import type { ChangeEvent } from 'react';
 import type { TEffectConfigNumber, TInputSignature } from '@/data/types';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState, useCallback } from 'react';
 
 export const InputRange = ({ name, item, onChange }: TInputSignature<TEffectConfigNumber>) => {
     const [value, setValue] = useState<number>(item.current);
+    const id = useId();
 
     useEffect(() => {
-        if (value !== item.current) {
-            setValue(item.current);
-        }
-    }, [item.current]);
+        const clamped = Math.min(item.max, Math.max(item.min, item.current));
+        setValue(clamped);
+    }, [item.current, item.min, item.max]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.currentTarget.valueAsNumber;
-        setValue(value);
-        onChange(name, item.f(value));
-    };
+    const handleChange = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => {
+            const v = e.currentTarget.valueAsNumber;
+            setValue(v);
+            onChange(name, item.f(v));
+        },
+        [name, onChange, item]
+    );
 
     const derived = item.f(value);
 
     return (
         <div className="config-item item-range">
-            <div title={item.desc ?? ''}>
+            <label htmlFor={id} title={item.desc ?? ''}>
                 {name} ({derived}{item.unit ?? ''}):
-            </div>
-            
+            </label>
+
             <input
+                id={id}
                 type="range"
                 min={item.min}
                 max={item.max}

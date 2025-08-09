@@ -13,6 +13,7 @@ import { InputString, InputRange, InputColor, InputFile } from './input/';
 import { Actions } from './actions';
 import { Workflow } from './workflow';
 import { Effects, Modes } from '@/data/';
+import { Button } from '@/components';
 import { EffectType, WorkItemType } from '@/data/enums';
 import { Github } from '@/icons/';
 import { listEffects, listModes } from 'imagerot/browser';
@@ -101,9 +102,12 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
                         ) : null;
                     }))}
                 </select>
-                <div className="button" onClick={() => {
-                    if (selected) onAdd(selected.key, selected.details);
-                }}>Add</div>
+
+                <Button text={"Add"} onClick={() => {
+                    if (selected) {
+                        onAdd(selected.key, selected.details);
+                    }
+                }} />
             </div>
 
             <div className="description">
@@ -245,13 +249,11 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
                 </div>
             ) : null}
 
-            <div className="button" onClick={() => {
+            <Button text={"Add effect to workflow"} icon={"add"} onClick={() => {
                 if (selected) {
                     onAdd(selected.key, config);
                 }
-            }}>
-                <span>Add effect to workflow</span>
-            </div>
+            }} />
         </div>
     );
 };

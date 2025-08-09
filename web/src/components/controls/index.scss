@@ -126,14 +126,23 @@
                         }
                     }
 
-                    > div.config-set {
+                    >div.config-set {
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         gap: 10px;
 
-                        > div.config-item.item-range {
-                            flex-grow: 1;
+                        >div.config-item.item-range {
+                            flex: 1 1 0;
+                            min-width: 0;
+
+                            >label {
+                                display: block;
+                            }
+
+                            >input[type="range"] {
+                                width: 100%;
+                            }
                         }
                     }
                 }

@@ -7,6 +7,7 @@ type TButtonProps = {
     disabled?: boolean;
     onClick?: (...args: any) => any;
     style?: CSSProperties;
+    icon?: string;
 };
 
 type TButtonSetProps = {
@@ -14,9 +15,9 @@ type TButtonSetProps = {
     style?: CSSProperties | null;
 }
 
-export const Button = ({ text, style, onClick, disabled = false }: TButtonProps) => {
+export const Button = ({ text, style, onClick, icon, disabled = false }: TButtonProps) => {
     return (
-        <div className="button" data-disabled={disabled} onClick={() => {
+        <div className={"button" + (icon ? ` icon ${icon}` : "")} data-disabled={disabled} onClick={() => {
             if (typeof onClick === 'function') {
                 onClick();
             }

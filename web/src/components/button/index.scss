@@ -20,24 +20,54 @@ div.button {
     &[data-disabled="true"] {
         cursor: not-allowed;
     }
+
+    &[data-disabled="false"] {
+        &.icon {
+            &:hover {
+                &::after {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    &.icon {
+        &::after {
+            content: "";
+            filter: invert(1);
+            width: 16px;
+            position: absolute;
+            inset: 0 0 0 auto;
+            margin-right: 8px;
+            opacity: 0.75;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        &.add::after {
+            background-image: url('@/assets/add.svg');
+            background-size: 16px 16px;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        &.process::after {
+            background-image: url('@/assets/wand.svg');
+            background-size: 14px 14px;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    }
 }
 
 div.button-set {
     display: flex;
     align-items: stretch;
     width: 100%;
+    gap: 8px;
 
-    > div.button {
+    >div.button {
         flex-grow: 1;
         flex-basis: 0;
-        border-radius: 0;
-
-        &:first-child {
-            border-radius: 4px 0 0 4px;
-        }
-
-        &:last-child {
-            border-radius: 0 4px 4px 0;
-        }
+        border-radius: 4px;
     }
 }

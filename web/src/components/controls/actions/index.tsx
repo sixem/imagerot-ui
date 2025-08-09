@@ -34,12 +34,13 @@ export const Actions = ({ current, setters, workflow, busy }: TActionsSignature)
             <Button {...{
                 text: 'Process image',
                 disabled: !current.loaded || busy.state,
-                onClick: onProcess
+                onClick: onProcess,
+                icon: 'process'
             }} />
 
             <ButtonSet style={{ marginTop: '10px' }} items={[
-                { text: 'Export workflow', disabled: workflow.length === 0 },
-                { text: 'Import workflow' }
+                { text: 'Export', disabled: workflow.length === 0 },
+                { text: 'Import' }
             ]}/>
         </div>
     );
