@@ -3,6 +3,7 @@ import type { TEffectConfigColor, TInputSignature } from '@/data/types';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { RgbColorPicker } from 'react-colorful';
 import { debounce } from '@/utils/';
+import { Tooltip } from '@/components/tooltips';
 
 type TColorObject = { r: number; g: number; b: number;};
 
@@ -46,10 +47,12 @@ export const InputColor = ({ name, item, onChange }: TInputSignature<TEffectConf
 
     return (
         <div className="config-item color-item" key={name}>
-            <div title={item.desc} key={item.type} className="flex">
+            <div key={item.type} className="flex">
 
                 <div className="label">
-                    <span>{name} ({`${pad(color.r)}, ${pad(color.g)}, ${pad(color.b)}`}):</span>
+                    <Tooltip text={item.desc || ""}>
+                        <span>{name} ({`${pad(color.r)}, ${pad(color.g)}, ${pad(color.b)}`}):</span>
+                    </Tooltip>
                 </div>
 
                 <div className="color-indcator" onClick={() => setPicking(!isPicking)}>

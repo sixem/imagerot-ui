@@ -49,7 +49,7 @@ export const Effects: TEffects = {
                 type: number, min: 0, current: 5, max: 100, f: (n) => n / 100,
                 desc: 'Frequency of the wave distortion'
             },
-            axis: { type: string, values: ['x', 'y'] }
+            axis: { type: string, values: ['x', 'y'], desc: 'Axis to apply the distortion along' }
         },
     },
     anaglyph: {
@@ -101,22 +101,31 @@ export const Effects: TEffects = {
         description: 'Pixelates the image.',
         format: 'Pixelate',
         config: {
-            intensity: { type: number, min: 0, current: 8, max: 100, f: (n) => n },
+            intensity: {
+                type: number, min: 0, current: 8, max: 100, f: (n) => n,
+                desc: 'Pixel block size (larger = more pixelation)'
+            },
         },
     },
     dither: {
         description: 'Adds dithering to the image.',
         format: 'Dither',
         config: {
-            intensity: { type: number, min: 0, current: 50, max: 100, f: (n) => n / 100 },
+            intensity: {
+                type: number, min: 0, current: 50, max: 100, f: (n) => n / 100,
+                desc: 'Dither strength'
+            },
         },
     },
     blur: {
         description: 'Adds motion blur to the image.',
         format: 'Blur',
         config: {
-            intensity: { type: number, min: 0, current: 5, max: 100, f: (n) => n },
-            direction: { type: string, values: ['horizontal', 'vertical'] },
+            intensity: {
+                type: number, min: 0, current: 5, max: 100, f: (n) => n,
+                desc: 'Blur strength'
+            },
+            direction: { type: string, values: ['horizontal', 'vertical'], desc: 'Direction of the blur' },
         },
     },
     rectangles: {
@@ -145,14 +154,20 @@ export const Effects: TEffects = {
         description: 'Applies a grayscale filter to the image.',
         format: 'Grayscale',
         config: {
-            intensity: { type: number, min: 0, current: 100, max: 100, f: (n) => n / 100 },
+            intensity: {
+                type: number, min: 0, current: 100, max: 100, f: (n) => n / 100,
+                desc: 'Scale from fully colored (0) to fully grayscale (1)'
+            },
         },
     },
     noise: {
         description: 'Applies noise to the image.',
         format: 'Noise',
         config: {
-            intensity: { type: number, min: 0, current: 10, max: 100, f: (n) => n },
+            intensity: {
+                type: number, min: 0, current: 10, max: 100, f: (n) => n,
+                desc: 'A higher value will increase the noise effect'
+            },
         },
     },
     sharpen: {
@@ -164,7 +179,10 @@ export const Effects: TEffects = {
         description: 'Adjusts the brightness.',
         format: 'Brightness',
         config: {
-            brightness: { type: number, min: -100, current: 10, max: 100, f: (n) => n },
+            brightness: {
+                type: number, min: -100, current: 10, max: 100, f: (n) => n,
+                desc: 'A higher value will increase the brightness'
+            },
         },
     },
     rainbow: {
@@ -176,56 +194,98 @@ export const Effects: TEffects = {
         description: 'Adds scanlines to the image.',
         format: 'Scanlines',
         config: {
-            opacity: { type: number, min: 0, current: 25, max: 100, f: (n) => n / 100 },
-            thickness: { type: number, min: 0, current: 2, max: 10, f: (n) => n, unit: 'px' },
-            lines: { type: number, min: 0, current: 100, max: 200, f: (n) => n },
+            opacity: {
+                type: number, min: 0, current: 25, max: 100, f: (n) => n / 100,
+                desc: 'Opacity of the scanlines'
+            },
+            thickness: {
+                type: number, min: 0, current: 2, max: 10, f: (n) => n, unit: 'px',
+                desc: 'Thickness of each scanline'
+            },
+            lines: {
+                type: number, min: 0, current: 100, max: 200, f: (n) => n,
+                desc: 'Number of scanlines across the image'
+            },
         },
     },
     interferenceLines: {
         description: 'Adds inferference scanlines to the image.',
         format: 'Interference Lines',
         config: {
-            lineThickness: { type: number, min: 0, current: 2, max: 10, f: (n) => n },
-            interferenceIntensity: { type: number, min: 0, current: 30, max: 100, f: (n) => n / 100 },
-            noiseIntensity: { type: number, min: 0, current: 10, max: 100, f: (n) => n / 100 },
-            colorBleed: { type: number, min: 0, current: 20, max: 100, f: (n) => n / 100 },
+            lineThickness: {
+                type: number, min: 0, current: 2, max: 10, f: (n) => n,
+                desc: 'Base thickness of interference lines'
+            },
+            interferenceIntensity: {
+                type: number, min: 0, current: 30, max: 100, f: (n) => n / 100,
+                desc: 'Strength of the interference pattern'
+            },
+            noiseIntensity: {
+                type: number, min: 0, current: 10, max: 100, f: (n) => n / 100,
+                desc: 'Amount of noise mixed into the lines'
+            },
+            colorBleed: {
+                type: number, min: 0, current: 20, max: 100, f: (n) => n / 100,
+                desc: 'Channel bleed between colors'
+            },
         },
     },
     hueShift: {
         description: 'Shifts the colors of the image.',
         format: 'Hue Shift',
         config: {
-            shift: { type: number, min: 0, current: 10, max: 360, f: (n) => n, unit: '°' },
+            shift: {
+                type: number, min: 0, current: 10, max: 360, f: (n) => n, unit: '°',
+                desc: 'Hue rotation amount in degrees'
+            },
         },
     },
     chromaticAberration: {
         description: 'Applies chromatic aberration to the image.',
         format: 'Chromatic Aberration',
         config: {
-            intensity: { type: number, min: 0, current: 5, max: 100, f: (n) => n },
+            intensity: {
+                type: number, min: 0, current: 5, max: 100, f: (n) => n,
+                desc: 'Amount of RGB channel separation'
+            },
         },
     },
     heatmap: {
         description: 'Applies a pseudo-heatmap to the image.',
         format: 'Heatmap',
         config: {
-            intensity: { type: number, min: 0, current: 8, max: 100, f: (n) => n / 10 },
+            intensity: {
+                type: number, min: 0, current: 8, max: 100, f: (n) => n / 10,
+                desc: 'Strength of the false-color mapping'
+            },
         },
     },
     solarize: {
         description: 'Applies solarization to the image.',
         format: 'Solarize',
         config: {
-            intensity: { type: number, min: 0, current: 50, max: 100, f: (n) => n / 100 },
+            intensity: {
+                type: number, min: 0, current: 50, max: 100, f: (n) => n / 100,
+                desc: 'Level of tone inversion in highlights'
+            },
         },
     },
     borders: {
         description: 'Adds borders to the image.',
         format: 'Borders',
         config: {
-            size: { type: number, min: 0, current: 5, max: 1000, f: (n) => n, unit: 'px' },
-            opacity: { type: number, min: 0, current: 100, max: 100, f: (n) => n / 100 },
-            color: { type: color, current: [0, 0, 0] },
+            size: {
+                type: number, min: 0, current: 5, max: 1000, f: (n) => n, unit: 'px',
+                desc: 'Border width'
+            },
+            opacity: {
+                type: number, min: 0, current: 100, max: 100, f: (n) => n / 100,
+                desc: 'Border opacity'
+            },
+            color: {
+                type: color, current: [0, 0, 0],
+                desc: 'Border color (RGB)'
+            },
         },
     },
 };

@@ -2,6 +2,7 @@ import type { ChangeEvent } from 'react';
 import type { TEffectConfigNumber, TInputSignature } from '@/data/types';
 
 import { useEffect, useId, useState, useCallback } from 'react';
+import { Tooltip } from '@/components/tooltips';
 
 export const InputRange = ({ name, item, onChange }: TInputSignature<TEffectConfigNumber>) => {
     const [value, setValue] = useState<number>(item.current);
@@ -25,9 +26,11 @@ export const InputRange = ({ name, item, onChange }: TInputSignature<TEffectConf
 
     return (
         <div className="config-item item-range">
-            <label htmlFor={id} title={item.desc ?? ''}>
-                {name} ({derived}{item.unit ?? ''}):
-            </label>
+            <Tooltip text={item.desc ?? ''}>
+                <label htmlFor={id}>
+                    {name} ({derived}{item.unit ?? ''}):
+                </label>
+            </Tooltip>
 
             <input
                 id={id}

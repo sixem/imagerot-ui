@@ -1,3 +1,4 @@
+import { Tooltip } from '@/components/tooltips';
 import type { TEffectConfigString, TInputSignature } from '@/data/types';
 
 import { useRef } from 'react';
@@ -10,7 +11,11 @@ export const InputString = ({ name, item, onChange }: TInputSignature<TEffectCon
 
     return (
         <div className="config-item" key={name}>
-            <div title={item.desc || ""} key={item.type}>{name}:</div>
+                <div key={item.type}>
+                    <Tooltip text={item.desc || ""}>
+                        <span>{name}:</span>
+                    </Tooltip>
+                </div>
 
             <select ref={selectRef} onChange={() => {
                 if (selectRef.current) {

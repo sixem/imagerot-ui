@@ -25,7 +25,7 @@ const calculateInset = (rect: DOMRect, margin: number = 5): TTooltipInset => {
     // Calculate vertical alignment
     inset.top = rect.y <= (viewport.height / 2)
         ? (rect.y + margin + rect.height) + 'px'
-        : Math.max(0, rect.y - rect.height) + 'px';
+        : Math.max(0, rect.y - rect.height - margin) + 'px';
 
     return inset;
 };
