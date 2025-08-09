@@ -3,12 +3,12 @@ export const MessageType = {
 };
 
 export const WorkItemType = {
-    MODE: 0, EFFECT: 1
-};
+    mode: 0, effect: 1
+} as const;
 
 export const EffectType = {
-    STRING: 'string',
-    NUMBER: 'number',
-    OBJECT: 'object',
-    COLOR: 'color'
-};
+    string: 'string',
+    number: 'number',
+    object: 'object',
+    color: 'color'
+} as const;

@@ -1,6 +1,6 @@
 import type { TImageFile } from '@/data/types';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Image, Controls, Notifications, TooltipDisplay } from '@/components/';
 import { binders } from '@/binders';
 import { Config } from '@/config';
@@ -18,83 +18,81 @@ const ImageRot = () => {
     const [currentFile, setFile] = useState<TImageFile | null>(null); // Base file
     const [currentEdit, setEdit] = useState<TImageFile | null>(null); // Modified file
 
-    // References to drag handlers (for handling of drag and drop)
-    const dragEnterHandler = useRef<(e: DragEvent) => void>(null);
-    const dragOverHandler  = useRef<(e: DragEvent) => void>(null);
-    const dragLeaveHandler = useRef<(e: DragEvent) => void>(null);
-    const dropHandler      = useRef<(e: DragEvent) => void>(null);
-
-    // Set current file (base file); revokes are handled in effects now
-    const setAndRevokeFile = (image: TImageFile | null) => {
+    // Set current file; clear edit on new base file
+    const setAndRevokeFile = useCallback((image: TImageFile | null) => {
         setFile(image);
-
-        // Clear and invalidate edit file (result/modified file) on new file load
         setEdit(null);
-    };
+    }, []);
 
-    // Set current edit; revokes are handled in effects now
-    const setAndRevokeEdit = (image: TImageFile | null) => {
-        setEdit(image);
-    };
-
-    // Revoke previous file URL on change or unmount
+    // Revoke previous file URL only when the file changes or unmounts
     useEffect(() => {
+        const previous = currentFile?.url;
         return () => {
-            if (currentFile?.url) {
-                URL.revokeObjectURL(currentFile.url);
+            if (previous) {
+                URL.revokeObjectURL(previous);
             }
         };
     }, [currentFile]);
 
-    // Revoke previous edit URL on change or unmount
+    // Revoke previous edit URL only when the edit changes or unmounts
     useEffect(() => {
+        const previous = currentEdit?.url;
         return () => {
-            if (currentEdit?.url) {
-                URL.revokeObjectURL(currentEdit.url);
+            if (previous) {
+                URL.revokeObjectURL(previous);
             }
         };
     }, [currentEdit]);
 
-    // Notify on new file load
+    const loadedId   = currentFile?.id ?? null;
+    const loadedName = currentFile?.file?.name ?? null;
+
     useEffect(() => {
-        if (currentFile?.file) {
-            Hooks.senders.notify(MessageType.OK, `Loaded ${truncateString(currentFile.file.name)} ...`);
+        if (loadedName) {
+            Hooks.senders.notify(
+                MessageType.OK,
+                `Loaded ${truncateString(loadedName)} ...`
+            );
         }
-    }, [currentFile]);
+    }, [loadedId]);
 
+    // Global drag/drop listeners with AbortController (clean teardown)
     useEffect(() => {
-        // Set up listeners and hooks
-
         binders.listen();
 
-        dragEnterHandler.current = (e: DragEvent) => {
+        const ac = new AbortController();
+        const { signal } = ac;
+
+        const onDragEnter = (e: DragEvent) => {
             e.preventDefault();
             setDropping(true);
         };
 
-        dragOverHandler.current = (e: DragEvent) => {
+        const onDragOver = (e: DragEvent) => {
             e.preventDefault();
         };
 
-        dragLeaveHandler.current = (e: DragEvent) => {
+        const onDragLeave = (e: DragEvent) => {
             e.preventDefault();
-
-            if (e.clientX === 0 && e.clientY === 0) {
-                setDropping(false);
-            }
+            if (e.clientX === 0 && e.clientY === 0) setDropping(false); // Leaving the window entirely
         };
 
-        dropHandler.current = async (e: DragEvent) => {
+        const onDrop = (e: DragEvent) => {
             e.preventDefault();
             setDropping(false);
 
-            if (e.dataTransfer && e.dataTransfer?.files.length > 0) {
+            if (e.dataTransfer && e.dataTransfer.files.length > 0) {
                 const file = e.dataTransfer.files[0];
                 const validated = Config.filetypes.allowed.includes(file.type);
 
                 if (validated) {
                     const id = self.crypto.randomUUID();
-                    setAndRevokeFile({file, id, url: URL.createObjectURL(file), size: file.size});
+                    setAndRevokeFile({
+                        file,
+                        id,
+                        url: URL.createObjectURL(file),
+                        size: file.size,
+                    });
                 } else {
                     Hooks.senders.notify(
                         MessageType.ERROR,
@@ -104,35 +102,34 @@ const ImageRot = () => {
             }
         };
 
-        // Attach drag handlers to window
-        window.addEventListener('dragenter', dragEnterHandler.current);
-        window.addEventListener('dragover', dragOverHandler.current);
-        window.addEventListener('dragleave', dragLeaveHandler.current);
-        window.addEventListener('drop', dropHandler.current);
+        window.addEventListener('dragenter', onDragEnter, { signal, passive: false });
+        window.addEventListener('dragover',  onDragOver,  { signal, passive: false });
+        window.addEventListener('dragleave', onDragLeave, { signal, passive: false });
+        window.addEventListener('drop',      onDrop,      { signal, passive: false });
 
-        // Clean up listeners on unmount
         return () => {
             binders.unlisten();
-
-            if (dragEnterHandler.current) window.removeEventListener('dragenter', dragEnterHandler.current);
-            if (dragOverHandler.current)  window.removeEventListener('dragover',  dragOverHandler.current);
-            if (dragLeaveHandler.current) window.removeEventListener('dragleave', dragLeaveHandler.current);
-            if (dropHandler.current)      window.removeEventListener('drop',      dropHandler.current);
+            ac.abort(); // Auto-removes all listeners
         };
-    }, []);
+    }, [setAndRevokeFile]);
+
+    // Stable props to avoid new identities each render
+    const current = useMemo(() => ({ loaded: currentFile, edited: currentEdit }), [currentFile, currentEdit]);
+    const setters = useMemo(() => ({ file: setAndRevokeFile, edit: setEdit }), [setAndRevokeFile]);
+    const busy    = useMemo(() => ({ state: isBusy, update: setBusy }), [isBusy]);
 
     return (
         <div className="wrapper">
             <Image
-                setters={{ file: setAndRevokeFile, edit: setAndRevokeEdit }}
-                current={{ loaded: currentFile, edited: currentEdit }}
-                busy={{ state: isBusy, update: (state: boolean) => setBusy(state)}}
+                setters={setters}
+                current={current}
+                busy={busy}
             />
 
             <Controls
-                setters={{ file: setAndRevokeFile, edit: setAndRevokeEdit }}
-                current={{ loaded: currentFile, edited: currentEdit }}
-                busy={{ state: isBusy, update: (state: boolean) => setBusy(state)}}
+                setters={setters}
+                current={current}
+                busy={busy}
             />
 
             {isDropping ? <div className="dropping-overlay" /> : null}

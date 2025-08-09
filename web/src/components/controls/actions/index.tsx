@@ -6,9 +6,9 @@ import { Button, ButtonSet } from '@/components/';
 
 import Processor from '@/workers/processor?worker';
 
-const processor = new Processor();
-
 type TActionsSignature = { workflow: TWorkItem[]; } & TPaneSignature;
+
+const processor = new Processor();
 
 export const Actions = ({ current, setters, workflow, busy }: TActionsSignature) => {
     const onProcess = () => {
@@ -20,10 +20,7 @@ export const Actions = ({ current, setters, workflow, busy }: TActionsSignature)
     useEffect(() => {
         processor.onmessage = (event: MessageEvent<TProcessorOutput | null>) => {
             busy.update(false);
-
-            if (event.data) {
-                setters.edit(event.data.image);
-            }
+            setters.edit(event.data ? event.data.image : null);
         };
 
         return () => {

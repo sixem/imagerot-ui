@@ -10,7 +10,7 @@ import './file.scss';
  */
 export const InputFile = ({ setter, text }: { setter: (image: TImageFile | null) => void; text?: string; }) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const label = text || 'Drop files anywhere, or click to select a file.';
+    const label = text ?? 'Drop files anywhere, or click to select a file.';
 
     const eventOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;

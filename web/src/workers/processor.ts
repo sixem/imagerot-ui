@@ -1,10 +1,14 @@
 import type { TProcessorInput } from '@/data/types';
 
+import { unflatten } from '@/utils/';
 import { WorkItemType } from '@/data/enums';
 import * as imagerot from 'imagerot/browser';
 
 self.onmessage = async (event: MessageEvent<TProcessorInput>) => {
-    const { image, workflow } = event.data;
+    const { image, workflow } = {
+        image: event.data.image,
+        workflow: event.data.workflow.filter((item) => !item.muted)
+    };
 
     // Bad image data
     if (image.file === null) {
@@ -21,12 +25,11 @@ self.onmessage = async (event: MessageEvent<TProcessorInput>) => {
 
     // Apply every item in the workflow to the staged variable
     for (const item of workflow) {
-        if (item.muted) continue;
-        if (item.type === WorkItemType.EFFECT) {
-            staged = await imagerot.useEffect(staged, item.key, item.config as {
-                [key: string]: string | number;
+        if (item.type === WorkItemType.effect) {
+            staged = await imagerot.useEffect(staged, item.key, unflatten(item.config) as {
+                [key: string]: string | number
             });
-        } else if (item.type === WorkItemType.MODE) {
+        } else if (item.type === WorkItemType.mode) {
             staged = await imagerot.useMode(staged, item.key);
         }
     }

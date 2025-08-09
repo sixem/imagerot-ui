@@ -1,18 +1,20 @@
-<h1 align="left">ImageRot UI</h1>
+# ImageRot UI
 
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff)
+![Sass](https://img.shields.io/badge/Sass-C69?logo=sass&logoColor=fff)
+![Tauri](https://img.shields.io/badge/Tauri-24C8D8?logo=tauri&logoColor=fff)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=fff)
 ![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=fff)
-![Tauri](https://img.shields.io/badge/Tauri-24C8D8?logo=tauri&logoColor=fff)
 
 [ImageRot](https://github.com/sixem/imagerot/) (/ˈɪm.ɪdʒ.rɒt/ noun) is a lightweight, efficient, cross-environment image library. It lets you apply unique effects and modes to images by manipulating raw image buffers.
 
-This is a browser- and desktop-compatible user interface for the library ImageRot, made in React, using Vite and Tauri! :zap:
+This is a browser- and desktop-compatible user interface for the library ImageRot, made in React, using Vite and Tauri! :sparkles:
 
 To get started, you can either download the latest release [here](https://github.com/sixem/imagerot-ui/releases) or visit the [Web UI](https://five.sh/imagerot/ui/) directly.
 
 <img width="1788" height="906" alt="rot-ui" src="https://github.com/user-attachments/assets/110d9a61-ac8d-49c7-838f-9ae8b7b01918" />
 
-## Quick Usage
+## :zap: Quick Usage
 
 1. Drag an image into the UI, or click to select one.
     - This will load the image into memory, and you can always reset to the base image by using the toolbar in the top-right of the canvas.
@@ -26,11 +28,11 @@ To get started, you can either download the latest release [here](https://github
 
 ## Development and Building
 
-Dependencies: [Rust](https://rustup.rs/) — [Node](https://nodejs.org/en/download)
+- :package: Dependencies: [Rust](https://rustup.rs/) - [Node](https://nodejs.org/en/download)
 
 This project is set up as a monorepo, where Tauri handles the desktop application, and Vite and React handles the general frontend.
 
-The preferred package manger is `pnpm`, and Cargo/Rust as well as a newer node version (I'd recommend 22+) is also required.
+The preferred package manger is `pnpm`, and Cargo/Rust as well as a newer Node version (I'd recommend 22+) are also required.
 
 To get started, clone the repository and install the dependencies.
 
@@ -40,7 +42,7 @@ cd imagerot-ui
 pnpm install
 ```
 
-### 🧪 Development
+### :test_tube: Development
 
 To start the development environment, run the `dev` script in the monorepo.
 
@@ -50,13 +52,22 @@ pnpm run dev
 
 This will spin up Vite at `http://localhost:5173` for web testing, and the Tauri application will also open for desktop testing.
 
-### 🧱 Building
+### :bricks: Building
 
 There are two build scripts available: `build:web` and `build:desktop`.
 
-- `build:web` builds the web version (Vite/React frontend) for web usage only.
-- `build:desktop` builds the web version *and* the desktop versions.
+- `build:web` builds the web version (the Vite/React frontend) for web usage only.
+- `build:desktop` builds the web version (prerequisite) *and* the desktop versions.
+
+## Roadmap
+
+This is a new project, and additional features are expected to be added over time. There is no current timeline for this. As for now, here are some potential features that may be implemented in the future:
+
+- Locally stored presets
+- More advanced saving options (conversion to other image types etc.)
+- Implementation of a simple keybind system
+- Image comparison slider for the unmodified and modified image
 
 ## Disclaimers
 
-Feedback is very much welcome, whether that's in the form of suggestions or by reporting general issues or bugs you've found! 💞
+This is just a fun personal hobby project, but feedback is still very much welcome! Whether that's in the form of suggestions or by reporting general issues or bugs you've found.

@@ -1,17 +1,14 @@
 import type {
     TEffectConfigItem,
     TEffectItem,
-    TEffectConfigNumber,
     TEffectValue,
-    TEffectConfigColor,
-    TEffectConfigString,
     TEffectChangeEvent,
     TPaneSignature,
     TModeItem,
     TWorkItem
 } from '@/data/types';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
 import { Actions } from './actions';
 import { Workflow } from './workflow';
@@ -22,32 +19,52 @@ import { listEffects, listModes } from 'imagerot/browser';
 
 import './index.scss';
 
+type TWorkItemCreator = (
+    key: string,
+    type: (typeof WorkItemType)[keyof typeof WorkItemType],
+    config: { [key: string]: TEffectValue; } | null
+) => TWorkItem;
+
 /** Get valid modes and effects for our current version */
-const validEffects = Object.fromEntries(listEffects().map((key) => [key, true]));
-const validModes = Object.fromEntries(listModes().map((key) => [key, true]));
+const EFFECT_VALID = new Set(listEffects());
+const MODE_VALID   = new Set(listModes());
 
-const getDefaultValue = (config: TEffectConfigItem) => {
-    const [type, a, b,, f] = config;
+/** Get the active UI effects and modes and sort them */
+const EFFECT_KEYS = Object.keys(Effects).sort();
+const MODE_KEYS   = Object.keys(Modes).sort();
 
-    switch (type) {
-        case EffectType.NUMBER : return f ? f(b as number) : b;
-        case EffectType.COLOR  : return a;
-        case EffectType.STRING : return (a as [number, number, number])[0] || null;
-        case EffectType.OBJECT : return null; // Needs support!
-        default                : return null;
+/** Get our default selections */
+const MODE_DEFAULT   = MODE_KEYS.find((k) => MODE_VALID.has(k)) ?? '';
+const EFFECT_DEFAULT = EFFECT_KEYS.find((k) => EFFECT_VALID.has(k)) ?? '';
+
+const getDefaultValue = (config: TEffectConfigItem): TEffectValue | null => {
+    switch (config.type) {
+        case EffectType.number:
+            return config.f(config.current);
+        case EffectType.color:
+            return config.current;
+        case EffectType.string:
+            return config.values.length > 0 ? config.values[0] : null;
+        default:
+            return null;
     }
 };
 
 /**
- * Sidebar header (top)
+ * Sidebar header
  */
 const Header = () => {
     return (
         <div className="header">
             <h2>ImageRot UI</h2>
             <div className="note">
-                <span>Check out the <a target="_blank" href="https://github.com/sixem/imagerot-ui/">project on GitHub</a></span>
-                <Github />
+                <span>Check out the <a
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href="https://github.com/sixem/imagerot-ui/"
+                >
+                    <span>project on GitHub</span>
+                </a></span><Github />
             </div>
         </div>
     );
@@ -60,7 +77,7 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
     const selectionRef = useRef<HTMLSelectElement>(null);
     const [selected, setSelected] = useState<{ key: string; details: TModeItem; } | null>(null);
 
-    const eventOnChange = () => {
+    const handleModeChange = useCallback(() => {
         if (selectionRef.current) {
             const value = selectionRef.current.value;
 
@@ -68,18 +85,18 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
                 setSelected({ key: value, details: Modes[value] });
             }
         }
-    };
+    }, []);
 
-    useEffect(() => eventOnChange(), []);
+    useEffect(() => handleModeChange(), [handleModeChange]);
 
     return (
         <div className="section selection-mode">
             <div className="sub-header">Available modes:</div>
 
             <div className="selection-buttoned">
-                <select name="mode-select" ref={selectionRef} onChange={eventOnChange}>
-                    {(Object.keys(Modes).sort().map((key) => {
-                        return validModes[key] ? (
+                <select name="mode-select" ref={selectionRef} onChange={handleModeChange} value={selected?.key ?? MODE_DEFAULT}>
+                    {(MODE_KEYS.map((key) => {
+                        return MODE_VALID.has(key) ? (
                             <option key={key} value={key}>{key}</option>
                         ) : null;
                     }))}
@@ -90,7 +107,7 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
             </div>
 
             <div className="description">
-                <span>{selected?.details?.description || "Adds the selected mode to the workflow."}</span>
+                <span>{selected?.details?.description ?? "Adds the selected mode to the workflow."}</span>
             </div>
         </div>
     );
@@ -99,43 +116,74 @@ const SelectionMode = ({ onAdd }: { onAdd: (mode: string, details: TModeItem) =>
 /**
  * Effect configuration
  */
-const SelectionEffectConfig = ({ config, onChange }: TEffectChangeEvent) => {
+const SelectionEffectConfig = memo(({ config, onChange, path = [] }: TEffectChangeEvent & { path?: string[] }) => {
     return (
-        <div className="configuration">
-            {Object.keys(config).map((key) => {
-                const [type] = config[key];
+        <Fragment>
+            {Object.entries(config).map(([key, item]) => {
+                const full = [...path, key];
+                const name = full.join('.');
 
-                switch (type) {
-                    case EffectType.NUMBER: {
-                        return <InputRange key={key} {...{ onChange, name: key }} item={config[key] as TEffectConfigNumber} />;
+                switch (item.type) {
+                    case EffectType.number: {
+                        return <InputRange key={name} {...{ onChange, name }} item={item} />;
+                    };
+
+                    case EffectType.string: {
+                        return <InputString key={name} {...{ onChange, name }} item={item} />;
+                    };
+
+                    case EffectType.color: {
+                        return <InputColor key={name} {...{ onChange, name }} item={item} />;
+                    };
+
+                    case EffectType.object: {
+                        return (
+                            <div className="config-set" key={name}>
+                                <SelectionEffectConfig
+                                    config={item.values}
+                                    onChange={onChange}
+                                    path={full}
+                                />
+                            </div>
+                        );
                     }
-
-                    case EffectType.STRING: {
-                        return <InputString key={key} {...{ onChange, name: key }} item={config[key] as TEffectConfigString} />;
-                    }
-
-                    case EffectType.COLOR: {
-                        return <InputColor key={key} {...{ onChange, name: key }} item={config[key] as TEffectConfigColor} />;
-                    }
-
-                    default: return null;
                 }
-            }).filter(_ => _)}
-        </div>
+            })}
+        </Fragment>
     );
-};
+});
 
 /**
- * Reads in the default configuration values from an object of `TEffectConfigItem` values
+ * Reads in the default configuration values and FLATTENS them using dot-keys.
  */
 const readConfigDefaults = (config: { [key: string]: TEffectConfigItem; }) => {
-    return Object.fromEntries(Object.keys(config || {}).map((key) => {
-        const value = getDefaultValue((config as {
-            [key: string]: TEffectConfigItem;
-        })[key]);
+    const out: { [key: string]: TEffectValue } = {};
 
-        return value !== null ? [key, value] : null;
-    }).filter((item): item is [string, TEffectValue] => item !== null));
+    const walk = (node: { [key: string]: TEffectConfigItem }, p: string[]) => {
+        for (const [k, item] of Object.entries(node || {})) {
+            const full = [...p, k];
+            const name = full.join('.');
+
+            switch (item.type) {
+                case EffectType.object: {
+                    walk(item.values, full);
+                    break;
+                }
+                case EffectType.number:
+                case EffectType.string:
+                case EffectType.color: {
+                    const value = getDefaultValue(item);
+                    if (value !== null) {
+                        out[name] = value as TEffectValue;
+                    } break;
+                }
+            }
+        }
+    };
+
+    walk(config || {}, []);
+
+    return out;
 };
 
 /**
@@ -143,10 +191,15 @@ const readConfigDefaults = (config: { [key: string]: TEffectConfigItem; }) => {
  */
 const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: string]: TEffectValue }) => void; }) => {
     const selectionRef = useRef<HTMLSelectElement>(null);
-    const [selected, setSelected] = useState<{ key: string; value: TEffectItem; } | null>(null);
-    const [config, setConfig] = useState<{ [key: string]: TEffectValue }>({});
 
-    const eventOnChange = () => {
+    const [selected, setSelected] = useState<{ key: string; value: TEffectItem; } | null>(null);
+    const [config, setConfig]     = useState<{ [key: string]: TEffectValue }>({});
+
+    const handleConfigChange = useCallback((name: string, value: TEffectValue) => {
+        setConfig(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    const handleEffectChange = useCallback(() => {
         if (selectionRef.current) {
             const value = selectionRef.current.value;
 
@@ -154,49 +207,63 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
                 setSelected({ key: value, value: Effects[value] });
             }
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (selected?.value?.config) {
-            // Read in configuration defaults and set as config state
             setConfig(readConfigDefaults(selected.value.config));
+        } else {
+            setConfig({});
         }
     }, [selected]);
 
     // Enforces automatic initial selection
-    useEffect(() => eventOnChange(), []);
+    useEffect(() => handleEffectChange(), [handleEffectChange]);
 
     return (
         <div className="section selection-effect">
             <div className="sub-header">Available effects:</div>
 
-            <select name="effect-select" ref={selectionRef} onChange={eventOnChange}>
-                {(Object.keys(Effects).sort().map((key) => { // Read in available configuration for the effect
-                    return validEffects[key] ? (
+            <select name="effect-select" ref={selectionRef} onChange={handleEffectChange} value={selected?.key ?? EFFECT_DEFAULT}>
+                {(EFFECT_KEYS.map((key) => {
+                    return EFFECT_VALID.has(key) ? (
                         <option key={key} value={key}>{Effects[key]?.format || key}</option>
                     ) : null;
                 }))}
             </select>
 
             <div className="description">
-                <span>{selected?.value?.description || "Adds the selected effect to the workflow."}</span>
+                <span>{selected?.value?.description ?? "Adds the selected effect to the workflow."}</span>
             </div>
 
-            {selected?.value?.config ? <SelectionEffectConfig config={selected.value.config} onChange={(name, value) => {
-                // On any input changes, update the config with the set value
-                if (selected?.value?.config?.hasOwnProperty(name)) { // Validating config key can't hurt
-                    setConfig(previous => ({...previous, [name]: value }));
-                }
-            }} /> : null}
+            {selected?.value?.config ? (
+                <div className="configuration">
+                    <SelectionEffectConfig
+                        config={selected.value.config}
+                        onChange={handleConfigChange}
+                    />
+                </div>
+            ) : null}
 
             <div className="button" onClick={() => {
-                if (selected) onAdd(selected.key, config);
-            }}>Add effect to workflow</div>
+                if (selected) {
+                    onAdd(selected.key, config);
+                }
+            }}>
+                <span>Add effect to workflow</span>
+            </div>
         </div>
     );
 };
 
 let workItemId = 0;
+
+/**
+ * Creates a simple work item object
+ */
+const createWorkItem: TWorkItemCreator = (key, type, config) => {
+    return { key, config, type, id: workItemId++, muted: false };
+};
 
 /**
  * Controls container
@@ -210,29 +277,21 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
         <div className="controls">
             <div className="top">
                 <Header />
-                
+
                 <div className="section">
                     <InputFile setter={setters.file} />
                 </div>
 
                 <SelectionMode onAdd={(mode, _) => {
-                    setWorkflow(previous => [...previous, {
-                        type: WorkItemType.MODE,
-                        id: workItemId++,
-                        key: mode,
-                        config: null,
-                        muted: false
-                    }]);
+                    setWorkflow(previous => [...previous, createWorkItem(
+                        mode, WorkItemType.mode, null
+                    )]);
                 }} />
 
                 <SelectionEffect onAdd={(effect, config) => {
-                    setWorkflow((previous) => [...previous, {
-                        type: WorkItemType.EFFECT,
-                        id: workItemId++,
-                        key: effect,
-                        config: config,
-                        muted: false
-                    }]);
+                    setWorkflow((previous) => [...previous, createWorkItem(
+                        effect, WorkItemType.effect, config
+                    )]);
                 }} />
 
                 <Workflow {...{ workflow, setWorkflow }} />

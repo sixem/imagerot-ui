@@ -20,7 +20,7 @@ const WorkflowItem = ({ item, index, onRemove, onToggle }: {
     onRemove: (item: TWorkItem) => void;
     onToggle: (item: TWorkItem) => void;
 }) => {
-    const type = item.type === WorkItemType.MODE ? "mode" : "effect";
+    const type = item.type === WorkItemType.mode ? "mode" : "effect";
     const isToggled = !!item.muted;
     const classList = ['work-item', "type-" + type];
 

@@ -1,19 +1,40 @@
-import { WorkItemType } from './enums';
+import { WorkItemType, EffectType } from './enums';
 
-export type TEffects = {
-    [key: string]: TEffectItem;
+export type TEffects = { [key: string]: TEffectItem; };
+export type TEffectType = typeof EffectType[keyof typeof EffectType];
+
+export type TEffectConfigObject = {
+    type: typeof EffectType.object;
+    values: { [key: string]: TEffectConfigItem; }
 };
 
-export type TEffectConfigNumber = ['number', number, number, number, (n: number) => number, (string | null)?, string?];
-export type TEffectConfigString = ['string', string[], string?];
-export type TEffectConfigColor  = ['color', [number, number, number], string?];
-export type TEffectConfigObject = ['object', { [key: string]: TEffectConfigItem }];
+export type TEffectConfigColor = {
+    type: typeof EffectType.color;
+    current: [number, number, number];
+    desc?: string;
+};
+
+export type TEffectConfigNumber = {
+    type: typeof EffectType.number;
+    min: number;
+    current: number;
+    max: number;
+    desc?: string;
+    unit?: string;
+    f: (n: number) => number;
+}
+
+export type TEffectConfigString = {
+    type: typeof EffectType.string;
+    values: string[];
+    desc?: string;
+}
 
 export type TEffectConfigItem =
-    TEffectConfigNumber |
     TEffectConfigString |
-    TEffectConfigColor  |
-    TEffectConfigObject;
+    TEffectConfigColor |
+    TEffectConfigObject |
+    TEffectConfigNumber;
 
 export type TEffectItem = {
     description?: string,
