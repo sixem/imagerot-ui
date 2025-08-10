@@ -10,6 +10,7 @@ import type {
 
 import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
+import { getImageDimensions, debug } from '@/utils';
 import { Config } from '@/config';
 import { Effects, Modes } from '@/data/';
 import { Button, Tooltip } from '@/components';
@@ -17,9 +18,12 @@ import { EffectType, WorkItemType } from '@/data/enums';
 import { Github } from '@/icons/';
 import { Actions } from './actions';
 import { Workflow } from './workflow';
+import { estimates } from '@/modules';
 import { listEffects, listModes } from 'imagerot/browser';
 
 import './index.scss';
+
+const log = debug('app:controls');
 
 type TWorkItemCreator = (
     key: string,
@@ -294,6 +298,40 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
  */
 const Controls = ({ current, setters, busy }: TPaneSignature) => {
     const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
+    const [estimated, setEstimated] = useState<number | null>(null);
+
+    useEffect(() => {
+        log("modified");
+
+        if (current.loaded) {
+            const id = current.loaded.id; // Store current ID
+
+            getImageDimensions(current.loaded.url).then((dimensions) => {
+                const { width, height } = dimensions;
+
+                // Update dimensions and estimates for the current image
+                if (current.loaded && id === current.loaded.id) {
+                    current.loaded.dimensions = [width, height];
+
+                    const estimatedMs = estimates.getEstimate([width, height], {
+                        effects : workflow.filter((it) => !it.muted && it.type === WorkItemType.effect).map((e) => e.key),
+                        modes   : workflow.filter((it) => !it.muted && it.type === WorkItemType.mode).map((m) => m.key)
+                    });
+
+                    if (estimatedMs) {
+                        log("Estimated processing (ms)", {
+                            current : Math.round(estimatedMs * 100) / 100,
+                            last    : estimated
+                        });
+                    }
+
+                    setEstimated(estimatedMs);
+                }
+            }).catch(() => setEstimated(null));
+        } else {
+            setEstimated(null);
+        }
+    }, [workflow, current]);
 
     return (
         <div className="controls">
@@ -319,7 +357,7 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
                 <Workflow {...{ workflow, setWorkflow }} />
             </div>
             <div className="bottom">
-                <Actions {...{ current, setters, busy }} workflow={workflow} />
+                <Actions {...{ current, setters, busy, estimated }} workflow={workflow} />
             </div>
         </div>
     );

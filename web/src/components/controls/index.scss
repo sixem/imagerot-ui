@@ -183,20 +183,20 @@
                 margin: 10px 0 14px 0;
             }
 
-            > div.git {
+            >div.git {
                 position: absolute;
                 inset: 0 0 0 auto;
                 height: 24px;
                 width: 24px;
 
                 a {
-                    > svg {
+                    >svg {
                         transition: color 0.25s ease-in-out;
                         color: rgba(255, 255, 255, 0.75);
                     }
 
                     &:hover {
-                        > svg {
+                        >svg {
                             color: #fff;
                         }
                     }

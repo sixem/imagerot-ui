@@ -7,26 +7,35 @@ import './index.scss';
 import { Tooltip } from '@/components/tooltips';
 
 type TWorkflowSignature = {
-    workflow: TWorkItem[];
-    setWorkflow: React.Dispatch<React.SetStateAction<TWorkItem[]>>
+    workflow    : TWorkItem[];
+    setWorkflow : React.Dispatch<React.SetStateAction<TWorkItem[]>>;
 };
 
 /**
  * Holds a single effect or mode item
  */
 type TWorkflowItemProps = {
-    item: TWorkItem;
-    index: number;
-    onRemove: (item: TWorkItem) => void;
-    onToggle: (item: TWorkItem) => void;
-    draggable?: boolean;
-    onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
-    onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
-    onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
+    item       : TWorkItem;
+    index      : number;
+    draggable? : boolean;
+    onRemove : (item: TWorkItem) => void;
+    onToggle : (item: TWorkItem) => void;
+    onDragStart? : (e: React.DragEvent<HTMLDivElement>) => void;
+    onDragOver?  : (e: React.DragEvent<HTMLDivElement>) => void;
+    onDragEnd?   : (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
-const WorkflowItem = ({ item, index, onRemove, onToggle, draggable, onDragStart, onDragOver, onDragEnd }: TWorkflowItemProps) => {
-    const type = item.type === WorkItemType.mode ? "mode" : "effect";
+const WorkflowItem = ({
+    item,
+    index,
+    draggable,
+    onRemove,
+    onToggle,
+    onDragStart,
+    onDragOver,
+    onDragEnd
+}: TWorkflowItemProps) => {
+    const type      = item.type === WorkItemType.mode ? "mode" : "effect";
     const isToggled = !!item.muted;
     const classList = ['work-item', "type-" + type];
 
@@ -36,12 +45,12 @@ const WorkflowItem = ({ item, index, onRemove, onToggle, draggable, onDragStart,
 
     return (
         <div
-            data-index={index}
-            className={classList.join(' ')}
-            draggable={draggable}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDragEnd={onDragEnd}
+            data-index  = {index}
+            className   = {classList.join(' ')}
+            draggable   = {draggable}
+            onDragStart = {onDragStart}
+            onDragOver  = {onDragOver}
+            onDragEnd   = {onDragEnd}
         >
             <div className="text">
                 <div>{item.key}</div>

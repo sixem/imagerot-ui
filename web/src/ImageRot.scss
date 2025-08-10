@@ -1,6 +1,24 @@
 @use '@/sass/variables' as *;
 
-@import url('https://fonts.googleapis.com/css2?family=Faculty+Glyphic&display=swap');
+/* Latin extension */
+@font-face {
+    font-family: 'Faculty Glyphic';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('@/assets/fonts/Faculty-Glyphic-1.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Latin */
+@font-face {
+    font-family: 'Faculty Glyphic';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('@/assets/fonts/Faculty-Glyphic-2.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 * {
     scrollbar-color: #232539 #111119;
@@ -73,7 +91,7 @@ a:hover {
             inset: 0;
             backdrop-filter: blur(2px);
             background-color: rgba(0, 0, 0, 0.35);
-            z-index: 1;
+            z-index: 99999;
             justify-content: center;
             align-items: center;
             display: flex;
@@ -168,7 +186,9 @@ div.drift-zoom-pane {
     max-height: 330px;
 }
 
-@media (max-width: 900px) {
+/** Mobile sizing */
+
+@media (max-width: 720px) {
 
     html,
     body {
@@ -178,8 +198,8 @@ div.drift-zoom-pane {
 
     #root {
         height: auto;
-    
-        > div.wrapper {
+
+        >div.wrapper {
             display: flex;
             min-height: 100vh;
             flex-direction: column;
@@ -194,7 +214,7 @@ div.drift-zoom-pane {
             }
 
             div.selector {
-                > div.top {
+                >div.top {
                     width: 100%;
                     overflow-x: hidden;
                     position: relative;
@@ -205,38 +225,38 @@ div.drift-zoom-pane {
                 }
             }
 
-            > div.image {
+            >div.image {
                 height: 40vh;
 
-                > div.lander {
-                    > img {
+                >div.lander {
+                    >img {
                         display: none;
                     }
                 }
             }
 
-            > div.controls {
+            >div.controls {
                 border-top: 2px solid rgba(0, 0, 0, 0.5);
                 margin: auto 0 auto 0;
                 max-width: none;
-            
-                > div.top {
-                    > div.header {
+
+                >div.top {
+                    >div.header {
                         text-align: left;
                         padding: 10px 0 18px 0;
 
-                        > h2 {
+                        >h2 {
                             font-size: 1.5em;
                             margin: 0;
                             padding-right: 24px;
                         }
 
-                        > div.git {
+                        >div.git {
                             top: 10px;
                         }
                     }
 
-                    > div.section.workflow > div.work-order {
+                    >div.section.workflow>div.work-order {
                         max-height: 200px;
                     }
                 }

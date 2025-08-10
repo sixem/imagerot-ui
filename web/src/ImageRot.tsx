@@ -42,7 +42,7 @@ const ImageRot = () => {
         return () => {
             if (previous) {
                 URL.revokeObjectURL(previous);
-                log("Revoked URL of staged (base) file", previous);
+                log("Revoked URL of base file", previous);
             }
         };
     }, [currentFile]);

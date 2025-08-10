@@ -191,11 +191,11 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
             <Spinner visible={busy.state} />
 
             <Options {...{
-                trash  : current.loaded ? () => { setters.edit(null); setters.file(null); } : null,
-                reset  : current.edited ? () => { setters.edit(null); } : null,
-                pin    : current.edited ? () => onImagePin(current, setters) : null,
-                save   : current.edited || current.loaded ? () => { onImageSave(current); } : null,
-                open   : currentUrl ? () => { window.open(currentUrl, '_blank'); } : null
+                trash : current.loaded ? () => { setters.edit(null); setters.file(null); } : null,
+                reset : current.edited ? () => { setters.edit(null); } : null,
+                pin   : current.edited ? () => onImagePin(current, setters) : null,
+                save  : current.edited || current.loaded ? () => { onImageSave(current); } : null,
+                open  : currentUrl ? () => { window.open(currentUrl, '_blank'); } : null
             }}/>
         </div>
     );

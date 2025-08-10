@@ -1,3 +1,5 @@
+import type { TBucketKeys } from '@/data/types';
+
 export const MessageType = {
     ok    : 0,
     warn  : 1,
@@ -15,3 +17,5 @@ export const EffectType = {
     object : 'object',
     color  : 'color'
 } as const;
+
+export const BucketKeys = ['modes', 'effects'] as const satisfies readonly TBucketKeys[];
