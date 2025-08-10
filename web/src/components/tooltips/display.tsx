@@ -1,12 +1,12 @@
 import type { TTooltipData, TTooltipInset } from './types';
 
 import { Config } from '@/config';
-import { Hooks, Triggers } from '@/modules';
+import { hooks, triggers } from '@/modules';
 import { useEffect, useState, useRef } from 'react';
 
 import './display.scss';
 
-const hookProps = { trigger: Triggers.TOOLTIP, identifier: 'tooltip:watcher' };
+const hookProps = { trigger: triggers.tooltip, identifier: 'tooltip:watcher' };
 
 /**
  * Calculates the inset placement of the tooltip given a DOMRect
@@ -38,7 +38,7 @@ export const TooltipDisplay = () => {
     const timerRef = useRef<any>(null);
 
     useEffect(() => {
-        Hooks.watch({
+        hooks.watch({
             ...hookProps,
             callback: (data: TTooltipData) => {
                 if (timerRef.current) {
@@ -59,7 +59,7 @@ export const TooltipDisplay = () => {
             }
         });
 
-        return () => { Hooks.unwatch(hookProps); }
+        return () => { hooks.unwatch(hookProps); }
     }, []);
 
     return (

@@ -1,5 +1,5 @@
-export const Triggers = {
-    DOCUMENT_PASTE: 'DOCUMENT_PASTE',
-    TOOLTIP: 'TOOLTIP',
-    NOTIFY: 'NOTIFY'
+export const triggers = {
+    documentPaste: 'documentPaste',
+    tooltip: 'tooltip',
+    notify: 'notify'
 };

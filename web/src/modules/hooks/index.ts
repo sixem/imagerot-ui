@@ -127,7 +127,7 @@ const creator = {
     }
 };
 
-export const Hooks = {
+export const hooks = {
     listen,
     unlisten,
     trigger,

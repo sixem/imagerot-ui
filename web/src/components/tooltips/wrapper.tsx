@@ -2,25 +2,25 @@ import type { ReactElement, Ref, MouseEvent, CSSProperties } from 'react';
 import type { TTooltipProps, TTooltipHandlers, TTooltipData } from './types';
 
 import { cloneElement, isValidElement, useEffect, useRef } from 'react';
-import { Hooks, Triggers } from '@/modules';
+import { hooks, triggers } from '@/modules';
 
 // Handlers to attach to the <Tooltip /> child
 const handlers: TTooltipHandlers = {
     onMouseEnter: (rect, text) => {
-        Hooks.trigger({
-            trigger: Triggers.TOOLTIP,
+        hooks.trigger({
+            trigger: triggers.tooltip,
             data: { visible: true, rect, text: (text || "") } as TTooltipData
         });
     },
     onMouseLeave: () => {
-        Hooks.trigger({
-            trigger: Triggers.TOOLTIP,
+        hooks.trigger({
+            trigger: triggers.tooltip,
             data: { visible: false } as TTooltipData
         });
     },
     onClick: () => {
-        Hooks.trigger({
-            trigger: Triggers.TOOLTIP,
+        hooks.trigger({
+            trigger: triggers.tooltip,
             data: { visible: false } as TTooltipData
         });
     }
@@ -56,7 +56,7 @@ export const Tooltip = ({ children, text, indicator = false }: TTooltipProps) =>
 
     useEffect(() => {
         return () => { // Clear any lingering tooltips on unmount
-            Hooks.trigger({ trigger: Triggers.TOOLTIP, data: { visible: false } });
+            hooks.trigger({ trigger: triggers.tooltip, data: { visible: false } });
         };
     }, []);
 
@@ -65,6 +65,5 @@ export const Tooltip = ({ children, text, indicator = false }: TTooltipProps) =>
             ref: setAnchorRef, ...propsCurrent, style: {
                 ...(propsChildren.style || {}), ...(indicator ? { cursor: 'help' } : {})
             }
-        })
-        : children;
+        }) : children;
 };

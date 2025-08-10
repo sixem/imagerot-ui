@@ -1,7 +1,7 @@
 import type { TNotifyItem } from '@/data/types';
 
 import { useEffect, useState } from 'react';
-import { Hooks, Triggers } from '@/modules';
+import { hooks, triggers } from '@/modules';
 
 import './index.scss';
 
@@ -50,15 +50,15 @@ export const Notifications = () => {
     };
 
     useEffect(() => {
-        Hooks.watch({
-            trigger: Triggers.NOTIFY,
+        hooks.watch({
+            trigger: triggers.notify,
             identifier: hookId.APP_NOTIFY_WATCHER,
             callback: onNotifyReceive
         });
 
         return () => {
-            Hooks.unwatch({
-                trigger: Triggers.NOTIFY,
+            hooks.unwatch({
+                trigger: triggers.notify,
                 identifier: hookId.APP_NOTIFY_WATCHER
             });
         }

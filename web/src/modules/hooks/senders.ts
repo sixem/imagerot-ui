@@ -1,11 +1,11 @@
 import { MessageType } from '@/data/enums';
-import { Hooks } from './index';
-import { Triggers } from './triggers';
+import { hooks } from './index';
+import { triggers } from './triggers';
 
 type MessageTypeValue = typeof MessageType[keyof typeof MessageType];
 
 const notify = (type: MessageTypeValue, message: string) => {
-    Hooks.trigger({ trigger: Triggers.NOTIFY, data: { type, message } });
+    hooks.trigger({ trigger: triggers.notify, data: { type, message } });
 };
 
 export const senders = {

@@ -2,7 +2,7 @@ import type { TPaneSignature } from '@/data/types';
 
 import { useRef, useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
-import { Hooks, Triggers } from '@/modules/';
+import { hooks, triggers } from '@/modules/';
 import { Tooltip } from '@/components/tooltips/';
 import { InputFile } from '@/components/controls/input';
 import { readFile } from '@/utils';
@@ -23,7 +23,7 @@ type TOptionSignature = (
 ) => void;
 
 const hookId = {
-    DOCUMENT_PASTE_WATCHER: 'document:paste:watcher'
+    DocumentPaste_WATCHER: 'document:paste:watcher'
 };
 
 /**
@@ -127,9 +127,9 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
             });
         }
 
-        Hooks.watch({
-            trigger: Triggers.DOCUMENT_PASTE,
-            identifier: hookId.DOCUMENT_PASTE_WATCHER,
+        hooks.watch({
+            trigger: triggers.documentPaste,
+            identifier: hookId.DocumentPaste_WATCHER,
             callback: (file: DataTransferItem) => {
                 readFile(file.getAsFile()).then((processed) => {
                     if (processed) {

@@ -1,2 +1,2 @@
-export { Hooks } from './hooks/';
-export { Triggers } from './hooks/triggers';
+export { hooks } from './hooks/';
+export { triggers } from './hooks/triggers';

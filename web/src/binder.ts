@@ -1,20 +1,18 @@
-import { Hooks, Triggers } from '@/modules/';
+import { hooks, triggers } from '@/modules/';
 
-const hookId = {
-    DOCUMENT_PASTE_LISTENER: 'document:paste:listener',
-};
+const hookId = { DocumentPasteListener: 'document:paste:listener' };
 
 const listen = () => {
-    Hooks.listen({
+    hooks.listen({
         pointer: document,
         events: 'paste',
-        identifier: hookId.DOCUMENT_PASTE_LISTENER,
+        identifier: hookId.DocumentPasteListener,
         callbacks: (event: ClipboardEvent) => {
             const items = event.clipboardData?.items || [];
 
             for (const item of items) {
                 if (item.kind === 'file') {
-                    Hooks.trigger({ trigger: Triggers.DOCUMENT_PASTE, data: item });
+                    hooks.trigger({ trigger: triggers.documentPaste, data: item });
                     break;
                 }
             }
@@ -23,11 +21,11 @@ const listen = () => {
 };
 
 const unlisten = () => {
-    Hooks.unlisten({
+    hooks.unlisten({
         pointer: document,
         events: 'paste',
-        identifier: hookId.DOCUMENT_PASTE_LISTENER
+        identifier: hookId.DocumentPasteListener
     });
 };
 
-export const binders = { listen, unlisten };
+export const binder = { listen, unlisten };

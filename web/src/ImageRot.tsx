@@ -2,21 +2,23 @@ import type { TImageFile } from '@/data/types';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Image, Controls, Notifications, TooltipDisplay } from '@/components/';
-import { binders } from '@/binders';
 import { Config } from '@/config';
 import { MessageType } from '@/data/enums';
-import { truncateString } from '@/utils';
-import { Hooks } from '@/modules/';
+import { truncateString, debug } from '@/utils';
+import { binder } from '@/binder';
+import { hooks } from '@/modules/';
 
 import './ImageRot.scss';
+
+const log = debug('app:main');
 
 const ImageRot = () => {
     const [isDropping, setDropping] = useState<boolean>(false);
     const [isBusy, setBusy] = useState<boolean>(false);
 
     // Store the loaded file as well as its edited version for restoration etc.
-    const [currentFile, setFile] = useState<TImageFile | null>(null); // Base file
-    const [currentEdit, setEdit] = useState<TImageFile | null>(null); // Modified file
+    const [currentFile, setFile] = useState<TImageFile | null>(null);
+    const [currentEdit, setEdit] = useState<TImageFile | null>(null);
 
     // Set current file; clear edit on new base file
     const setAndRevokeFile = useCallback((image: TImageFile | null) => {
@@ -30,6 +32,7 @@ const ImageRot = () => {
         return () => {
             if (previous) {
                 URL.revokeObjectURL(previous);
+                log("Revoked URL of staged (base) file", previous);
             }
         };
     }, [currentFile]);
@@ -40,6 +43,7 @@ const ImageRot = () => {
         return () => {
             if (previous) {
                 URL.revokeObjectURL(previous);
+                log("Revoked URL of edited file", previous);
             }
         };
     }, [currentEdit]);
@@ -49,8 +53,10 @@ const ImageRot = () => {
 
     useEffect(() => {
         if (loadedName) {
-            Hooks.senders.notify(
-                MessageType.OK,
+            log("Loaded file", currentFile);
+
+            hooks.senders.notify(
+                MessageType.ok,
                 `Loaded ${truncateString(loadedName)} ...`
             );
         }
@@ -58,10 +64,10 @@ const ImageRot = () => {
 
     // Global drag/drop listeners with AbortController (clean teardown)
     useEffect(() => {
-        binders.listen();
+        binder.listen();
 
-        const ac = new AbortController();
-        const { signal } = ac;
+        const controller = new AbortController();
+        const { signal } = controller;
 
         const onDragEnter = (e: DragEvent) => {
             e.preventDefault();
@@ -74,7 +80,8 @@ const ImageRot = () => {
 
         const onDragLeave = (e: DragEvent) => {
             e.preventDefault();
-            if (e.clientX === 0 && e.clientY === 0) setDropping(false); // Leaving the window entirely
+            // Leaving the window entirely
+            if (e.clientX === 0 && e.clientY === 0) setDropping(false);
         };
 
         const onDrop = (e: DragEvent) => {
@@ -87,6 +94,9 @@ const ImageRot = () => {
 
                 if (validated) {
                     const id = self.crypto.randomUUID();
+
+                    log("Drop file validated", file);
+
                     setAndRevokeFile({
                         file,
                         id,
@@ -94,8 +104,8 @@ const ImageRot = () => {
                         size: file.size,
                     });
                 } else {
-                    Hooks.senders.notify(
-                        MessageType.ERROR,
+                    hooks.senders.notify(
+                        MessageType.error,
                         `File was not loaded: Invalid file type (${file.type}) ...`
                     );
                 }
@@ -108,8 +118,8 @@ const ImageRot = () => {
         window.addEventListener('drop',      onDrop,      { signal, passive: false });
 
         return () => {
-            binders.unlisten();
-            ac.abort(); // Auto-removes all listeners
+            binder.unlisten();
+            controller.abort(); // Auto-removes all listeners
         };
     }, [setAndRevokeFile]);
 
