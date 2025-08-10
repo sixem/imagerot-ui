@@ -12,6 +12,16 @@ import './ImageRot.scss';
 
 const log = debug('app:main');
 
+const isFileDrag = (e: DragEvent) => {
+    const dt = e.dataTransfer;
+
+    if (!dt) return false;
+    if (dt.types && Array.from(dt.types).includes('Files')) return true;
+    if (dt.items && Array.from(dt.items).some(i => i.kind === 'file')) return true;
+
+    return false;
+};
+
 const ImageRot = () => {
     const [isDropping, setDropping] = useState<boolean>(false);
     const [isBusy, setBusy] = useState<boolean>(false);
@@ -70,21 +80,34 @@ const ImageRot = () => {
         const { signal } = controller;
 
         const onDragEnter = (e: DragEvent) => {
-            e.preventDefault();
-            setDropping(true);
+            if (isFileDrag(e)) {
+                e.preventDefault();
+                setDropping(true);
+            }
         };
 
         const onDragOver = (e: DragEvent) => {
-            e.preventDefault();
+            if (isFileDrag(e)) {
+                e.preventDefault();
+            }
         };
 
         const onDragLeave = (e: DragEvent) => {
-            e.preventDefault();
-            // Leaving the window entirely
-            if (e.clientX === 0 && e.clientY === 0) setDropping(false);
+            if (isFileDrag(e)) {
+                e.preventDefault();
+
+                // Leaving the window entirely
+                if (e.clientX === 0 && e.clientY === 0) {
+                    setDropping(false);
+                }
+            }
         };
 
-        const onDrop = (e: DragEvent) => {
+        const onDrop = async (e: DragEvent) => {
+            if (!isFileDrag(e)) {
+                return;
+            }
+
             e.preventDefault();
             setDropping(false);
 

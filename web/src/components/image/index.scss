@@ -36,9 +36,19 @@ div.spinner {
     position: relative;
     user-select: none;
 
-    > div.lander > div.file-drop > div.file-drop-target {
-        font-size: 1em;
-        font-weight: 500;
+    > div.lander {
+        text-align: center;
+
+        > div.file-drop > div.file-drop-target {
+            font-size: 1em;
+            font-weight: 500;
+            background-color: #121212;
+        }
+
+        > img {
+            margin-bottom: 25px;
+            pointer-events: none;
+        }
     }
 
     &.zooming {

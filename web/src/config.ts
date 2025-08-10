@@ -12,6 +12,12 @@ const Config = {
     },
     tooltips: {
         delay: 250
+    },
+    selections: {
+        defaults: {
+            mode: 'pixelsort',
+            effect: 'degrade'
+        }
     }
 };
 

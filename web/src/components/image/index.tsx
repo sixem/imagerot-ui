@@ -7,6 +7,7 @@ import { Tooltip } from '@/components/tooltips/';
 import { InputFile } from '@/components/controls/input';
 import { readFile } from '@/utils';
 
+import iconUrl from '@/assets/icon.png';
 import Drift from 'drift-zoom';
 import './index.scss';
 
@@ -178,6 +179,7 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
         }} >
             {current?.loaded === null ? (
                 <div className="lander" style={{ margin: '10px' }}>
+                    <img src={iconUrl} />
                     <InputFile setter={setters.file} text={
                         "To get started, click here to select an image or drop an image anywhere."
                     } />

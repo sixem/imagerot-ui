@@ -10,12 +10,13 @@ import type {
 
 import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
-import { Actions } from './actions';
-import { Workflow } from './workflow';
+import { Config } from '@/config';
 import { Effects, Modes } from '@/data/';
 import { Button } from '@/components';
 import { EffectType, WorkItemType } from '@/data/enums';
 import { Github } from '@/icons/';
+import { Actions } from './actions';
+import { Workflow } from './workflow';
 import { listEffects, listModes } from 'imagerot/browser';
 
 import './index.scss';
@@ -23,8 +24,20 @@ import './index.scss';
 type TWorkItemCreator = (
     key: string,
     type: (typeof WorkItemType)[keyof typeof WorkItemType],
-    config: { [key: string]: TEffectValue; } | null
+    configuration: { [key: string]: TEffectValue; } | null
 ) => TWorkItem;
+
+let workItemId = 0;
+
+const pickDefault = <T extends string>(
+    keys: readonly T[],
+    valid: ReadonlySet<T>,
+    preferred?: T
+): (T | '') => {
+    return preferred && keys.includes(preferred) && valid.has(preferred)
+        ? preferred
+        : (keys.find(k => valid.has(k)) ?? '');
+}
 
 /** Get valid modes and effects for our current version */
 const EFFECT_VALID = new Set(listEffects());
@@ -34,10 +47,23 @@ const MODE_VALID   = new Set(listModes());
 const EFFECT_KEYS = Object.keys(Effects).sort();
 const MODE_KEYS   = Object.keys(Modes).sort();
 
-/** Get our default selections */
-const MODE_DEFAULT   = MODE_KEYS.find((k) => MODE_VALID.has(k)) ?? '';
-const EFFECT_DEFAULT = EFFECT_KEYS.find((k) => EFFECT_VALID.has(k)) ?? '';
+Config.selections.defaults.effect
 
+/** Get our default selected mode */
+const MODE_DEFAULT = pickDefault(
+  MODE_KEYS, MODE_VALID,
+  Config?.selections?.defaults?.mode as typeof MODE_KEYS[number] | undefined
+);
+
+/** Get our default selected effect */
+const EFFECT_DEFAULT = pickDefault(
+  EFFECT_KEYS, EFFECT_VALID,
+  Config?.selections?.defaults?.effect as typeof EFFECT_KEYS[number] | undefined
+);
+
+/**
+ * Gets the default value of a configuration item
+ */
 const getDefaultValue = (config: TEffectConfigItem): TEffectValue | null => {
     switch (config.type) {
         case EffectType.number:
@@ -49,6 +75,13 @@ const getDefaultValue = (config: TEffectConfigItem): TEffectValue | null => {
         default:
             return null;
     }
+};
+
+/**
+ * Creates a simple work item object
+ */
+const createWorkItem: TWorkItemCreator = (key, type, configuration) => {
+    return { key, config: configuration, type, id: workItemId++, muted: false };
 };
 
 /**
@@ -256,15 +289,6 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
             }} />
         </div>
     );
-};
-
-let workItemId = 0;
-
-/**
- * Creates a simple work item object
- */
-const createWorkItem: TWorkItemCreator = (key, type, config) => {
-    return { key, config, type, id: workItemId++, muted: false };
 };
 
 /**
