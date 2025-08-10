@@ -301,8 +301,6 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
     const [estimated, setEstimated] = useState<number | null>(null);
 
     useEffect(() => {
-        log("modified");
-
         if (current.loaded) {
             const id = current.loaded.id; // Store current ID
 
