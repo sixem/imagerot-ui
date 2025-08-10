@@ -19,8 +19,6 @@ type TWorkflowItemProps = {
     index: number;
     onRemove: (item: TWorkItem) => void;
     onToggle: (item: TWorkItem) => void;
-
-    // added (optional) DnD props
     draggable?: boolean;
     onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
     onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -40,7 +38,6 @@ const WorkflowItem = ({ item, index, onRemove, onToggle, draggable, onDragStart,
         <div
             data-index={index}
             className={classList.join(' ')}
-            // added for DnD
             draggable={draggable}
             onDragStart={onDragStart}
             onDragOver={onDragOver}

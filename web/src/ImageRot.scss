@@ -167,3 +167,80 @@ div.drift-zoom-pane {
     max-width: 330px;
     max-height: 330px;
 }
+
+@media (max-width: 900px) {
+
+    html,
+    body {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    #root {
+        height: auto;
+    
+        > div.wrapper {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: stretch;
+
+            div.file-input {
+                text-align: left;
+            }
+
+            pre {
+                text-wrap: initial;
+            }
+
+            div.selector {
+                > div.top {
+                    width: 100%;
+                    overflow-x: hidden;
+                    position: relative;
+                    padding-right: 5px;
+                    display: flex;
+                    flex-direction: column;
+                    flex-grow: 1;
+                }
+            }
+
+            > div.image {
+                height: 40vh;
+
+                > div.lander {
+                    > img {
+                        display: none;
+                    }
+                }
+            }
+
+            > div.controls {
+                border-top: 2px solid rgba(0, 0, 0, 0.5);
+                margin: auto 0 auto 0;
+                max-width: none;
+            
+                > div.top {
+                    > div.header {
+                        text-align: left;
+                        padding: 10px 0 18px 0;
+
+                        > h2 {
+                            font-size: 1.5em;
+                            margin: 0;
+                            padding-right: 24px;
+                        }
+
+                        > div.git {
+                            top: 10px;
+                        }
+                    }
+
+                    > div.section.workflow > div.work-order {
+                        max-height: 200px;
+                    }
+                }
+            }
+        }
+    }
+}

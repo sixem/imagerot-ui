@@ -25,6 +25,10 @@ export const Actions = ({ current, setters, workflow, busy }: TActionsSignature)
             busy.update(false);
             log("Got processed image response", event.data);
             setters.edit(event.data ? event.data.image : null);
+
+            if (window.matchMedia('(max-width: 900px)').matches) {
+                window.scrollTo(0, 0);
+            }
         };
 
         return () => {

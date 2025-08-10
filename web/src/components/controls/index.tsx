@@ -12,7 +12,7 @@ import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react'
 import { InputString, InputRange, InputColor, InputFile } from './input/';
 import { Config } from '@/config';
 import { Effects, Modes } from '@/data/';
-import { Button } from '@/components';
+import { Button, Tooltip } from '@/components';
 import { EffectType, WorkItemType } from '@/data/enums';
 import { Github } from '@/icons/';
 import { Actions } from './actions';
@@ -91,14 +91,10 @@ const Header = () => {
     return (
         <div className="header">
             <h2>ImageRot UI</h2>
-            <div className="note">
-                <span>Check out the <a
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    href="https://github.com/sixem/imagerot-ui/"
-                >
-                    <span>project on GitHub</span>
-                </a></span><Github />
+            <div className="git">
+                <Tooltip text="Check out the project on GitHub!">
+                    <a target="_blank" href="https://github.com/sixem/imagerot-ui/"><Github /></a>
+                </Tooltip>
             </div>
         </div>
     );
