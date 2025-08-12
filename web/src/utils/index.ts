@@ -1,3 +1,4 @@
+export { debug } from './debug';
 export { randomString } from './randomString/';
 export { truncateString } from './truncateString';
 export { readFile } from './readFile';
@@ -6,4 +7,6 @@ export { debounce } from './debounce';
 export { unflatten } from './unflatten';
 export { getAverage } from './getAverage';
 export { getImageDimensions } from './getImageDimensions';
-export { debug } from './debug';
+export { pick } from './pick';
+export { saveAsAdaptive } from './saveAsAdaptive';
+export { useStoredState } from './useStoredState';

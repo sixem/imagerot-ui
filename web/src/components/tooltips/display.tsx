@@ -1,6 +1,6 @@
 import type { TTooltipData, TTooltipInset } from './types';
 
-import { Config } from '@/config';
+import { config } from '@/config';
 import { hooks, triggers } from '@/modules';
 import { useEffect, useState, useRef } from 'react';
 
@@ -16,16 +16,16 @@ const calculateInset = (rect: DOMRect, margin: number = 5): TTooltipInset => {
     const inset: TTooltipInset = { top: 'auto', right: 'auto', bottom: 'auto', left: 'auto' };
 
     // Calculate horizontal alignment
-    if (rect.x <= (viewport.width / 2)) {
-        inset.left = (rect.x + margin) + 'px';
+    if (rect.left <= (viewport.width / 2)) {
+        inset.left = (rect.left + margin) + 'px';
     } else {
-        inset.right = Math.max(0, viewport.width - rect.x - rect.width + margin) + 'px';
+        inset.right = Math.max(0, viewport.width - rect.left - rect.width + margin) + 'px';
     }
 
     // Calculate vertical alignment
-    inset.top = rect.y <= (viewport.height / 2)
-        ? (rect.y + margin + rect.height) + 'px'
-        : Math.max(0, rect.y - rect.height - margin) + 'px';
+    inset.top = rect.top <= (viewport.height / 2)
+        ? (rect.top + margin + rect.height) + 'px'
+        : Math.max(0, rect.top - rect.height - margin) + 'px';
 
     return inset;
 };
@@ -51,7 +51,7 @@ export const TooltipDisplay = () => {
                     setText(data.text);
 
                     // Make it visible with n delay (ms)
-                    timerRef.current = setTimeout(() => setVisible(true), Config.tooltips.delay);
+                    timerRef.current = setTimeout(() => setVisible(true), config.tooltips.delay);
                 } else {
                     setText("");
                     setVisible(false);

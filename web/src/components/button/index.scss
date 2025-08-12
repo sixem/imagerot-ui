@@ -3,7 +3,7 @@
 div.button {
     color: white;
     background-color: $color-primary-standout;
-    padding: 4px 10px 6px 10px;
+    padding: 4px 10px 6px;
     text-align: center;
     border-radius: 4px;
     user-select: none;
@@ -21,44 +21,62 @@ div.button {
         cursor: not-allowed;
     }
 
-    &[data-disabled="false"] {
-        &.icon {
-            &:hover {
-                &::after {
-                    opacity: 1;
-                }
-            }
-        }
-    }
-
     &.icon {
+        /* define per-icon vars on the element */
+        --icon-url: none;
+        --icon-size: 20px;
+
+        /* single pseudo for both textless and with-text buttons */
         &::after {
             content: "";
-            filter: invert(1);
-            width: 16px;
             position: absolute;
             inset: 0 0 0 auto;
             margin-right: 8px;
-            opacity: 0.75;
-            transition: opacity 0.2s ease-in-out;
+            opacity: .75;
+            transition: opacity .2s ease-in-out;
+            pointer-events: none;
+
+            /* monochrome icon tinted by currentColor */
+            -webkit-mask: var(--icon-url) center/var(--icon-size) no-repeat;
+            mask: var(--icon-url) center/var(--icon-size) no-repeat;
+            background-color: currentColor;
+            min-width: var(--icon-size);
         }
 
-        &.add::after {
-            background-image: url('@/assets/add.svg');
-            background-size: 16px 16px;
-            background-repeat: no-repeat;
-            background-position: center;
+        &:not([data-disabled="true"]):hover::after {
+            opacity: 1;
         }
 
-        &.process::after {
-            background-image: url('@/assets/wand.svg');
-            background-size: 14px 14px;
-            background-repeat: no-repeat;
-            background-position: center;
+        /* center-only icon variant */
+        &.textless {
+            padding: 0 14px;
+            min-width: var(--icon-size);
+
+            &::after {
+                inset: 0;
+                margin: 0;
+            }
+        }
+
+        /* icon variants (one-liners) */
+        &.add {
+            --icon-url: url('@/assets/queue-fill.svg');
+            --icon-size: 16px;
+        }
+
+        &.process {
+            --icon-url: url('@/assets/wand.svg');
+            --icon-size: 14px;
+        }
+
+        &.cog {
+            --icon-url: url('@/assets/cog.svg');
+            --icon-size: 20px;
         }
     }
 }
 
+/* Button set */
 div.button-set {
     display: flex;
     align-items: stretch;
@@ -66,8 +84,12 @@ div.button-set {
     gap: 8px;
 
     >div.button {
-        flex-grow: 1;
-        flex-basis: 0;
+        flex: 1 1 0;
         border-radius: 4px;
+        min-width: 0;
+    }
+
+    >div.button.textless {
+        flex: 0 0 auto;
     }
 }

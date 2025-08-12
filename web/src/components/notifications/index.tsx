@@ -2,12 +2,11 @@ import type { TNotifyItem } from '@/data/types';
 
 import { useEffect, useState } from 'react';
 import { hooks, triggers } from '@/modules';
+import { config } from '@/config';
 
 import './index.scss';
 
-const hookId = {
-    APP_NOTIFY_WATCHER: 'app:notify:watcher',
-};
+const hookId = { appNotifyWatcher: 'app:notify:watcher' };
 
 // Tracks the current notification item ID
 let currentId = 0;
@@ -27,7 +26,9 @@ export const Notifications = () => {
             setItems(previous => previous.map((item) => {
                 if (item.id === id) {
                     item.visible = true;
-                    setTimeout(() => notificationRemove(item.id), duration || 5000);
+                    setTimeout(() => {
+                        notificationRemove(item.id);
+                    }, duration || config.notifications.defaultDuration);
                 }
                 return item;
             }));
@@ -52,14 +53,14 @@ export const Notifications = () => {
     useEffect(() => {
         hooks.watch({
             trigger: triggers.notify,
-            identifier: hookId.APP_NOTIFY_WATCHER,
+            identifier: hookId.appNotifyWatcher,
             callback: onNotifyReceive
         });
 
         return () => {
             hooks.unwatch({
                 trigger: triggers.notify,
-                identifier: hookId.APP_NOTIFY_WATCHER
+                identifier: hookId.appNotifyWatcher
             });
         }
     }, []);

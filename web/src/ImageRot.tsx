@@ -2,9 +2,9 @@ import type { TImageFile } from '@/data/types';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Image, Controls, Notifications, TooltipDisplay } from '@/components/';
-import { Config } from '@/config';
 import { MessageType } from '@/data/enums';
 import { truncateString, debug } from '@/utils';
+import { config } from '@/config';
 import { binder } from '@/binder';
 import { hooks } from '@/modules/';
 
@@ -113,7 +113,7 @@ const ImageRot = () => {
 
             if (e.dataTransfer && e.dataTransfer.files.length > 0) {
                 const file = e.dataTransfer.files[0];
-                const validated = Config.filetypes.allowed.includes(file.type);
+                const validated = config.filetypes.allowed.includes(file.type);
 
                 if (validated) {
                     const id = self.crypto.randomUUID();
@@ -140,9 +140,9 @@ const ImageRot = () => {
         window.addEventListener('dragleave', onDragLeave, { signal, passive: false });
         window.addEventListener('drop',      onDrop,      { signal, passive: false });
 
-        return () => {
+        return () => { // Clean up listeners
             binder.unlisten();
-            controller.abort(); // Auto-removes all listeners
+            controller.abort();
         };
     }, [setAndRevokeFile]);
 

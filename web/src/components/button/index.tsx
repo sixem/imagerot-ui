@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import './index.scss';
 
 type TButtonProps = {
-    text: string;
+    text: string | null;
     disabled?: boolean;
     onClick?: (...args: any) => any;
     style?: CSSProperties;
@@ -16,13 +16,23 @@ type TButtonSetProps = {
 }
 
 export const Button = ({ text, style, onClick, icon, disabled = false }: TButtonProps) => {
+    const classList = ['button'];
+
+    if (icon) {
+        classList.push('icon ' + icon);
+
+        if (text === null) {
+            classList.push('textless');
+        }
+    }
+
     return (
-        <div className={"button" + (icon ? ` icon ${icon}` : "")} data-disabled={disabled} onClick={() => {
-            if (typeof onClick === 'function') {
+        <div className={classList.join(' ')} data-disabled={disabled} onClick={() => {
+            if (!disabled && typeof onClick === 'function') {
                 onClick();
             }
         }} style={style || {}}>
-            <span>{text}</span>
+            {text === null ? null : (<span>{text}</span>)}
         </div>
     );
 };

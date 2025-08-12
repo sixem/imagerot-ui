@@ -17,14 +17,29 @@
                 "width": 1280,
                 "height": 720,
                 "dragDropEnabled": false,
-                "backgroundColor": "#000"
+                "backgroundColor": "#000",
+                "label": "main"
             }
         ],
         "security": {
             "csp": {
-                "default-src": "'self' tauri: asset:",
-                "navigate-to": "'self'"
-            }
+                "default-src": "'self' asset:",
+                "img-src": "'self' asset: blob: data:",
+                "style-src": "'self' 'unsafe-inline'",
+                "worker-src": "'self' blob:"
+            },
+            "capabilities": [
+                {
+                    "identifier": "save-file-capability",
+                    "description": "Allows save dialog and writing to user-selected files",
+                    "windows": ["main"],
+                    "permissions": [
+                        "core:default",
+                        "dialog:allow-save",
+                        "fs:allow-write-file"
+                    ]
+                }
+            ]
         }
     },
     "bundle": {
@@ -34,7 +49,9 @@
             "msi",
             "appimage",
             "deb",
-            "rpm"
+            "rpm",
+            "app",
+            "dmg"
         ],
         "icon": [
             "icons/32x32.png",

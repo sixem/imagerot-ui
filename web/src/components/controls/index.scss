@@ -1,213 +1,226 @@
 @use 'sass:color';
 @use '@/sass/variables' as *;
 
-#root>div.wrapper>div.controls {
-    text-align: center;
-    order: 2;
-    flex: 0 0 325px;
-    margin-left: auto;
-    padding: 0px 10px;
-    border-left: 2px solid #171724;
-    background-color: #14141cf5;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    user-select: none;
-    max-width: 325px;
+#root>div.wrapper {
+    &.reversed {
+        >div.controls {
+            border-right: 2px solid #171724;
+        }
+    }
 
-    >div.top {
-        width: 100%;
-        overflow-x: hidden;
-        position: relative;
-        padding-right: 5px;
-        padding-left: 5px;
+    &:not(.reversed) {
+        >div.controls {
+            border-left: 2px solid #171724;
+        }
+    }
+
+    >div.controls {
+        text-align: center;
+        order: 2;
+        flex: 0 0 325px;
+        margin-left: auto;
+        padding: 0px 10px;
+        background-color: #14141cf5;
         display: flex;
         flex-direction: column;
-        flex-grow: 1;
-        scrollbar-gutter: stable;
+        justify-content: space-between;
+        position: relative;
+        user-select: none;
+        max-width: 325px;
 
-        &::after {
-            content: "";
-            min-height: 1px;
-            position: sticky;
-            inset: auto 10px 0px 10px;
-            box-shadow: 0 0 8px #000;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .sub-header {
+        >div.top {
             width: 100%;
-            text-align: left;
-            margin-bottom: 8px;
-            padding-left: 2px;
-        }
-
-        >div.section {
+            overflow-x: hidden;
+            position: relative;
+            padding-right: 5px;
+            padding-left: 5px;
             display: flex;
             flex-direction: column;
-            padding-bottom: 10px;
+            flex-grow: 1;
+            scrollbar-gutter: stable;
 
-            >div.selection-buttoned {
+            &::after {
+                content: "";
+                min-height: 1px;
+                position: sticky;
+                inset: auto 10px 0px 10px;
+                box-shadow: 0 0 8px #000;
+                pointer-events: none;
+                z-index: 1;
+            }
+
+            .sub-header {
+                width: 100%;
+                text-align: left;
+                margin-bottom: 8px;
+                padding-left: 2px;
+            }
+
+            >div.section {
                 display: flex;
-                gap: 10px;
+                flex-direction: column;
+                padding-bottom: 10px;
 
-                >select {
-                    flex-grow: 1;
-                }
-            }
+                >div.selection-buttoned {
+                    display: flex;
+                    gap: 10px;
 
-            >div.description {
-                margin-top: 6px;
-                color: $color-primary-text;
-                text-align: right;
-                font-size: 0.9em;
-            }
-
-            &.selection-effect {
-                >div.button {
-                    margin-top: 14px;
+                    >select {
+                        flex-grow: 1;
+                    }
                 }
 
-                >div.configuration {
-                    div.config-item {
-                        text-transform: capitalize;
-                        text-align: left;
+                >div.description {
+                    margin-top: 6px;
+                    color: $color-primary-text;
+                    text-align: right;
+                    font-size: 0.9em;
+                }
 
-                        >select {
-                            width: 100%;
-                            margin-top: 8px;
-                        }
-
-                        >input[type="range"] {
-                            width: 100%;
-                        }
-
-                        &.color-item {
-                            >div.flex {
-                                display: flex;
-                                gap: 10px;
-                                margin-top: 12px;
-
-                                >div.label {
-                                    padding-bottom: 2px;
-                                }
-
-                                >div.color-indcator {
-                                    background-color: $color-primary-standout;
-                                    min-height: 20px;
-                                    position: relative;
-                                    border-radius: 4px;
-
-                                    cursor: pointer;
-                                    flex-grow: 1;
-
-                                    >div.bg {
-                                        background-color: red;
-                                        position: absolute;
-                                        inset: 4px;
-                                    }
-                                }
-                            }
-
-                            >div.react-colorful {
-                                margin-top: 6px;
-                                width: 100%;
-                            }
-                        }
-
-                        &:first-child {
-                            margin-top: 8px;
-                        }
-
-                        &:not(:last-child) {
-                            margin-bottom: 8px;
-                        }
+                &.selection-effect {
+                    >div.button {
+                        margin-top: 14px;
                     }
 
-                    >div.config-set {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        gap: 10px;
+                    >div.configuration {
+                        div.config-item {
+                            text-transform: capitalize;
+                            text-align: left;
 
-                        >div.config-item.item-range {
-                            flex: 1 1 0;
-                            min-width: 0;
-
-                            >label {
-                                display: block;
+                            >select {
+                                width: 100%;
+                                margin-top: 8px;
                             }
 
                             >input[type="range"] {
                                 width: 100%;
                             }
+
+                            &.color-item {
+                                >div.flex {
+                                    display: flex;
+                                    gap: 10px;
+                                    margin-top: 12px;
+
+                                    >div.label {
+                                        padding-bottom: 2px;
+                                    }
+
+                                    >div.color-indcator {
+                                        background-color: $color-primary-standout;
+                                        min-height: 20px;
+                                        position: relative;
+                                        border-radius: 4px;
+
+                                        cursor: pointer;
+                                        flex-grow: 1;
+
+                                        >div.bg {
+                                            background-color: red;
+                                            position: absolute;
+                                            inset: 4px;
+                                        }
+                                    }
+                                }
+
+                                >div.react-colorful {
+                                    margin-top: 6px;
+                                    width: 100%;
+                                }
+                            }
+
+                            &:first-child {
+                                margin-top: 8px;
+                            }
+
+                            &:not(:last-child) {
+                                margin-bottom: 8px;
+                            }
+                        }
+
+                        >div.config-set {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            gap: 10px;
+
+                            >div.config-item.item-range {
+                                flex: 1 1 0;
+                                min-width: 0;
+
+                                >label {
+                                    display: block;
+                                }
+
+                                >input[type="range"] {
+                                    width: 100%;
+                                }
+                            }
                         }
                     }
                 }
+
+                &.selection-mode {
+                    margin-bottom: 10px !important;
+                    padding-bottom: 8px !important;
+                }
+
+                &:not(.workflow) {
+                    flex: 0 0 auto;
+                }
+
+                &:not(:last-child) {
+                    border-bottom: 1px solid $color-primary-standout;
+                    margin-bottom: 10px;
+                    padding-bottom: 15px;
+                }
             }
 
-            &.selection-mode {
-                margin-bottom: 10px !important;
-                padding-bottom: 8px !important;
-            }
-
-            &:not(.workflow) {
-                flex: 0 0 auto;
-            }
-
-            &:not(:last-child) {
+            >div.header {
+                text-align: center;
+                margin: 0;
                 border-bottom: 1px solid $color-primary-standout;
-                margin-bottom: 10px;
-                padding-bottom: 15px;
-            }
-        }
-
-        >div.header {
-            text-align: center;
-            margin: 0;
-            border-bottom: 1px solid $color-primary-standout;
-            margin-bottom: 14px;
-            margin-top: 8px;
-            position: relative;
-
-            >h2 {
-                z-index: 0;
+                margin-bottom: 14px;
+                margin-top: 8px;
                 position: relative;
-                font-weight: bold;
-                letter-spacing: 5px;
-                font-size: 1.9em;
-                font-family: "Faculty Glyphic", sans-serif;
-                font-style: normal;
-                margin: 10px 0 14px 0;
-            }
 
-            >div.git {
-                position: absolute;
-                inset: 0 0 0 auto;
-                height: 24px;
-                width: 24px;
+                >h2 {
+                    z-index: 0;
+                    position: relative;
+                    font-weight: bold;
+                    letter-spacing: 5px;
+                    font-size: 1.9em;
+                    font-family: "Faculty Glyphic", sans-serif;
+                    font-style: normal;
+                    margin: 10px 0 14px 0;
+                }
 
-                a {
-                    >svg {
-                        transition: color 0.25s ease-in-out;
-                        color: rgba(255, 255, 255, 0.75);
-                    }
+                >div.git {
+                    position: absolute;
+                    inset: 0 0 0 auto;
+                    height: 24px;
+                    width: 24px;
 
-                    &:hover {
+                    a {
                         >svg {
-                            color: #fff;
+                            transition: color 0.25s ease-in-out;
+                            color: rgba(255, 255, 255, 0.75);
+                        }
+
+                        &:hover {
+                            >svg {
+                                color: #fff;
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    >div.bottom {
-        z-index: 1;
-        padding: 10px 0;
-        border-top: 1px solid #171724;
+        >div.bottom {
+            z-index: 1;
+            padding: 10px 0;
+            border-top: 1px solid #171724;
+        }
     }
 }

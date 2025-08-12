@@ -11,7 +11,7 @@ import type {
 import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
 import { getImageDimensions, debug } from '@/utils';
-import { Config } from '@/config';
+import { config } from '@/config';
 import { Effects, Modes } from '@/data/';
 import { Button, Tooltip } from '@/components';
 import { EffectType, WorkItemType } from '@/data/enums';
@@ -36,7 +36,7 @@ let workItemId = 0;
 const pickDefault = <T extends string>(
     keys: readonly T[],
     valid: ReadonlySet<T>,
-    preferred?: T
+    preferred?: T | null | undefined
 ): (T | '') => {
     return preferred && keys.includes(preferred) && valid.has(preferred)
         ? preferred
@@ -51,18 +51,16 @@ const MODE_VALID   = new Set(listModes());
 const EFFECT_KEYS = Object.keys(Effects).sort();
 const MODE_KEYS   = Object.keys(Modes).sort();
 
-Config.selections.defaults.effect
-
 /** Get our default selected mode */
 const MODE_DEFAULT = pickDefault(
   MODE_KEYS, MODE_VALID,
-  Config?.selections?.defaults?.mode as typeof MODE_KEYS[number] | undefined
+  config?.selections?.defaults?.mode as typeof MODE_KEYS[number] | null | undefined
 );
 
 /** Get our default selected effect */
 const EFFECT_DEFAULT = pickDefault(
   EFFECT_KEYS, EFFECT_VALID,
-  Config?.selections?.defaults?.effect as typeof EFFECT_KEYS[number] | undefined
+  config?.selections?.defaults?.effect as typeof EFFECT_KEYS[number] | null | undefined
 );
 
 /**
@@ -97,7 +95,7 @@ const Header = () => {
             <h2>ImageRot UI</h2>
             <div className="git">
                 <Tooltip text="Check out the project on GitHub!">
-                    <a target="_blank" href="https://github.com/sixem/imagerot-ui/"><Github /></a>
+                    <a target="_blank" href={__APP_HOMEPAGE__}><Github /></a>
                 </Tooltip>
             </div>
         </div>

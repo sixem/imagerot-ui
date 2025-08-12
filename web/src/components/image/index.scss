@@ -1,5 +1,22 @@
 @use '@/sass/variables' as *;
 
+@keyframes color-shift {
+    0% {
+        background-position: 0% 0%, 100% 100%, 50% 50%;
+        background-size: 150% 150%;
+    }
+
+    50% {
+        background-position: 80% 20%, 20% 80%, 50% 50%;
+        background-size: 170% 170%;
+    }
+
+    100% {
+        background-position: 0% 0%, 100% 100%, 50% 50%;
+        background-size: 150% 150%;
+    }
+}
+
 div.spinner {
     position: absolute;
     pointer-events: none;
@@ -13,7 +30,7 @@ div.spinner {
         opacity: 1;
     }
 
-    > div.icon {
+    >div.icon {
         background: url('@/assets/spinner.svg');
         width: 24px;
         height: 24px;
@@ -27,129 +44,167 @@ div.spinner {
     }
 }
 
-#root > div.wrapper > div.image {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-    user-select: none;
-
-    > div.lander {
-        text-align: center;
-
-        > div.file-drop > div.file-drop-target {
-            font-size: 1em;
-            font-weight: 500;
-            background-color: #121212;
-        }
-
-        > img {
-            margin-bottom: 25px;
-            pointer-events: none;
-            opacity: 0.85;
-        }
-    }
-
-    &.zooming {
-        > img {
-            cursor: zoom-out;
-        }
-    }
-
-    > img {
-        max-width: 100%;
-        max-height: 100%;
-        transition: opacity .35s ease-in-out;
-        opacity: 0;
-    }
-
-    > div.options {
-        position: absolute;
-        inset: 10px 10px auto auto;
-        gap: 5px;
+#root>div.wrapper {
+    >div.image {
+        flex-grow: 1;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        user-select: none;
 
-        > div {
-            padding: 5px;
-            width: 20px;
-            height: 20px;
-            background-color: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(3px);
-            border-radius: 4px;
-            transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
-            display: inline-block;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+        >div.lander {
+            text-align: center;
 
-            &:hover {
-                background-color: rgb(16, 16, 35, 0.7);
-                cursor: pointer;
-
-                &::before {
-                    opacity: 1;
-                }
+            >div.file-drop>div.file-drop-target {
+                font-size: 1em;
+                font-weight: 500;
+                background-color: #121212;
             }
 
-            &::before {
-                content: '';
+            >div.version {
+                margin-top: 25px;
+                color: #9b9b9b;
+                letter-spacing: 1px;
+                font-size: 0.8em;
+                position: fixed;
+                inset: auto auto 6px 6px;
+            }
+
+            >div.img {
+                position: relative;
+                display: inline-block;
+                overflow: hidden;
+                margin-bottom: 25px;
+
+                >img {
+                    pointer-events: none;
+                    opacity: 0.85;
+
+                    width: 100px;
+
+                    display: block;
+                    position: relative;
+                }
+            }
+        }
+
+        &.zooming {
+            >img {
+                cursor: zoom-out;
+            }
+        }
+
+        >img {
+            max-width: 100%;
+            max-height: 100%;
+            transition: opacity .35s ease-in-out;
+            opacity: 0;
+        }
+
+        >div.options {
+            position: absolute;
+            gap: 5px;
+            display: flex;
+
+            >div {
+                padding: 5px;
                 width: 20px;
                 height: 20px;
-                display: block;
-                opacity: 0.75;
-            }
+                background-color: rgba(0, 0, 0, 0.35);
+                backdrop-filter: blur(3px);
+                border-radius: 4px;
+                transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+                display: inline-block;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
 
-            &.file-reset::before {
-                background-image: url('@/assets/reset.svg');
-                background-size: 16px 16px;
-                background-repeat: no-repeat;
-                background-position: center;
-                filter: invert(100%);
-            }
+                &:hover {
+                    background-color: rgb(16, 16, 35, 0.7);
+                    cursor: pointer;
 
-            &.file-open::before {
-                background-image: url('@/assets/open.svg');
-                filter: invert(100%);
-            }
+                    &::before {
+                        opacity: 1;
+                    }
+                }
 
-            &.file-save::before {
-                background-image: url('@/assets/save.svg');
-                filter: invert(100%);
-            }
+                &::before {
+                    content: '';
+                    width: 20px;
+                    height: 20px;
+                    display: block;
+                    opacity: 0.75;
+                }
 
-            &.file-pin::before {
-                background-image: url('@/assets/pin.svg');
-                background-size: 15px 15px;
-                background-repeat: no-repeat;
-                background-position: center;
-                filter: invert(100%);
-            }
-
-            &.file-trash::before {
-                background-image: url('@/assets/trash.svg');
-                background-size: 16px 16px;
-                background-repeat: no-repeat;
-                background-position: center;
-                filter: invert(100%);
-            }
-
-            &.file-toggle {
-                &.expanded::before {
-                    background-image: url('@/assets/scale-down.svg');
-                    background-size: 20px 20px;
+                &.file-reset::before {
+                    background-image: url('@/assets/reset.svg');
+                    background-size: 16px 16px;
                     background-repeat: no-repeat;
                     background-position: center;
                     filter: invert(100%);
                 }
 
-                &:not(.expanded)::before {
-                    background-image: url('@/assets/scale-up.svg');
-                    background-size: 20px 20px;
+                &.file-open::before {
+                    background-image: url('@/assets/open.svg');
+                    filter: invert(100%);
+                }
+
+                &.file-save::before {
+                    background-image: url('@/assets/save.svg');
+                    filter: invert(100%);
+                }
+
+                &.file-pin::before {
+                    background-image: url('@/assets/pin.svg');
+                    background-size: 15px 15px;
                     background-repeat: no-repeat;
                     background-position: center;
                     filter: invert(100%);
                 }
+
+                &.file-trash::before {
+                    background-image: url('@/assets/trash.svg');
+                    background-size: 16px 16px;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    filter: invert(100%);
+                }
+
+                &.file-toggle {
+                    &.expanded::before {
+                        background-image: url('@/assets/scale-down.svg');
+                        background-size: 20px 20px;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        filter: invert(100%);
+                    }
+
+                    &:not(.expanded)::before {
+                        background-image: url('@/assets/scale-up.svg');
+                        background-size: 20px 20px;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        filter: invert(100%);
+                    }
+                }
             }
+        }
+    }
+
+    &:not(.reversed) {
+        >div.image>div.options {
+            inset: 10px 10px auto auto;
+        }
+    }
+
+    &.reversed {
+        >div.image>div.options {
+            inset: 10px auto auto 10px;
+            flex-direction: row-reverse;
+        }
+
+        >div.image>div.lander>div.version {
+            inset: auto 10px 10px auto;
         }
     }
 }

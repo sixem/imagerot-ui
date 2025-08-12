@@ -1,7 +1,7 @@
 import type { TImageFile } from '@/data/types';
 
 import { useRef } from 'react';
-import { Config } from '@/config';
+import { config } from '@/config';
 
 import './file.scss';
 
@@ -15,7 +15,7 @@ export const InputFile = ({ setter, text }: { setter: (image: TImageFile | null)
     const eventOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
 
-        if (files && files.length > 0 && Config.filetypes.allowed.includes(files[0].type)) {
+        if (files && files.length > 0 && config.filetypes.allowed.includes(files[0].type)) {
             const file = files[0];
             const id = self.crypto.randomUUID();
             
@@ -25,7 +25,7 @@ export const InputFile = ({ setter, text }: { setter: (image: TImageFile | null)
 
     return (
         <div className="file-drop">
-            <input onChange={eventOnChange} ref={inputRef} type="file" accept={Config.filetypes.allowed.join(', ')} />
+            <input onChange={eventOnChange} ref={inputRef} type="file" accept={config.filetypes.allowed.join(', ')} />
             <div className="file-drop-target" onClick={() => inputRef?.current?.click() }>
                 <span>{label}</span>
             </div>

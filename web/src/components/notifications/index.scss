@@ -1,39 +1,83 @@
-#root > div.wrapper > div.notifier {
-    position: fixed;
-    inset: 6px auto auto 6px;
-    user-select: none;
-    display: flex;
+#root>div.wrapper {
+    &.reversed {
+        >div.notifier {
+            inset: 6px 6px auto auto;
 
-    flex-direction: column;
-    align-items: flex-start;
+            >div.notify-item {
+                display: flex;
+                flex-direction: row-reverse;
 
-    gap: 6px;
-
-    transition: all;
-    z-index: 999;
-
-    > div.notify-item {
-        backdrop-filter: blur(3px);
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: 3px 10px 5px 10px;
-        font-size: 0.9em;
-        border-radius: 4px;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
-
-        transition: opacity 0.5s ease-in-out;
-
-        cursor: pointer;
-
-        &.hidden       { opacity: 0; }
-        &:not(.hidden) { opacity: 1; }
-
-        &::before {
-            display: inline-block;
-            margin-right: 6px;
+                &::before {
+                    display: inline-block;
+                    margin-left: 6px;
+                }
+            }
         }
+    }
 
-        &[data-type="0"]::before { content: '✓'; color: rgb(61, 255, 61); }
-        &[data-type="1"]::before { content: '!'; color: rgb(255, 189, 68); }
-        &[data-type="2"]::before { content: '✘'; color: red; }
+    &:not(.reversed) {
+        >div.notifier {
+            inset: 6px auto auto 6px;
+
+            >div.notify-item {
+                display: flex;
+                flex-direction: row;
+
+                &::before {
+                    display: inline-block;
+                    margin-right: 6px;
+                }
+            }
+        }
+    }
+
+    >div.notifier {
+        position: fixed;
+        user-select: none;
+        display: flex;
+
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 6px;
+
+        transition: all;
+        z-index: 999;
+
+        >div.notify-item {
+            backdrop-filter: blur(3px);
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 3px 10px 5px 10px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+
+            transition: opacity 0.5s ease-in-out;
+
+            cursor: pointer;
+
+            &.hidden {
+                opacity: 0;
+            }
+
+            &:not(.hidden) {
+                opacity: 1;
+            }
+
+            &[data-type="0"]::before {
+                content: '✓';
+                color: rgb(61, 255, 61);
+            }
+
+            &[data-type="1"]::before {
+                content: '!';
+                color: rgb(255, 189, 68);
+            }
+
+            &[data-type="2"]::before {
+                content: '✘';
+                color: red;
+            }
+        }
     }
 }

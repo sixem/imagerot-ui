@@ -1,4 +1,4 @@
-const Config = {
+const config = {
     filetypes: {
         allowed: [
             'image/png',
@@ -21,4 +21,4 @@ const Config = {
     }
 };
 
-export { Config };
+export { config };

@@ -1,11 +1,11 @@
 import type { TPaneSignature } from '@/data/types';
 
 import { useRef, useState, useEffect } from 'react';
-import { saveAs } from 'file-saver';
 import { hooks, triggers } from '@/modules/';
 import { Tooltip } from '@/components/tooltips/';
 import { InputFile } from '@/components/controls/input';
-import { readFile } from '@/utils';
+import { readFile, saveAsAdaptive } from '@/utils';
+import { config } from '@/config';
 
 import iconUrl from '@/assets/icon.png';
 import Drift from 'drift-zoom';
@@ -24,7 +24,7 @@ type TOptionSignature = (
 ) => void;
 
 const hookId = {
-    DocumentPaste_WATCHER: 'document:paste:watcher'
+    DocumentPasteWatcher: 'document:paste:watcher'
 };
 
 /**
@@ -105,7 +105,8 @@ const onImageSave: (current: TPaneSignature["current"]) => void = async (current
         const target = (current.edited || current.loaded);
 
         if (target) {
-            saveAs(target.url, self.crypto.randomUUID() + '.png' || 'image.png');
+            const filename = self.crypto.randomUUID() + '.png' || 'image.png';
+            saveAsAdaptive(target.url, filename, ['image/png']);
         }
     }
 };
@@ -114,15 +115,15 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
     const imgRef = useRef<HTMLImageElement>(null);
     const [isZooming, setZooming] = useState<boolean>(false);
     
-    let zoomInstance: Drift | null = null;
-
     useEffect(() => {
+        let zoomInstance: Drift | null = null;
+
         if (imgRef.current) {
             imgRef.current.style.opacity = '1';
 
             // Create a new zoom instance on the current image
             zoomInstance = new Drift(imgRef.current, {
-                paneContainer: document.body.querySelector('#root') as HTMLDivElement,
+                paneContainer: document.body.querySelector('#root > div.wrapper') as HTMLDivElement,
                 sourceAttribute: 'src',
                 handleTouch: false
             });
@@ -130,7 +131,7 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
 
         hooks.watch({
             trigger: triggers.documentPaste,
-            identifier: hookId.DocumentPaste_WATCHER,
+            identifier: hookId.DocumentPasteWatcher,
             callback: (file: DataTransferItem) => {
                 readFile(file.getAsFile()).then((processed) => {
                     if (processed) {
@@ -138,11 +139,15 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
                     }
                 }).catch((error) => {
                     console.error(error);
-                })
+                });
             }
         });
 
-        return () => { if (zoomInstance) zoomInstance.disable(); };
+        return () => {
+            if (zoomInstance) {
+                zoomInstance.disable();
+            }
+        };
     });
 
     useEffect(() => {
@@ -158,7 +163,13 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
 
     return (
         <div className={"image" + (isZooming ? " zooming" : "")} onMouseDown={(e) => {
-            if (!(e.target as HTMLElement).classList.contains('image')) return;
+            if (e.button === 2 || (e.button === 0 && e.ctrlKey)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+
+            if (!imgRef.current || !(e.target as HTMLElement).classList.contains('image')) return;
 
             setZooming(true);
 
@@ -179,10 +190,15 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
         }} >
             {current?.loaded === null ? (
                 <div className="lander" style={{ margin: '10px' }}>
-                    <img src={iconUrl} />
+                    <div className="img">
+                        <img src={iconUrl} />
+                    </div>
                     <InputFile setter={setters.file} text={
                         "To get started, click here to select an image or drop an image anywhere."
                     } />
+                    <div className="version">
+                        <span>Version: {__APP_VERSION__}</span>
+                    </div>
                 </div>
             ) : <img id="output" ref={imgRef} src={currentUrl} draggable={false} style={{
                 pointerEvents: isZooming ? 'auto' : 'none'
