@@ -1,12 +1,11 @@
 
 import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { MessageType, WorkItemType } from '@/data/enums';
 import { Button, ButtonSet } from '@/components/';
 import { estimates, hooks } from '@/modules';
 import { debug, pick, saveAsAdaptive } from '@/utils';
-import { config } from '@/config';
 import { listEffects, listModes } from 'imagerot/browser';
 
 import Processor from '@/workers/processor?worker';
@@ -41,35 +40,40 @@ const workflowToJson = (data: TWorkItem[]): string | null => {
  * Returns null on invalid or empty data.
  */
 const workflowFromJson = (data: string): TWorkflowExportItem[] | null => {
-    const parsed = JSON.parse(data) as TWorkflowExport;
+    try {
+        const parsed = JSON.parse(data) as TWorkflowExport;
 
-    if (!parsed.items) return null;
+        if (!parsed.items) return null;
 
-    const effects = new Set(listEffects());
-    const types   = new Set(Object.values(WorkItemType));
-    const modes   = new Set(listModes());
+        const effects = new Set(listEffects());
+        const types   = new Set(Object.values(WorkItemType));
+        const modes   = new Set(listModes());
 
-    return parsed.items.map((item) => {
-        const { key, type, muted, config } = item;
+        return parsed.items.map((item) => {
+            const { key, type, muted, config } = item;
 
-        if (!types.has(type)) return null;
+            if (!types.has(type)) return null;
 
-        switch (type) {
-            case WorkItemType.effect: {
-                return effects.has(key)
-                    ? { key, type, muted: muted ?? false, config: config || {} }
-                    : null
-            };
+            switch (type) {
+                case WorkItemType.effect: {
+                    return effects.has(key)
+                        ? { key, type, muted: muted ?? false, config: config || {} }
+                        : null
+                };
 
-            case WorkItemType.mode: {
-                return modes.has(key)
-                    ? { key, type, muted: muted ?? false, config: null }
-                    : null
+                case WorkItemType.mode: {
+                    return modes.has(key)
+                        ? { key, type, muted: muted ?? false, config: null }
+                        : null
+                }
+
+                default: return null
             }
-
-            default: return null
-        }
-    }).filter((item) => item !== null);
+        }).filter((item) => item !== null);
+    } catch (error) {
+        log(error);
+        return null;
+    }
 };
 
 /**
@@ -82,12 +86,18 @@ const saveWorkflow = async (workflow: TWorkItem[]) => {
         const filename = `workflowExport_${self.crypto.randomUUID()}.json`;
         const blob = new Blob([converted], { type: 'application/json' });
 
-        await saveAsAdaptive(blob, filename, config.filetypes.allowed);
+        await saveAsAdaptive(blob, filename, { mimes: [blob.type] });
         hooks.senders.notify(MessageType.ok, 'Exported: ' + filename);
     }
 };
 
 export const Actions = ({ current, setters, workflow, busy, estimated }: TActionsSignature) => {
+    const busyRef = useRef(busy);
+    const settersRef = useRef(setters);
+
+    useEffect(() => { busyRef.current = busy; }, [busy]);
+    useEffect(() => { settersRef.current = setters; }, [setters]);
+
     const onProcess = () => {
         if (current.loaded && !busy.state) { // Send data to worker
             busy.update(true);
@@ -98,7 +108,7 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
 
     useEffect(() => {
         processor.onmessage = (event: MessageEvent<TProcessorOutput | null>) => {
-            busy.update(false);
+            busyRef.current.update(false);
 
             if (event.data) {
                 log("Got processed image response", event.data);
@@ -109,7 +119,7 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
                 }
             }
 
-            setters.edit(event.data ? event.data.image : null);
+            settersRef.current.edit(event.data ? event.data.image : null);
 
             if (window.matchMedia('(max-width: 720px)').matches) {
                 document.body.scrollTo(0, 0);
@@ -117,7 +127,7 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
         };
 
         return () => {
-            busy.update(false);
+            busyRef.current.update(false);
             processor.onmessage = null;
         };
     }, []);
@@ -137,8 +147,9 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
 
             <ButtonSet style={{ marginTop: '10px' }} items={[
                 { text: 'Export workflow', disabled: workflow.length === 0, onClick: () => saveWorkflow(workflow)},
-                { text: 'Import workflow' },
-                { text: null, icon: 'cog', disabled: true }
+                { text: 'Import workflow' , onClick: () => workflowFromJson("") },
+                // { text: null, icon: 'cog', disabled: true }
+                /** TODO: Add a settings button (above), and open an overlay with different settings. */
             ]}/>
         </div>
     );

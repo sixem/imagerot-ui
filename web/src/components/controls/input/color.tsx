@@ -1,6 +1,6 @@
 import type { TEffectConfigColor, TInputSignature } from '@/data/types';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { RgbColorPicker } from 'react-colorful';
 import { debounce } from '@/utils/';
 import { Tooltip } from '@/components/tooltips';
@@ -22,25 +22,28 @@ export const InputColor = ({ name, item, onChange }: TInputSignature<TEffectConf
 
     const [isPicking, setPicking] = useState<boolean>(false);
 
+    const pendingRef = useRef(false);
     const colorRef = useRef<TColorObject>(color);
-    const pending  = useRef(false);
+    const nameRef = useRef(name);
 
-    const debouncedOnChange = useCallback(debounce(onChange, 250), [onChange]);
+    const debouncedOnChange = useMemo(() => debounce(onChange, 250), [onChange]);
+
+    useEffect(() => { nameRef.current = name;}, [name]);
 
     useEffect(() => {
-        debouncedOnChange(name, [color.r, color.g, color.b]);
+        debouncedOnChange(nameRef.current, [color.r, color.g, color.b]);
         colorRef.current = color;
-    }, [color]);
+    }, [color, debouncedOnChange]);
 
     const handleChange = (updated: { r: number; g: number; b: number }) => {
         colorRef.current = updated;
         
-        if (!pending.current) {
-            pending.current = true;
+        if (!pendingRef.current) {
+            pendingRef.current = true;
 
             requestAnimationFrame(() => {
                 setColor(colorRef.current);
-                pending.current = false;
+                pendingRef.current = false;
             });
         }
     };

@@ -1,4 +1,7 @@
-use tauri::{self, Manager};
+#[cfg(debug_assertions)]
+use tauri::Manager;
+
+use tauri::{self};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

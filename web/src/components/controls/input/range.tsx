@@ -11,7 +11,7 @@ export const InputRange = ({ name, item, onChange }: TInputSignature<TEffectConf
     useEffect(() => {
         const clamped = Math.min(item.max, Math.max(item.min, item.current));
         setValue(clamped);
-    }, [item.current, item.min, item.max]);
+    }, [item]);
 
     const handleChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {

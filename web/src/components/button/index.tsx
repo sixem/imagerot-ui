@@ -5,8 +5,8 @@ import './index.scss';
 type TButtonProps = {
     text: string | null;
     disabled?: boolean;
-    onClick?: (...args: any) => any;
-    style?: CSSProperties;
+    onClick?: () => void;
+    style?: CSSProperties | null;
     icon?: string;
 };
 
@@ -41,7 +41,7 @@ export const ButtonSet = ({ items, style = {} }: TButtonSetProps) => {
     return (
         <div className="button-set" style={style || {}}>
             {items.map((item, index) => {
-                return <Button key={index} {...(({ style, ...rest }) => rest)(item)} />;
+                return <Button key={index} {...item} />;
             })}
         </div>
     );

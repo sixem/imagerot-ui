@@ -27,9 +27,15 @@ const urlToBlob = async (url: Blob | string) => {
     }
 
     return url;
-}
+};
 
-export const saveAsAdaptive = async (target: Blob | string, filename: string, mimes?: string[]): Promise<void> => {
+type TSaveAsOptions = {
+    mimes:string[]
+};
+
+type TSaveAsAdaptive = (target: Blob | string, filename: string, options: TSaveAsOptions) => Promise<void>;
+
+export const saveAsAdaptive: TSaveAsAdaptive = async (target, filename, options) => {
     const isTauri = '__TAURI_INTERNALS__' in window;
     const blob = await urlToBlob(target);
 
@@ -39,7 +45,8 @@ export const saveAsAdaptive = async (target: Blob | string, filename: string, mi
         const { writeFile } = await import('@tauri-apps/plugin-fs');
 
         // Open native save dialog with optional filters
-        const filters = getMimeFilters(mimes);
+        const filters = getMimeFilters(options.mimes);
+
         const filePath = await save({
             defaultPath: filename,
             filters,
@@ -50,12 +57,12 @@ export const saveAsAdaptive = async (target: Blob | string, filename: string, mi
             const arrayBuffer = await blob.arrayBuffer();
             await writeFile(filePath, new Uint8Array(arrayBuffer));
 
-            log("Attempted save", { tauriContext: isTauri, filePath, filename, mimes });
+            log("Attempted save", { tauriContext: isTauri, filePath, filename, options });
         }
     } else {
         // Browser context
         const { default: saveAs } = await import('file-saver');
         saveAs(blob, filename);
-        log("Attempted save", { tauriContext: isTauri, filename, mimes });
+        log("Attempted save", { tauriContext: isTauri, filename, options });
     }
 };

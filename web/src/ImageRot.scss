@@ -100,7 +100,9 @@ a:hover {
         }
 
         &:not(.reversed) {
-            flex-direction: row;
+            @media (min-width: 720px) {
+                flex-direction: row;
+            }
 
             div.drift-zoom-pane {
                 inset: 6px 6px auto auto;

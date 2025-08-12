@@ -5,7 +5,6 @@ import { hooks, triggers } from '@/modules/';
 import { Tooltip } from '@/components/tooltips/';
 import { InputFile } from '@/components/controls/input';
 import { readFile, saveAsAdaptive } from '@/utils';
-import { config } from '@/config';
 
 import iconUrl from '@/assets/icon.png';
 import Drift from 'drift-zoom';
@@ -106,7 +105,9 @@ const onImageSave: (current: TPaneSignature["current"]) => void = async (current
 
         if (target) {
             const filename = self.crypto.randomUUID() + '.png' || 'image.png';
-            saveAsAdaptive(target.url, filename, ['image/png']);
+            saveAsAdaptive(target.url, filename, {
+                mimes: ['image/png']
+            });
         }
     }
 };

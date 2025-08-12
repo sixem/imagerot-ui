@@ -26,17 +26,39 @@
                 "default-src": "'self' asset:",
                 "img-src": "'self' asset: blob: data:",
                 "style-src": "'self' 'unsafe-inline'",
-                "worker-src": "'self' blob:"
+                "worker-src": "'self' blob:",
+                "connect-src": "'self' asset: blob: data: ipc:"
             },
             "capabilities": [
                 {
                     "identifier": "save-file-capability",
                     "description": "Allows save dialog and writing to user-selected files",
-                    "windows": ["main"],
+                    "windows": [
+                        "main"
+                    ],
                     "permissions": [
                         "core:default",
                         "dialog:allow-save",
                         "fs:allow-write-file"
+                    ]
+                },
+                {
+                    "identifier": "open-external-safe",
+                    "windows": [
+                        "main"
+                    ],
+                    "permissions": [
+                        {
+                            "identifier": "opener:allow-open-url",
+                            "allow": [
+                                {
+                                    "url": "https://github.com/**"
+                                },
+                                {
+                                    "url": "https://*.github.com/**"
+                                }
+                            ]
+                        }
                     ]
                 }
             ]

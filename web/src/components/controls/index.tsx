@@ -315,10 +315,7 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
                     });
 
                     if (estimatedMs) {
-                        log("Estimated processing (ms)", {
-                            current : Math.round(estimatedMs * 100) / 100,
-                            last    : estimated
-                        });
+                        log("Estimated processing (ms)", Math.round(estimatedMs * 100) / 100);
                     }
 
                     setEstimated(estimatedMs);
@@ -338,7 +335,7 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
                     <InputFile setter={setters.file} />
                 </div>
 
-                <SelectionMode onAdd={(mode, _) => {
+                <SelectionMode onAdd={(mode) => {
                     setWorkflow(previous => [...previous, createWorkItem(
                         mode, WorkItemType.mode, null
                     )]);

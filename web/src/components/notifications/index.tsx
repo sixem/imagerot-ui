@@ -1,6 +1,6 @@
 import type { TNotifyItem } from '@/data/types';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { hooks, triggers } from '@/modules';
 import { config } from '@/config';
 
@@ -14,9 +14,24 @@ let currentId = 0;
 export const Notifications = () => {
     const [items, setItems] = useState<(TNotifyItem & { id: number; visible: boolean; })[]>([]);
 
+    // Removes a notification by its ID
+    const notificationRemove = useCallback((id: number) => {
+        setItems(previous => previous.map((item) => {
+            if (item.id === id) {
+                const updatedItem = { ...item, visible: false };
+                setTimeout(() => {
+                    setItems(previous => previous.filter((item) => item.id !== id));
+                }, 500);
+                return updatedItem;
+            }
+            return item;
+        }));
+    }, []);
+
     // Handles notifications received and places them into the current state
-    const onNotifyReceive = (data: TNotifyItem) => {
-        const { type, message, id, duration } = {...data, ...{ id: currentId++ }};
+    const onNotifyReceive = useCallback((data: TNotifyItem) => {
+        const { type, message, duration } = data;
+        const id = currentId++;
 
         // Make item invisible
         setItems(previous => [...previous, { id, type, message, visible: false }]);
@@ -25,30 +40,16 @@ export const Notifications = () => {
         requestAnimationFrame(() => {
             setItems(previous => previous.map((item) => {
                 if (item.id === id) {
-                    item.visible = true;
+                    const updatedItem = { ...item, visible: true };
                     setTimeout(() => {
                         notificationRemove(item.id);
                     }, duration || config.notifications.defaultDuration);
+                    return updatedItem;
                 }
                 return item;
             }));
         });
-    };
-
-    // Removes a notification by its ID
-    const notificationRemove = (id: number) => {
-        setItems(previous => previous.map((item) => {
-            if (item.id === id) {
-                item.visible = false;
-
-                setTimeout(() => {
-                    setItems(previous => previous.filter((item) => item.id !== id));
-                }, 500);
-            }
-            
-            return item;
-        }));
-    };
+    }, [notificationRemove]);
 
     useEffect(() => {
         hooks.watch({
@@ -63,7 +64,7 @@ export const Notifications = () => {
                 identifier: hookId.appNotifyWatcher
             });
         }
-    }, []);
+    }, [onNotifyReceive]);
 
     return (
         <div className="notifier">

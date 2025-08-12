@@ -1,6 +1,6 @@
 import type { TImageFile } from '@/data/types';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { Image, Controls, Notifications, TooltipDisplay } from '@/components/';
 import { MessageType } from '@/data/enums';
 import { truncateString, debug } from '@/utils';
@@ -30,15 +30,19 @@ const ImageRot = () => {
     const [currentFile, setFile] = useState<TImageFile | null>(null);
     const [currentEdit, setEdit] = useState<TImageFile | null>(null);
 
+    const currentFileRef = useRef(currentFile);
+    const loadedId = currentFile?.id ?? null;
+
     // Set current file; clear edit on new base file
     const setAndRevokeFile = useCallback((image: TImageFile | null) => {
-        setFile(image);
-        setEdit(null);
+        setFile(image); setEdit(null);
     }, []);
 
     // Revoke previous file URL only when the file changes or unmounts
     useEffect(() => {
         const previous = currentFile?.url;
+        currentFileRef.current = currentFile;
+
         return () => {
             if (previous) {
                 URL.revokeObjectURL(previous);
@@ -58,12 +62,10 @@ const ImageRot = () => {
         };
     }, [currentEdit]);
 
-    const loadedId   = currentFile?.id ?? null;
-    const loadedName = currentFile?.file?.name ?? null;
-
     useEffect(() => {
+        const loadedName = currentFileRef.current?.file?.name ?? null;
         if (loadedName) {
-            log("Loaded file", currentFile);
+            log("Loaded file", currentFileRef.current);
 
             hooks.senders.notify(
                 MessageType.ok,

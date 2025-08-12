@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 
 export type TTooltipProps = {
-    children: ReactElement<any>;
+    children: ReactElement<unknown>;
     text: string;
     indicator?: boolean;
 };

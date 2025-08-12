@@ -2,34 +2,52 @@ import { randomString } from '@/utils/';
 import { senders } from './senders';
 
 type TPointer = HTMLElement | Window | Document;
-type TCallback = (...params: any[]) => void;
-type TBound = { [key: string]: { callbacks: { [key: string]: TCallback[] }, handler: TCallback } };
+
+export type TCallback<T = unknown> = { bivarianceHack(arg: T): void }["bivarianceHack"];
+
+type TBound = {
+    [key: string]: {
+        callbacks: { [key: string]: TCallback<Event>[] };
+        handler: TCallback<Event>;
+    };
+};
 
 type TListen = (params: {
     pointer: TPointer;
     events: string | string[];
-    callbacks: TCallback | TCallback[];
+    callbacks: TCallback<Event> | TCallback<Event>[];
     identifier: string;
 }) => void;
 
-type TTrigger = (params: { trigger: string; data: any }) => void;
-type TWatch = (params: { trigger: string; identifier: string; callback: TCallback }) => void;
+type TTrigger = (params: { trigger: string; data: unknown }) => void;
+
+// Make watch generic so callers can pass strongly-typed payload callbacks
+type TWatch = <T = unknown>(params: {
+    trigger: string;
+    identifier: string;
+    callback: TCallback<T>;
+}) => void;
 type TUnwatch = (params: { trigger: string; identifier: string }) => void;
 
-const listeners: { [key: string]: { pointer: TPointer, bound: TBound } } = {};
-const triggers: { [key: string]: { watchers: { [key: string]: Parameters<TWatch>[0]['callback'] } } } = {};
+const listeners: { [key: string]: { pointer: TPointer; bound: TBound } } = {};
+
+// Store watchers as accepting unknown (internal erasure)
+const triggers: Record<string, { watchers: Record<string, (arg: unknown) => void> }> = {};
 
 const unlisten = ({ pointer, events, identifier }: Omit<Parameters<TListen>[0], 'callbacks'>) => {
     if (!pointer || !identifier) throw new Error('Missing required parameters for listen hook');
     if (!Array.isArray(events)) events = [events];
 
     const keys = Object.keys(listeners);
-    const preExistingPointer = keys.length > 0 ? keys.filter(id => listeners[id].pointer === pointer) : false;
-    if (!preExistingPointer) return;
+    const preExistingPointer = keys.length > 0
+        ? keys.filter(id => listeners[id].pointer === pointer)
+        : false;
 
+    if (!preExistingPointer) return;
     const key = preExistingPointer[0];
+
     for (const event of events) {
-        if (listeners[key].bound.hasOwnProperty(event)) {
+        if (Object.prototype.hasOwnProperty.call(listeners[key].bound, event)) {
             for (const [id] of Object.entries(listeners[key].bound[event].callbacks)) {
                 delete listeners[key].bound[event].callbacks[id];
             }
@@ -46,15 +64,13 @@ const listen: TListen = ({ pointer, events, callbacks, identifier }) => {
     if (!Array.isArray(events)) events = [events];
 
     const keys = Object.keys(listeners);
-    const preExistingPointer = keys.length > 0 ? keys.filter(id => {
-        return listeners[id].pointer === pointer;
-    }) : false;
+    const preExistingPointer =
+        keys.length > 0 ? keys.filter(id => listeners[id].pointer === pointer) : false;
 
     if (!preExistingPointer || preExistingPointer.length === 0) {
         const bound: TBound = {};
 
         for (const event of events) {
-
             bound[event] = {
                 callbacks: { [identifier]: callbacks },
                 handler: (e: Event) => {
@@ -64,7 +80,7 @@ const listen: TListen = ({ pointer, events, callbacks, identifier }) => {
                 }
             };
 
-            pointer.addEventListener(event, bound[event].handler, { capture: true });
+            pointer.addEventListener(event, bound[event].handler as EventListener, { capture: true });
         }
 
         listeners[keys.length] = { pointer, bound };
@@ -72,8 +88,7 @@ const listen: TListen = ({ pointer, events, callbacks, identifier }) => {
         const id = preExistingPointer[0];
 
         for (const event of events) {
-
-            if (!listeners[id].bound.hasOwnProperty(event)) {
+            if (!Object.prototype.hasOwnProperty.call(listeners[id].bound, event)) {
                 listeners[id].bound[event] = {
                     callbacks: { [identifier]: callbacks },
                     handler: (e: Event) => {
@@ -83,7 +98,9 @@ const listen: TListen = ({ pointer, events, callbacks, identifier }) => {
                     }
                 };
 
-                pointer.addEventListener(event, listeners[id].bound[event].handler, { capture: true });
+                pointer.addEventListener(event, listeners[id].bound[event].handler as EventListener, {
+                    capture: true
+                });
             } else {
                 listeners[id].bound[event].callbacks[identifier] = callbacks;
             }
@@ -92,18 +109,20 @@ const listen: TListen = ({ pointer, events, callbacks, identifier }) => {
 };
 
 const trigger: TTrigger = ({ trigger, data }) => {
-    if (!triggers.hasOwnProperty(trigger)) return;
+    if (!Object.prototype.hasOwnProperty.call(triggers, trigger)) return;
     for (const [, callback] of Object.entries(triggers[trigger].watchers)) callback(data);
 };
 
+// Generic implementation; store erased to unknown internally
 const watch: TWatch = ({ trigger, identifier, callback }) => {
-    if (!triggers.hasOwnProperty(trigger)) triggers[trigger] = { watchers: {} };
-    triggers[trigger].watchers[identifier] = callback;
+    if (!Object.prototype.hasOwnProperty.call(triggers, trigger)) triggers[trigger] = { watchers: {} };
+    // erase payload type when storing
+    triggers[trigger].watchers[identifier] = callback as unknown as (arg: unknown) => void;
 };
 
 const unwatch: TUnwatch = ({ trigger, identifier }) => {
-    if (!triggers.hasOwnProperty(trigger)) return;
-    if (triggers[trigger].watchers.hasOwnProperty(identifier)) {
+    if (!Object.prototype.hasOwnProperty.call(triggers, trigger)) return;
+    if (Object.prototype.hasOwnProperty.call(triggers[trigger].watchers, identifier)) {
         delete triggers[trigger].watchers[identifier];
     }
 };
