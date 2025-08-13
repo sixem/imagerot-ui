@@ -175,7 +175,7 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
             setZooming(true);
 
             if (imgRef.current) { // Assures we zoom in straight away on mouse down
-                imgRef.current.dispatchEvent(new MouseEvent('mouseenter', {
+                imgRef.current.dispatchEvent(new MouseEvent('mousemove', {
                     bubbles: true,
                     cancelable: true,
                     clientX: e.clientX,

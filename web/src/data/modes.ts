@@ -1,5 +1,12 @@
 import type { TModes } from './types';
 
+/**
+ * Contains our available UI modes
+ * 
+ * The key must match a valid ImageRot
+ * mode, otherwise it'll be ignored.
+ */
+
 export const Modes: TModes = {
     pixelsort: {
         format: 'Pixel Sort',

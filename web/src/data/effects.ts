@@ -4,6 +4,13 @@ import { EffectType } from './enums';
 
 const { string, number, object, color } = EffectType;
 
+/**
+ * Contains our available UI effects
+ * 
+ * The key must match a valid ImageRot
+ * effect, otherwise it'll be ignored.
+ */
+
 export const Effects: TEffects = {
     degrade: {
         description: 'Adds JPEG artifacts to the image.',
