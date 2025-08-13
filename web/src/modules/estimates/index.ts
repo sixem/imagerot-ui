@@ -1,6 +1,6 @@
 import type { TEstimateTable, TEstimateRecord, TBucketKeys } from '@/data/types';
 
-import { BucketKeys} from '@/data/enums';
+import { BucketKeys } from '@/data/enums';
 import { getAverage } from '@/utils';
 import { listEffects, listModes } from 'imagerot/browser';
 
@@ -60,6 +60,7 @@ const addRecord = (record: TEstimateRecord) => {
  */
 const getEstimate = (dimensions: [number, number], items: Record<TBucketKeys, string[]>) => {
     const pixels = dimensions[0] * dimensions[1];
+    
     let totalMs = 0;
 
     for (const type of BucketKeys) {

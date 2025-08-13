@@ -95,7 +95,7 @@ export type TWorkItem = {
     key: string;
     type: ValueOf<typeof WorkItemType>;
     config: null | Dict<TEffectValue>;
-    id: number;
+    id: string;
     muted?: boolean;
 };
 

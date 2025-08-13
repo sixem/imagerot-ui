@@ -134,9 +134,7 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
             handleTouch: false
         });
 
-        return () => {
-            zoomRef.current?.destroy();
-        }
+        return () => zoomRef.current?.destroy()
     }, [isZooming]);
     
     // Set up binds on component mount

@@ -10,11 +10,11 @@ import type {
 
 import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
-import { getImageDimensions, debug } from '@/utils';
+import { getImageDimensions, debug, useStoredState, uid } from '@/utils';
 import { config } from '@/config';
 import { Effects, Modes } from '@/data/';
 import { Button, Tooltip } from '@/components';
-import { EffectType, WorkItemType } from '@/data/enums';
+import { EffectType, WorkItemType, StorageKeys } from '@/data/enums';
 import { Github } from '@/icons/';
 import { Actions } from './actions';
 import { Workflow } from './workflow';
@@ -30,8 +30,6 @@ type TWorkItemCreator = (
     type: (typeof WorkItemType)[keyof typeof WorkItemType],
     configuration: { [key: string]: TEffectValue; } | null
 ) => TWorkItem;
-
-let workItemId = 0;
 
 const pickDefault = <T extends string>(
     keys: readonly T[],
@@ -83,7 +81,7 @@ const getDefaultValue = (config: TEffectConfigItem): TEffectValue | null => {
  * Creates a simple work item object
  */
 const createWorkItem: TWorkItemCreator = (key, type, configuration) => {
-    return { key, config: configuration, type, id: workItemId++, muted: false };
+    return { key, config: configuration, type, id: uid(), muted: false };
 };
 
 /**
@@ -228,7 +226,7 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
     const selectionRef = useRef<HTMLSelectElement>(null);
 
     const [selected, setSelected] = useState<{ key: string; value: TEffectItem; } | null>(null);
-    const [config, setConfig]     = useState<{ [key: string]: TEffectValue }>({});
+    const [config, setConfig] = useState<{ [key: string]: TEffectValue }>({});
 
     const handleConfigChange = useCallback((name: string, value: TEffectValue) => {
         setConfig(prev => ({ ...prev, [name]: value }));
@@ -295,8 +293,8 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
  * Contains file inputs, selections of modes and effects and the workflow
  */
 const Controls = ({ current, setters, busy }: TPaneSignature) => {
-    const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
     const [estimated, setEstimated] = useState<number | null>(null);
+    const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
 
     useEffect(() => {
         if (current.loaded) {
@@ -350,7 +348,10 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
                 <Workflow {...{ workflow, setWorkflow }} />
             </div>
             <div className="bottom">
-                <Actions {...{ current, setters, busy, estimated }} workflow={workflow} />
+                <Actions
+                    setters={{...setters, workflow: setWorkflow}}
+                    {...{ busy, estimated, workflow, current }}
+                />
             </div>
         </div>
     );

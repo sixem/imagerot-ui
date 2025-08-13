@@ -1,18 +1,20 @@
 
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 
 import { useEffect, useRef } from 'react';
 import { MessageType, WorkItemType, StorageKeys } from '@/data/enums';
 import { Button, ButtonSet } from '@/components/';
 import { estimates, hooks } from '@/modules';
-import { debug, pick, saveAsAdaptive, useStoredState } from '@/utils';
+import { debug, pick, uid, saveAsAdaptive, useStoredState } from '@/utils';
 import { listEffects, listModes } from 'imagerot/browser';
 
 import Processor from '@/workers/processor?worker';
 
-type TActionsSignature = { workflow: TWorkItem[]; } & TPaneSignature & {
+type TActionsSignature = TPaneSignature & {
     estimated: number | null;
-};
+    workflow: TWorkItem[];
+} & { setters: { workflow: Dispatch<SetStateAction<TWorkItem[]>> }};
 
 type TWorkflowExportItem = Pick<TWorkItem, 'key' | 'type' | 'muted' | 'config'>;
 
@@ -78,7 +80,7 @@ const workflowFromJson = (data: string): TWorkflowExportItem[] | null => {
 
 
 /**
- * Attempts to export and save the current workflow to a local .json file.
+ * Attempts to export and save the current workflow to a local .json file
 */
 const saveWorkflow = async (workflow: TWorkItem[]) => {
     const converted = workflowToJson(workflow);
@@ -92,20 +94,53 @@ const saveWorkflow = async (workflow: TWorkItem[]) => {
     }
 };
 
-export const Actions = ({ current, setters, workflow, busy, estimated }: TActionsSignature) => {
+export const Actions = ({ current, setters, busy, estimated, workflow }: TActionsSignature) => {
     const [isReversed, setReversed] = useStoredState<boolean>(StorageKeys.uiReversed, false);
 
-    const busyRef = useRef(busy);
+    const inputRef   = useRef<HTMLInputElement>(null);
+    const busyRef    = useRef(busy);
     const settersRef = useRef(setters);
 
     useEffect(() => { busyRef.current = busy; }, [busy]);
     useEffect(() => { settersRef.current = setters; }, [setters]);
 
-    const onProcess = () => {
+    // Called when starting a new image generation
+    const onProcess = async () => {
         if (current.loaded && !busy.state) { // Send data to worker
             busy.update(true);
             log("Processing image", { workflow, current: current.loaded });
             processor.postMessage({ workflow, image: current.loaded });
+        }
+    };
+
+    // Called when importing a workflow file
+    const onImport = async (event: ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+
+        if (files && files.length > 0 && files[0].type.startsWith('application/json')) {
+            const file = files[0];
+
+            if (file.size > 1E6) {
+                hooks.senders.notify(MessageType.warn, 'File is too large!');
+                return;
+            }
+
+            file.text().then((data) => {
+                const items = workflowFromJson(data);
+
+                if (items && items.length > 0) {
+                    const workitems = items.map((item) => {
+                        const { key, type, config, muted } = item;
+                        return { id: uid(), key, type, config, muted }
+                    });
+
+                    setters.workflow(workitems || []);
+                    hooks.senders.notify(MessageType.ok, `Imported ${items.length} workflow item(s)`);
+                }
+            }).catch((error) => {
+                hooks.senders.notify(MessageType.warn, 'Could not parse import file!');
+                log(error);
+            })
         }
     };
 
@@ -136,7 +171,7 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
     }, []);
 
     return (
-        <div className="">
+        <div className="options-bottom">
             <Button {...{
                 text: 'Process image' + (
                     (estimated && workflow.filter(item => !item.muted).length > 0)
@@ -147,9 +182,11 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
                 icon: 'process'
             }} />
 
+            <input onChange={onImport} ref={inputRef} type="file" accept={'application/json'} />
+
             <ButtonSet style={{ marginTop: '10px' }} items={[
                 { text: 'Export workflow', disabled: workflow.length === 0, onClick: () => saveWorkflow(workflow)},
-                { text: 'Import workflow' , onClick: () => workflowFromJson("") },
+                { text: 'Import workflow' , onClick: () => inputRef?.current?.click() },
                 { text: null, tooltip: "Reverse the interface UI", icon: 'reverse', onClick: () => setReversed(!isReversed) }
             ]}/>
         </div>

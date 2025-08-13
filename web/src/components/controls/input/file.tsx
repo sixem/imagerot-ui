@@ -1,3 +1,4 @@
+import type { ChangeEvent } from 'react';
 import type { TImageFile } from '@/data/types';
 
 import { useRef } from 'react';
@@ -13,7 +14,7 @@ export const InputFile = ({ setter, text }: { setter: (image: TImageFile | null)
     const inputRef = useRef<HTMLInputElement>(null);
     const label = text ?? 'Drop files anywhere, or click to select a file.';
 
-    const eventOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const eventOnChange = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
 
         if (files && files.length > 0 && config.filetypes.allowed.includes(files[0].type)) {
