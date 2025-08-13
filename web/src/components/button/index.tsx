@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 
 import './index.scss';
+import { Tooltip } from '../tooltips';
 
 type TButtonProps = {
     text: string | null;
@@ -8,6 +9,7 @@ type TButtonProps = {
     onClick?: () => void;
     style?: CSSProperties | null;
     icon?: string;
+    tooltip?: string | null;
 };
 
 type TButtonSetProps = {
@@ -15,7 +17,7 @@ type TButtonSetProps = {
     style?: CSSProperties | null;
 }
 
-export const Button = ({ text, style, onClick, icon, disabled = false }: TButtonProps) => {
+export const Button = ({ text, style, onClick, icon, disabled = false, tooltip = null }: TButtonProps) => {
     const classList = ['button'];
 
     if (icon) {
@@ -26,7 +28,7 @@ export const Button = ({ text, style, onClick, icon, disabled = false }: TButton
         }
     }
 
-    return (
+    const Element = (
         <div className={classList.join(' ')} data-disabled={disabled} onClick={() => {
             if (!disabled && typeof onClick === 'function') {
                 onClick();
@@ -35,6 +37,12 @@ export const Button = ({ text, style, onClick, icon, disabled = false }: TButton
             {text === null ? null : (<span>{text}</span>)}
         </div>
     );
+
+    return tooltip ? (
+        <Tooltip text={tooltip}>
+            {Element}
+        </Tooltip>
+    ) : Element;
 };
 
 export const ButtonSet = ({ items, style = {} }: TButtonSetProps) => {

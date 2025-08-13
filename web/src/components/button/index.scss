@@ -73,6 +73,11 @@ div.button {
             --icon-url: url('@/assets/cog.svg');
             --icon-size: 20px;
         }
+
+        &.reverse {
+            --icon-url: url('@/assets/reverse.svg');
+            --icon-size: 14px;
+        }
     }
 }
 
