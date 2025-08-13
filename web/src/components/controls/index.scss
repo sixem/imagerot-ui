@@ -226,6 +226,12 @@
                 input {
                     display: none;
                 }
+
+                @media (max-width: 720px) {
+                    div.button.reverse {
+                        display: none;
+                    }
+                }
             }
         }
     }

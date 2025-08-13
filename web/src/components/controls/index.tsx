@@ -10,11 +10,11 @@ import type {
 
 import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
-import { getImageDimensions, debug, useStoredState, uid } from '@/utils';
+import { getImageDimensions, debug, uid } from '@/utils';
 import { config } from '@/config';
 import { Effects, Modes } from '@/data/';
 import { Button, Tooltip } from '@/components';
-import { EffectType, WorkItemType, StorageKeys } from '@/data/enums';
+import { EffectType, WorkItemType } from '@/data/enums';
 import { Github } from '@/icons/';
 import { Actions } from './actions';
 import { Workflow } from './workflow';
