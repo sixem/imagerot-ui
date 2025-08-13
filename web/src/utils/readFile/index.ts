@@ -1,5 +1,6 @@
 import type { TImageFile } from '@/data/types';
 
+import { uid } from '@/utils';
 import { hooks } from '@/modules/';
 import { MessageType } from '@/data/enums';
 import { config } from '@/config';
@@ -12,8 +13,9 @@ export const readFile = async (file: File | null = null): Promise<TImageFile | n
         return null;
     }
 
-    const id = self.crypto.randomUUID();
+    const id   = uid();
     const size = file.size;
+    const url  = URL.createObjectURL(file);
 
-    return { file, id, size, url: URL.createObjectURL(file) };
+    return { file, id, size, url };
 };

@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { hooks, triggers } from '@/modules/';
 import { Tooltip } from '@/components/tooltips/';
 import { InputFile } from '@/components/controls/input';
-import { readFile, saveAsAdaptive } from '@/utils';
+import { readFile, saveAsAdaptive, debug } from '@/utils';
 
 import iconUrl from '@/assets/icon.png';
 import Drift from 'drift-zoom';
@@ -22,9 +22,8 @@ type TOptionSignature = (
     setters: TPaneSignature["setters"]
 ) => void;
 
-const hookId = {
-    DocumentPasteWatcher: 'document:paste:watcher'
-};
+const hookId = { documentPasteWatcher: 'document:paste:watcher' };
+const log = debug('app:components:image');
 
 /**
  * General option buttons
@@ -104,53 +103,58 @@ const onImageSave: (current: TPaneSignature["current"]) => void = async (current
         const target = (current.edited || current.loaded);
 
         if (target) {
-            const filename = self.crypto.randomUUID() + '.png' || 'image.png';
-            saveAsAdaptive(target.url, filename, {
-                mimes: ['image/png']
-            });
+            saveAsAdaptive(target.url);
         }
     }
 };
 
 const Image = ({ current, setters, busy }: TPaneSignature) => {
     const imgRef = useRef<HTMLImageElement>(null);
+    const zoomRef = useRef<Drift>(null);
+    const settersRef = useRef(setters);
     const [isZooming, setZooming] = useState<boolean>(false);
-    
+
+    useEffect(() => { settersRef.current = setters }, [setters]);
+
     useEffect(() => {
-        let zoomInstance: Drift | null = null;
-
-        if (imgRef.current) {
-            imgRef.current.style.opacity = '1';
-
-            // Create a new zoom instance on the current image
-            zoomInstance = new Drift(imgRef.current, {
-                paneContainer: document.body.querySelector('#root > div.wrapper') as HTMLDivElement,
-                sourceAttribute: 'src',
-                handleTouch: false
-            });
-        }
-
-        hooks.watch({
-            trigger: triggers.documentPaste,
-            identifier: hookId.DocumentPasteWatcher,
-            callback: (file: DataTransferItem) => {
-                readFile(file.getAsFile()).then((processed) => {
-                    if (processed) {
-                        setters.file(processed);
-                    }
-                }).catch((error) => {
-                    console.error(error);
-                });
+        requestAnimationFrame(() => {
+            if (imgRef.current) {
+                imgRef.current.style.opacity = '1';
             }
+        })
+    }, [current?.loaded])
+
+    // Handles image zooming events
+    useEffect(() => {
+        if (!imgRef.current) return;
+
+        zoomRef.current = new Drift(imgRef.current, {
+            paneContainer: document.body.querySelector('#root > div.wrapper') as HTMLDivElement,
+            sourceAttribute: 'src',
+            handleTouch: false
         });
 
         return () => {
-            if (zoomInstance) {
-                zoomInstance.disable();
+            zoomRef.current?.destroy();
+        }
+    }, [isZooming]);
+    
+    // Set up binds on component mount
+    useEffect(() => {
+        hooks.watch({
+            trigger: triggers.documentPaste,
+            identifier: hookId.documentPasteWatcher,
+            callback: (file: DataTransferItem) => {
+                readFile(file.getAsFile()).then((processed) => {
+                    if (processed) {
+                        settersRef.current.file(processed);
+                    }
+                }).catch((error) => log(error));
             }
-        };
-    });
+        });
+    }, []);
 
+    // Update image source when current changes
     useEffect(() => {
         if (current.loaded && imgRef.current) {
             imgRef.current.src = current.loaded.url;
@@ -164,31 +168,14 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
 
     return (
         <div className={"image" + (isZooming ? " zooming" : "")} onMouseDown={(e) => {
-            if (e.button === 2 || (e.button === 0 && e.ctrlKey)) {
+            if (e.button === 2 || (e.button === 0 && e.ctrlKey) || isZooming) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
             }
 
-            if (!imgRef.current || !(e.target as HTMLElement).classList.contains('image')) return;
-
             setZooming(true);
-
-            if (imgRef.current) { // Assures we zoom in straight away on mouse down
-                imgRef.current.dispatchEvent(new MouseEvent('mousemove', {
-                    bubbles: true,
-                    cancelable: true,
-                    clientX: e.clientX,
-                    clientY: e.clientY,
-                }));
-            }
-        }} onMouseUp={() => {
-            setZooming(false);
-
-            if (imgRef.current) { // Trigger zoom exit on mouse up
-                imgRef.current.dispatchEvent(new MouseEvent('mouseleave'));
-            }
-        }} >
+        }} onMouseUp={() => setZooming(false)} >
             {current?.loaded === null ? (
                 <div className="lander" style={{ margin: '10px' }}>
                     <div className="img">

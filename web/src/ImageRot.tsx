@@ -2,8 +2,8 @@ import type { TImageFile } from '@/data/types';
 
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { Image, Controls, Notifications, TooltipDisplay } from '@/components/';
-import { MessageType } from '@/data/enums';
-import { truncateString, debug } from '@/utils';
+import { MessageType, StorageKeys } from '@/data/enums';
+import { truncateString, debug, useStoredState, uid } from '@/utils';
 import { config } from '@/config';
 import { binder } from '@/binder';
 import { hooks } from '@/modules/';
@@ -25,6 +25,7 @@ const isFileDrag = (e: DragEvent) => {
 const ImageRot = () => {
     const [isDropping, setDropping] = useState<boolean>(false);
     const [isBusy, setBusy] = useState<boolean>(false);
+    const [isReversed,,hasLoaded] = useStoredState(StorageKeys.uiReversed, false);
 
     // Store the loaded file as well as its edited version for restoration etc.
     const [currentFile, setFile] = useState<TImageFile | null>(null);
@@ -118,7 +119,7 @@ const ImageRot = () => {
                 const validated = config.filetypes.allowed.includes(file.type);
 
                 if (validated) {
-                    const id = self.crypto.randomUUID();
+                    const id = uid();
 
                     log("Drop file validated", file);
 
@@ -153,8 +154,8 @@ const ImageRot = () => {
     const setters = useMemo(() => ({ file: setAndRevokeFile, edit: setEdit }), [setAndRevokeFile]);
     const busy    = useMemo(() => ({ state: isBusy, update: setBusy }), [isBusy]);
 
-    return (
-        <div className="wrapper">
+    return !hasLoaded ? null : (
+        <div className={"wrapper" + (isReversed ? " reversed" : "")}>
             <Image
                 setters={setters}
                 current={current}

@@ -2,10 +2,10 @@
 import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 
 import { useEffect, useRef } from 'react';
-import { MessageType, WorkItemType } from '@/data/enums';
+import { MessageType, WorkItemType, StorageKeys } from '@/data/enums';
 import { Button, ButtonSet } from '@/components/';
 import { estimates, hooks } from '@/modules';
-import { debug, pick, saveAsAdaptive } from '@/utils';
+import { debug, pick, saveAsAdaptive, useStoredState } from '@/utils';
 import { listEffects, listModes } from 'imagerot/browser';
 
 import Processor from '@/workers/processor?worker';
@@ -76,6 +76,7 @@ const workflowFromJson = (data: string): TWorkflowExportItem[] | null => {
     }
 };
 
+
 /**
  * Attempts to export and save the current workflow to a local .json file.
 */
@@ -83,15 +84,17 @@ const saveWorkflow = async (workflow: TWorkItem[]) => {
     const converted = workflowToJson(workflow);
 
     if (converted) {
-        const filename = `workflowExport_${self.crypto.randomUUID()}.json`;
         const blob = new Blob([converted], { type: 'application/json' });
 
-        await saveAsAdaptive(blob, filename, { mimes: [blob.type] });
-        hooks.senders.notify(MessageType.ok, 'Exported: ' + filename);
+        if (await saveAsAdaptive(blob, 'workflowExport')) {
+            hooks.senders.notify(MessageType.ok, 'Workflow exported');
+        }
     }
 };
 
 export const Actions = ({ current, setters, workflow, busy, estimated }: TActionsSignature) => {
+    const [isReversed, setReversed] = useStoredState<boolean>(StorageKeys.uiReversed, false);
+
     const busyRef = useRef(busy);
     const settersRef = useRef(setters);
 
@@ -137,8 +140,7 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
             <Button {...{
                 text: 'Process image' + (
                     (estimated && workflow.filter(item => !item.muted).length > 0)
-                        ? ` (~${(estimated / 1000).toFixed(3)}s)`
-                        : ""
+                        ? ` (~${(estimated / 1000).toFixed(3)}s)` : ""
                 ),
                 disabled: !current.loaded || busy.state,
                 onClick: onProcess,
@@ -148,8 +150,7 @@ export const Actions = ({ current, setters, workflow, busy, estimated }: TAction
             <ButtonSet style={{ marginTop: '10px' }} items={[
                 { text: 'Export workflow', disabled: workflow.length === 0, onClick: () => saveWorkflow(workflow)},
                 { text: 'Import workflow' , onClick: () => workflowFromJson("") },
-                // { text: null, icon: 'cog', disabled: true }
-                /** TODO: Add a settings button (above), and open an overlay with different settings. */
+                { text: null, tooltip: "Reverse the interface UI", icon: 'reverse', onClick: () => setReversed(!isReversed) }
             ]}/>
         </div>
     );

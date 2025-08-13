@@ -1,8 +1,7 @@
-import { debug } from '@/utils';
+import { debug, uid, isTauri } from '@/utils';
 
 const log = debug('app:utils:save-as-adaptive');
 
-/** Simple MIME-to-extensions map */
 const mimeToExtensions: Record<string, string[]> = {
     'image/png': ['png'],
     'image/jpeg': ['jpg', 'jpeg'],
@@ -29,40 +28,42 @@ const urlToBlob = async (url: Blob | string) => {
     return url;
 };
 
-type TSaveAsOptions = {
-    mimes:string[]
-};
+type TSaveAsAdaptive = (target: Blob | string, basename?: string | null) => Promise<boolean>;
 
-type TSaveAsAdaptive = (target: Blob | string, filename: string, options: TSaveAsOptions) => Promise<void>;
-
-export const saveAsAdaptive: TSaveAsAdaptive = async (target, filename, options) => {
-    const isTauri = '__TAURI_INTERNALS__' in window;
+export const saveAsAdaptive: TSaveAsAdaptive = async (target, basename = null) => {
     const blob = await urlToBlob(target);
 
-    if (isTauri) {
+    if (!Object.hasOwn(mimeToExtensions, blob.type)) {
+        return false;
+    }
+    
+    const filename = (basename ? (basename + '-') : "") + uid();
+
+    if (isTauri()) {
         // Tauri context
-        const { save } = await import('@tauri-apps/plugin-dialog');
         const { writeFile } = await import('@tauri-apps/plugin-fs');
+        const { save } = await import('@tauri-apps/plugin-dialog');
 
         // Open native save dialog with optional filters
-        const filters = getMimeFilters(options.mimes);
-
         const filePath = await save({
             defaultPath: filename,
-            filters,
+            filters: getMimeFilters([blob.type])
         });
 
         if (filePath) {
             // Convert blob to Uint8Array and write to the chosen path
             const arrayBuffer = await blob.arrayBuffer();
             await writeFile(filePath, new Uint8Array(arrayBuffer));
-
-            log("Attempted save", { tauriContext: isTauri, filePath, filename, options });
+            log("Attempted save", { tauriContext: true, filePath, filename });
+            return true;
         }
     } else {
         // Browser context
         const { default: saveAs } = await import('file-saver');
         saveAs(blob, filename);
-        log("Attempted save", { tauriContext: isTauri, filename, options });
+        log("Attempted save", { tauriContext: false, filename });
+        return true;
     }
+
+    return false;
 };

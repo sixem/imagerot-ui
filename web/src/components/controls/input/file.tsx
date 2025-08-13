@@ -1,6 +1,7 @@
 import type { TImageFile } from '@/data/types';
 
 import { useRef } from 'react';
+import { uid } from '@/utils';
 import { config } from '@/config';
 
 import './file.scss';
@@ -17,7 +18,7 @@ export const InputFile = ({ setter, text }: { setter: (image: TImageFile | null)
 
         if (files && files.length > 0 && config.filetypes.allowed.includes(files[0].type)) {
             const file = files[0];
-            const id = self.crypto.randomUUID();
+            const id = uid();
             
             setter({ file, id, url: URL.createObjectURL(file), size: file.size });
         }

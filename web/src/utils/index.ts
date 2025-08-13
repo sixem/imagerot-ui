@@ -10,3 +10,5 @@ export { getImageDimensions } from './getImageDimensions';
 export { pick } from './pick';
 export { saveAsAdaptive } from './saveAsAdaptive';
 export { useStoredState } from './useStoredState';
+export { uid } from './uid';
+export { isTauri } from './isTauri';
