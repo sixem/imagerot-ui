@@ -39,6 +39,7 @@ const workflowToJson = (data: TWorkItem[]): string | null => {
 
 /**
  * Parses a JSON string containing workflow items into an array of `TWorkflowExportItem`
+ * 
  * Returns null on invalid or empty data.
  */
 const workflowFromJson = (data: string): TWorkflowExportItem[] | null => {
