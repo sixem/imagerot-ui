@@ -1,5 +1,8 @@
-export const uid = () => {
-    return (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2);
-};
+export const uid = (() => {
+    let c = 0;
+
+    return () =>
+        (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+            ? crypto.randomUUID()
+            : `${Date.now().toString(36)}-${(c++).toString(36)}`;
+})();

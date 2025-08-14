@@ -116,9 +116,9 @@ jobs:
       
           # Create (or edit) the draft release
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --draft --title "ImageRot UI build ($TAG)"
+            gh release edit "$TAG" --draft --title "ImageRot UI build $TAG"
           else
-            gh release create "$TAG" --draft --title "ImageRot UI build ($TAG)" --target "${GITHUB_SHA}"
+            gh release create "$TAG" --draft --title "ImageRot UI build $TAG" --target "${GITHUB_SHA}"
           fi
       
           # Collect actual installer files across all OSes

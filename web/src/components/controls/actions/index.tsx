@@ -48,8 +48,8 @@ const workflowFromJson = (data: string): TWorkflowExportItem[] | null => {
         if (!parsed.items) return null;
 
         const effects = new Set(listEffects());
-        const types   = new Set(Object.values(WorkItemType));
         const modes   = new Set(listModes());
+        const types   = new Set(Object.values(WorkItemType));
 
         return parsed.items.map((item) => {
             const { key, type, muted, config } = item;

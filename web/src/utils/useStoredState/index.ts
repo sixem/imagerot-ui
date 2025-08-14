@@ -4,10 +4,9 @@ import { uid } from '@/utils';
 
 type UpdatePayload<T> = { key: string; value?: T; source?: string };
 
-const channel =
-    typeof BroadcastChannel !== 'undefined'
-        ? new BroadcastChannel('stored-state-channel')
-        : null;
+const channel = typeof BroadcastChannel !== 'undefined'
+    ? new BroadcastChannel('stored-state-channel')
+    : null;
 
 export const useStoredState = <T,>(key: string, initial: T) => {
     const [value, setValue] = useState<T>(() => {

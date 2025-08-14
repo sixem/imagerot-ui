@@ -7,6 +7,7 @@ import pkg from './package.json' with { type: 'json' };
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [react(), tsconfigPaths()],
+    base: './',
     server: {
         watch: {
             usePolling: true,
