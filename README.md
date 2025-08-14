@@ -17,12 +17,12 @@ To get started, you can either download the latest release [here](https://github
 ## :zap: Quick Usage
 
 1. Drag an image into the UI, or click to select one.
-    - This will load the image into memory, and you can always reset to the base image by using the toolbar in the top-right of the canvas.
+    - This will load the image into memory, and you can always reset to the base image by using the toolbar located at the top of the canvas.
       
 2. Select effects and/or modes from the sidebar, and add them to the workflow.
     - The workflow items will be applied to the image in the order in which they appear.
     - You can re-order them by simply dragging them around.
-    - These items can also be muted (eye toggle button), which will exclude them from the process entirely until unmuted.
+    - These items can also be muted, which will exclude them from the process entirely until unmuted.
   
 4. Finally, process the image and get your result!
 
