@@ -107,10 +107,33 @@ export const Actions = ({ current, setters, busy, estimated, workflow }: TAction
 
     // Called when starting a new image generation
     const onProcess = async () => {
-        if (current.loaded && !busy.state && processorRef.current) { // Send data to worker
-            busy.update(true);
-            log("Processing image", { workflow, current: current.loaded });
-            processorRef.current.postMessage({ workflow, image: current.loaded });
+        if (!current.loaded || busy.state || !processorRef.current) return;
+        if (!current.loaded.file) {
+            hooks.senders.notify(MessageType.error, 'Could not read the image file');
+            return;
+        }
+
+        busy.update(true);
+        log("Processing image", { workflow, current: current.loaded });
+
+        try {
+            const file = current.loaded.file;
+            const buffer = await file.arrayBuffer();
+
+            processorRef.current.postMessage({
+                workflow,
+                image: {
+                    buffer,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    id: current.loaded.id
+                }
+            }, [buffer]);
+        } catch (error) {
+            busy.update(false);
+            hooks.senders.notify(MessageType.error, 'Could not prepare image for processing');
+            log(error);
         }
     };
 

@@ -72,19 +72,16 @@
 
                 >div.options {
                     flex-grow: 0;
-                    background-color: #22232d;
+                    background-color: #25263d;
                     display: flex;
                     flex-direction: row;
 
                     > div {
                         height: 100%;
                         width: 25px;
-                        background-color: #20212d;
                         cursor: pointer;
 
-                        &:not(:last-child) {
-                            border-right: 2px solid #22232d;
-                        }
+                        border-left: 2px solid #22232d;
 
                         &:hover {
                             background-color: #2e3045;

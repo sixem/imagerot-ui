@@ -8,7 +8,7 @@ import type {
     TWorkItem
 } from '@/data/types';
 
-import { useEffect, useState, useRef, Fragment, useCallback, memo } from 'react';
+import { useEffect, useState, useRef, Fragment, useCallback, memo, useMemo } from 'react';
 import { InputString, InputRange, InputColor, InputFile } from './input/';
 import { getImageDimensions, debug, uid } from '@/utils';
 import { config } from '@/config';
@@ -297,6 +297,19 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
     const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
     const [dimensions, setDimensions] = useState<[number, number] | null>(null);
 
+    const activeWorkflow = useMemo(() => {
+        const effects: string[] = [];
+        const modes: string[] = [];
+
+        for (const item of workflow) {
+            if (item.muted) continue;
+            if (item.type === WorkItemType.effect) effects.push(item.key);
+            if (item.type === WorkItemType.mode) modes.push(item.key);
+        }
+
+        return { effects, modes };
+    }, [workflow]);
+
     useEffect(() => {
         let alive = true;
 
@@ -322,8 +335,8 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
         }
 
         const estimatedMs = estimates.getEstimate(dimensions, {
-            effects : workflow.filter((it) => !it.muted && it.type === WorkItemType.effect).map((e) => e.key),
-            modes   : workflow.filter((it) => !it.muted && it.type === WorkItemType.mode).map((m) => m.key)
+            effects : activeWorkflow.effects,
+            modes   : activeWorkflow.modes
         });
 
         if (estimatedMs) {
@@ -331,7 +344,7 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
         }
 
         setEstimated(estimatedMs);
-    }, [dimensions, workflow]);
+    }, [dimensions, activeWorkflow]);
 
     return (
         <div className="controls">

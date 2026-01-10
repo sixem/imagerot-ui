@@ -237,18 +237,18 @@ div.save-modal {
         border-bottom: 1px solid #171724;
 
         >div.title {
-            font-size: 1.05em;
-            letter-spacing: 1px;
-            font-weight: 600;
+            font-size: 0.9em;
+            letter-spacing: 0;
+            font-weight: 400;
         }
 
         >div.close {
-            width: 18px;
-            height: 18px;
+            width: 24px;
+            height: 24px;
             background-image: url('@/assets/cross.svg');
             background-repeat: no-repeat;
             background-position: center;
-            background-size: 12px 12px;
+            background-size: 20px 20px;
             filter: invert(100%);
             opacity: 0.75;
             cursor: pointer;
@@ -274,7 +274,7 @@ div.save-modal {
                 flex: 0 0 80px;
                 text-align: left;
                 color: #f0f0f0;
-                font-size: 0.85em;
+                font-size: 0.9em;
             }
 
             >select {
@@ -296,7 +296,7 @@ div.save-modal {
                     text-align: right;
                     font-variant-numeric: tabular-nums;
                     color: #f0f0f0;
-                    font-size: 0.85em;
+                    font-size: 0.9em;
                 }
 
                 &.disabled {
@@ -314,7 +314,7 @@ div.save-modal {
 
         >div.save-error {
             color: #e86868;
-            font-size: 0.85em;
+            font-size: 0.9em;
             text-align: left;
         }
     }

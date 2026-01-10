@@ -100,7 +100,13 @@ export type TWorkItem = {
 };
 
 export interface TProcessorInput {
-    image: TImageFile;
+    image: {
+        buffer: ArrayBuffer;
+        name: string;
+        type: string;
+        size: number;
+        id: string;
+    };
     workflow: TWorkItem[];
 }
 export interface TProcessorOutput {

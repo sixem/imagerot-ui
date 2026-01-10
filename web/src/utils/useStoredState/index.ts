@@ -21,13 +21,27 @@ export const useStoredState = <T,>(key: string, initial: T) => {
     const [loaded, setLoaded] = useState(false);
     const valueRef = useRef(value);
     const sourceRef = useRef<string>(uid());
+    const persistTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Sync localStorage and broadcast on value change (if loaded)
     useEffect(() => {
         valueRef.current = value;
-        try {
-            localStorage.setItem(`stored:${key}`, JSON.stringify(value));
-        } catch { /** Do nothing */ }
+        if (persistTimeoutRef.current) {
+            clearTimeout(persistTimeoutRef.current);
+        }
+
+        const nextValue = value;
+        const nextKey = key;
+
+        persistTimeoutRef.current = setTimeout(() => {
+            try {
+                localStorage.setItem(`stored:${nextKey}`, JSON.stringify(nextValue));
+            } catch { /** Do nothing */ }
+
+            if (loaded) {
+                void storage.set(nextKey, nextValue);
+            }
+        }, 200);
 
         if (loaded) {
             const payload = { key, value, source: sourceRef.current };
@@ -36,14 +50,13 @@ export const useStoredState = <T,>(key: string, initial: T) => {
         }
     }, [key, value, loaded]);
 
-    // Async persistence to storage (no broadcast here to avoid delay)
     useEffect(() => {
-        if (!loaded) return;
-
-        (async () => {
-            await storage.set(key, value);
-        })();
-    }, [key, value, loaded]);
+        return () => {
+            if (persistTimeoutRef.current) {
+                clearTimeout(persistTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Mount: async load from storage, listeners
     useEffect(() => {

@@ -23,6 +23,7 @@ type TWorkflowItemProps = {
     onDragStart? : (e: React.DragEvent<HTMLDivElement>) => void;
     onDragOver?  : (e: React.DragEvent<HTMLDivElement>) => void;
     onDragEnd?   : (e: React.DragEvent<HTMLDivElement>) => void;
+    onDrop?      : (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
 const WorkflowItem = ({
@@ -33,7 +34,8 @@ const WorkflowItem = ({
     onToggle,
     onDragStart,
     onDragOver,
-    onDragEnd
+    onDragEnd,
+    onDrop
 }: TWorkflowItemProps) => {
     const type      = item.type === WorkItemType.mode ? "mode" : "effect";
     const isToggled = !!item.muted;
@@ -51,6 +53,7 @@ const WorkflowItem = ({
             onDragStart = {onDragStart}
             onDragOver  = {onDragOver}
             onDragEnd   = {onDragEnd}
+            onDrop      = {onDrop}
         >
             <div className="text">
                 <div>{item.key}</div>
@@ -78,8 +81,8 @@ const WorkflowItem = ({
  * Contains the active modes and effects that will be used to process the image
  */
 export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
-    const draggingId = useRef<TWorkItem['id'] | null>(null); // added
-    const lastInsertIndexRef = useRef<number | null>(null);
+    const draggingId = useRef<TWorkItem['id'] | null>(null);
+    const pendingIndexRef = useRef<number | null>(null);
 
     const onRemove = (item: TWorkItem) => {
         setWorkflow((previous) => previous.filter((current) => {
@@ -100,13 +103,13 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
     const onDragStart = (e: React.DragEvent<HTMLDivElement>, id: TWorkItem['id']) => {
         if ((e.target as HTMLElement).closest('.options')) { e.preventDefault(); return; }
         draggingId.current = id;
-        lastInsertIndexRef.current = null;
+        pendingIndexRef.current = null;
         e.dataTransfer.effectAllowed = 'move';
     };
 
     const onDragEnd = () => {
         draggingId.current = null;
-        lastInsertIndexRef.current = null;
+        pendingIndexRef.current = null;
     };
 
     const onDragOver = (e: React.DragEvent<HTMLDivElement>, overIndex: number) => {
@@ -116,28 +119,34 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
         const rect   = target.getBoundingClientRect();
         const after  = (e.clientY - rect.top) > rect.height / 2;
 
-        let insertIndex = overIndex + (after ? 1 : 0);
+        const insertIndex = overIndex + (after ? 1 : 0);
+        pendingIndexRef.current = insertIndex;
+    };
 
-        if (insertIndex === lastInsertIndexRef.current) return;
-        lastInsertIndexRef.current = insertIndex;
+    const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+
+        const insertIndex = pendingIndexRef.current;
+        if (insertIndex === null) return;
 
         setWorkflow((previous) => {
+            let targetIndex = insertIndex;
             const from = previous.findIndex(x => x.id === draggingId.current);
 
             if (from < 0) return previous;
-            if (insertIndex > previous.length) insertIndex = previous.length;
-            if (from < insertIndex) insertIndex--;
-            if (from === insertIndex) return previous;
-
-            lastInsertIndexRef.current = insertIndex;
+            if (targetIndex > previous.length) targetIndex = previous.length;
+            if (from < targetIndex) targetIndex--;
+            if (from === targetIndex) return previous;
 
             const next = previous.slice();
             const [moved] = next.splice(from, 1);
 
-            next.splice(insertIndex, 0, moved);
-            
+            next.splice(targetIndex, 0, moved);
+
             return next;
         });
+
+        pendingIndexRef.current = null;
     };
 
     return (
@@ -154,6 +163,7 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
                                 onDragStart={(e) => onDragStart(e, item.id)}
                                 onDragOver={(e) => onDragOver(e, index)}
                                 onDragEnd={onDragEnd}
+                                onDrop={onDrop}
                             />
                         );
                     })}
