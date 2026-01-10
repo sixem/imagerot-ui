@@ -35,14 +35,14 @@ export const TooltipDisplay = () => {
     const [currentText, setText] = useState<string>("");
     const [currentInset, setInset] = useState<TTooltipInset | null>(null);
 
-    const timerRef = useRef<unknown>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         hooks.watch({
             ...hookProps,
             callback: (data: TTooltipData) => {
-                if (timerRef.current) {
-                    clearTimeout(timerRef.current as NodeJS.Timeout);
+                if (timerRef.current !== null) {
+                    clearTimeout(timerRef.current);
                 }
 
                 if (data.visible && data.text) {
@@ -59,7 +59,12 @@ export const TooltipDisplay = () => {
             }
         });
 
-        return () => { hooks.unwatch(hookProps); }
+        return () => {
+            hooks.unwatch(hookProps);
+            if (timerRef.current !== null) {
+                clearTimeout(timerRef.current);
+            }
+        }
     }, []);
 
     return (

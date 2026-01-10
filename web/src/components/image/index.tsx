@@ -150,6 +150,12 @@ const Image = ({ current, setters, busy }: TPaneSignature) => {
                 }).catch((error) => log(error));
             }
         });
+        return () => {
+            hooks.unwatch({
+                trigger: triggers.documentPaste,
+                identifier: hookId.documentPasteWatcher
+            });
+        };
     }, []);
 
     // Update image source when current changes

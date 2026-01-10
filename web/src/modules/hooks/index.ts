@@ -1,4 +1,3 @@
-import { randomString } from '@/utils/';
 import { senders } from './senders';
 
 type TPointer = HTMLElement | Window | Document;
@@ -39,19 +38,29 @@ const unlisten = ({ pointer, events, identifier }: Omit<Parameters<TListen>[0], 
     if (!Array.isArray(events)) events = [events];
 
     const keys = Object.keys(listeners);
-    const preExistingPointer = keys.length > 0
-        ? keys.filter(id => listeners[id].pointer === pointer)
-        : false;
+    const key = keys.find(id => listeners[id].pointer === pointer);
 
-    if (!preExistingPointer) return;
-    const key = preExistingPointer[0];
+    if (!key) return;
+
+    const bound = listeners[key].bound;
 
     for (const event of events) {
-        if (Object.prototype.hasOwnProperty.call(listeners[key].bound, event)) {
-            for (const [id] of Object.entries(listeners[key].bound[event].callbacks)) {
-                delete listeners[key].bound[event].callbacks[id];
-            }
+        if (!Object.prototype.hasOwnProperty.call(bound, event)) continue;
+
+        const entry = bound[event];
+
+        if (Object.prototype.hasOwnProperty.call(entry.callbacks, identifier)) {
+            delete entry.callbacks[identifier];
         }
+
+        if (Object.keys(entry.callbacks).length === 0) {
+            pointer.removeEventListener(event, entry.handler as EventListener, { capture: true });
+            delete bound[event];
+        }
+    }
+
+    if (Object.keys(bound).length === 0) {
+        delete listeners[key];
     }
 };
 
@@ -125,24 +134,9 @@ const unwatch: TUnwatch = ({ trigger, identifier }) => {
     if (Object.prototype.hasOwnProperty.call(triggers[trigger].watchers, identifier)) {
         delete triggers[trigger].watchers[identifier];
     }
-};
 
-const creator = {
-    occupied: [] as string[],
-    generate: (length: number = 8) => {
-        let id = randomString(length);
-        const existingIdentifiers: string[] = [];
-
-        for (const key of Object.keys(triggers)) {
-            existingIdentifiers.push(...Object.keys(triggers[key].watchers));
-        }
-
-        while (existingIdentifiers.includes(id) || creator.occupied.includes(id)) {
-            id = randomString(length);
-        }
-
-        creator.occupied.push(id);
-        return id;
+    if (Object.keys(triggers[trigger].watchers).length === 0) {
+        delete triggers[trigger];
     }
 };
 
@@ -152,6 +146,5 @@ export const hooks = {
     trigger,
     watch,
     unwatch,
-    senders,
-    creator
+    senders
 };
