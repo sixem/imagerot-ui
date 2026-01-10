@@ -78,8 +78,8 @@ const WorkflowItem = ({
  * Contains the active modes and effects that will be used to process the image
  */
 export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
-    const listRef = useRef<HTMLDivElement>(null);
     const draggingId = useRef<TWorkItem['id'] | null>(null); // added
+    const lastInsertIndexRef = useRef<number | null>(null);
 
     const onRemove = (item: TWorkItem) => {
         setWorkflow((previous) => previous.filter((current) => {
@@ -100,11 +100,13 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
     const onDragStart = (e: React.DragEvent<HTMLDivElement>, id: TWorkItem['id']) => {
         if ((e.target as HTMLElement).closest('.options')) { e.preventDefault(); return; }
         draggingId.current = id;
+        lastInsertIndexRef.current = null;
         e.dataTransfer.effectAllowed = 'move';
     };
 
     const onDragEnd = () => {
         draggingId.current = null;
+        lastInsertIndexRef.current = null;
     };
 
     const onDragOver = (e: React.DragEvent<HTMLDivElement>, overIndex: number) => {
@@ -116,6 +118,9 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
 
         let insertIndex = overIndex + (after ? 1 : 0);
 
+        if (insertIndex === lastInsertIndexRef.current) return;
+        lastInsertIndexRef.current = insertIndex;
+
         setWorkflow((previous) => {
             const from = previous.findIndex(x => x.id === draggingId.current);
 
@@ -123,6 +128,8 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
             if (insertIndex > previous.length) insertIndex = previous.length;
             if (from < insertIndex) insertIndex--;
             if (from === insertIndex) return previous;
+
+            lastInsertIndexRef.current = insertIndex;
 
             const next = previous.slice();
             const [moved] = next.splice(from, 1);
@@ -137,7 +144,7 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
         <div className="section workflow">
             <div className="sub-header">Active workflow items ({workflow.filter((item) => !item.muted).length}):</div>
             {workflow.length > 0 ? (
-                <div className="work-order" ref={listRef}>
+                <div className="work-order">
                     {workflow.map((item, index) => {
                         return (
                             <WorkflowItem

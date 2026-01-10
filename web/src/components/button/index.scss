@@ -78,6 +78,11 @@ div.button {
             --icon-url: url('@/assets/reverse.svg');
             --icon-size: 14px;
         }
+
+        &.export {
+            --icon-url: url('@/assets/save.svg');
+            --icon-size: 14px;
+        }
     }
 }
 

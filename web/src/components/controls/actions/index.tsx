@@ -5,7 +5,7 @@ import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 import { useEffect, useRef } from 'react';
 import { MessageType, WorkItemType, StorageKeys } from '@/data/enums';
 import { Button, ButtonSet } from '@/components/';
-import { estimates, hooks } from '@/modules';
+import { estimates, hooks, triggers } from '@/modules';
 import { debug, pick, uid, saveAsAdaptive, useStoredState } from '@/utils';
 import { listEffects, listModes } from 'imagerot/browser';
 
@@ -23,7 +23,6 @@ type TWorkflowExport = {
 };
 
 const log = debug('app:controls:actions');
-const processor = new Processor();
 
 /**
  * Converts an array of workflow items into a JSON string for export
@@ -98,31 +97,34 @@ const saveWorkflow = async (workflow: TWorkItem[]) => {
 export const Actions = ({ current, setters, busy, estimated, workflow }: TActionsSignature) => {
     const [isReversed, setReversed] = useStoredState<boolean>(StorageKeys.uiReversed, false);
 
-    const inputRef   = useRef<HTMLInputElement>(null);
-    const busyRef    = useRef(busy);
-    const settersRef = useRef(setters);
+    const inputRef     = useRef<HTMLInputElement>(null);
+    const busyRef      = useRef(busy);
+    const settersRef   = useRef(setters);
+    const processorRef = useRef<Worker | null>(null);
 
     useEffect(() => { busyRef.current = busy; }, [busy]);
     useEffect(() => { settersRef.current = setters; }, [setters]);
 
     // Called when starting a new image generation
     const onProcess = async () => {
-        if (current.loaded && !busy.state) { // Send data to worker
+        if (current.loaded && !busy.state && processorRef.current) { // Send data to worker
             busy.update(true);
             log("Processing image", { workflow, current: current.loaded });
-            processor.postMessage({ workflow, image: current.loaded });
+            processorRef.current.postMessage({ workflow, image: current.loaded });
         }
     };
 
     // Called when importing a workflow file
     const onImport = async (event: ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
+        const input = event.currentTarget;
+        const files = input.files;
 
         if (files && files.length > 0 && files[0].type.startsWith('application/json')) {
             const file = files[0];
 
             if (file.size > 1E6) {
                 hooks.senders.notify(MessageType.warn, 'File is too large!');
+                input.value = '';
                 return;
             }
 
@@ -141,12 +143,17 @@ export const Actions = ({ current, setters, busy, estimated, workflow }: TAction
             }).catch((error) => {
                 hooks.senders.notify(MessageType.warn, 'Could not parse import file!');
                 log(error);
-            })
+            });
         }
+
+        input.value = '';
     };
 
     useEffect(() => {
-        processor.onmessage = (event: MessageEvent<TProcessorOutput | null>) => {
+        const worker = new Processor();
+        processorRef.current = worker;
+
+        worker.onmessage = (event: MessageEvent<TProcessorOutput | null>) => {
             busyRef.current.update(false);
 
             if (event.data) {
@@ -165,23 +172,48 @@ export const Actions = ({ current, setters, busy, estimated, workflow }: TAction
             }
         };
 
+        worker.onerror = (event) => {
+            busyRef.current.update(false);
+            hooks.senders.notify(MessageType.error, 'Image processing failed');
+            log("Worker error", event);
+        };
+
         return () => {
             busyRef.current.update(false);
-            processor.onmessage = null;
+            worker.onmessage = null;
+            worker.onerror = null;
+            worker.terminate();
+            processorRef.current = null;
         };
     }, []);
 
+    const showExport = !!current.edited;
+
     return (
         <div className="options-bottom">
-            <Button {...{
-                text: 'Process image' + (
-                    (estimated && workflow.filter(item => !item.muted).length > 0)
-                        ? ` (~${(estimated / 1000).toFixed(3)}s)` : ""
-                ),
-                disabled: !current.loaded || busy.state,
-                onClick: onProcess,
-                icon: 'process'
-            }} />
+            <div className="process-row">
+                <Button {...{
+                    text: 'Process image' + (
+                        (estimated && workflow.filter(item => !item.muted).length > 0)
+                            ? ` (~${(estimated / 1000).toFixed(3)}s)` : ""
+                    ),
+                    disabled: !current.loaded || busy.state,
+                    onClick: onProcess,
+                    icon: 'process'
+                }} />
+
+                {showExport ? (
+                    <Button
+                        text={null}
+                        icon="export"
+                        tooltip="Export image"
+                        disabled={busy.state}
+                        onClick={() => {
+                            hooks.trigger({ trigger: triggers.exportImage, data: null });
+                        }}
+                    />
+                ) : null}
+            </div>
 
             <input onChange={onImport} ref={inputRef} type="file" accept={'application/json'} />
 

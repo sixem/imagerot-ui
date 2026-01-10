@@ -36,8 +36,15 @@ export const saveAsAdaptive: TSaveAsAdaptive = async (target, basename = null) =
     if (!Object.hasOwn(mimeToExtensions, blob.type)) {
         return false;
     }
-    
-    const filename = (basename ? (basename + '-') : "") + uid();
+
+    const mimeExtension = mimeToExtensions[blob.type]?.[0] || '';
+    const rawBase       = basename ? basename.trim() : '';
+    const match         = rawBase ? rawBase.match(/\.([a-z0-9]+)$/i) : null;
+    const baseName      = match ? rawBase.slice(0, -match[0].length) : rawBase;
+    const baseExtension = match ? match[1] : '';
+    const extension     = baseExtension || mimeExtension;
+    const name          = (baseName ? (baseName + '-') : '') + uid();
+    const filename      = extension ? `${name}.${extension}` : name;
 
     if (isTauri()) {
         // Tauri context

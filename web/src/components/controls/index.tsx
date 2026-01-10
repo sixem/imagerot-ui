@@ -93,7 +93,7 @@ const Header = () => {
             <h2>ImageRot UI</h2>
             <div className="git">
                 <Tooltip text="Check out the project on GitHub!">
-                    <a target="_blank" href={__APP_HOMEPAGE__}><Github /></a>
+                    <a target="_blank" rel="noreferrer" href={__APP_HOMEPAGE__}><Github /></a>
                 </Tooltip>
             </div>
         </div>
@@ -295,34 +295,43 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
 const Controls = ({ current, setters, busy }: TPaneSignature) => {
     const [estimated, setEstimated] = useState<number | null>(null);
     const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
+    const [dimensions, setDimensions] = useState<[number, number] | null>(null);
 
     useEffect(() => {
-        if (current.loaded) {
-            const id = current.loaded.id; // Store current ID
+        let alive = true;
 
-            getImageDimensions(current.loaded.url).then((dimensions) => {
-                const { width, height } = dimensions;
-
-                // Update dimensions and estimates for the current image
-                if (current.loaded && id === current.loaded.id) {
-                    current.loaded.dimensions = [width, height];
-
-                    const estimatedMs = estimates.getEstimate([width, height], {
-                        effects : workflow.filter((it) => !it.muted && it.type === WorkItemType.effect).map((e) => e.key),
-                        modes   : workflow.filter((it) => !it.muted && it.type === WorkItemType.mode).map((m) => m.key)
-                    });
-
-                    if (estimatedMs) {
-                        log("Estimated processing (ms)", Math.round(estimatedMs * 100) / 100);
-                    }
-
-                    setEstimated(estimatedMs);
-                }
-            }).catch(() => setEstimated(null));
-        } else {
-            setEstimated(null);
+        if (!current.loaded) {
+            setDimensions(null);
+            return () => { alive = false; };
         }
-    }, [workflow, current]);
+
+        getImageDimensions(current.loaded.url).then(({ width, height }) => {
+            if (!alive) return;
+            setDimensions([width, height]);
+        }).catch(() => {
+            if (alive) setDimensions(null);
+        });
+
+        return () => { alive = false; };
+    }, [current.loaded?.id]);
+
+    useEffect(() => {
+        if (!dimensions) {
+            setEstimated(null);
+            return;
+        }
+
+        const estimatedMs = estimates.getEstimate(dimensions, {
+            effects : workflow.filter((it) => !it.muted && it.type === WorkItemType.effect).map((e) => e.key),
+            modes   : workflow.filter((it) => !it.muted && it.type === WorkItemType.mode).map((m) => m.key)
+        });
+
+        if (estimatedMs) {
+            log("Estimated processing (ms)", Math.round(estimatedMs * 100) / 100);
+        }
+
+        setEstimated(estimatedMs);
+    }, [dimensions, workflow]);
 
     return (
         <div className="controls">

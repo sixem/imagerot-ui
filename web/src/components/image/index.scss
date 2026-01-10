@@ -204,3 +204,121 @@ div.spinner {
         }
     }
 }
+
+div.save-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+div.save-modal {
+    width: min(92vw, 380px);
+    background-color: #14141cf5;
+    border: 1px solid #171724;
+    border-radius: 8px;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.6);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: #f4f4f4;
+
+    >div.save-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #171724;
+
+        >div.title {
+            font-size: 1.05em;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        >div.close {
+            width: 18px;
+            height: 18px;
+            background-image: url('@/assets/cross.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 12px 12px;
+            filter: invert(100%);
+            opacity: 0.75;
+            cursor: pointer;
+            transition: opacity 0.2s ease-in-out;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+
+    >div.save-body {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        >div.save-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            >label {
+                flex: 0 0 80px;
+                text-align: left;
+                color: #f0f0f0;
+                font-size: 0.85em;
+            }
+
+            >select {
+                flex: 1 1 0;
+            }
+
+            >div.save-quality {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex: 1 1 0;
+
+                >input[type="range"] {
+                    flex: 1 1 0;
+                }
+
+                >span {
+                    min-width: 70px;
+                    text-align: right;
+                    font-variant-numeric: tabular-nums;
+                    color: #f0f0f0;
+                    font-size: 0.85em;
+                }
+
+                &.disabled {
+                    opacity: 0.6;
+                }
+            }
+
+            >div.save-size {
+                flex: 1 1 0;
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+                color: #f0f0f0;
+            }
+        }
+
+        >div.save-error {
+            color: #e86868;
+            font-size: 0.85em;
+            text-align: left;
+        }
+    }
+    >div.save-actions {
+        margin-top: 2px;
+    }
+}

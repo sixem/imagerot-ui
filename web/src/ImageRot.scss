@@ -156,15 +156,22 @@ a:hover {
 /* Select */
 select {
     background-color: $color-primary-standout;
+    background-image: url('@/assets/chevron-down.svg');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 6px;
     box-sizing: border-box;
     border: none;
     border-radius: 4px;
     box-shadow: 0 0 4px rgb(14 14 14);
     outline: none;
 
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     text-transform: capitalize;
     color: #fff;
-    padding: 4px 0 6px 4px;
+    padding: 4px 28px 6px 4px;
     cursor: pointer;
 }
 

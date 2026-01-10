@@ -223,6 +223,20 @@
             border-top: 1px solid #171724;
 
             >div.options-bottom {
+                >div.process-row {
+                    display: flex;
+                    gap: 8px;
+                    align-items: stretch;
+
+                    >div.button {
+                        flex: 1 1 0;
+                    }
+
+                    >div.button.textless {
+                        flex: 0 0 auto;
+                    }
+                }
+
                 input {
                     display: none;
                 }

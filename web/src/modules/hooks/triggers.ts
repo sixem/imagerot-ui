@@ -1,5 +1,6 @@
 export const triggers = {
     documentPaste: 'documentPaste',
     tooltip: 'tooltip',
-    notify: 'notify'
+    notify: 'notify',
+    exportImage: 'exportImage'
 };
