@@ -28,13 +28,33 @@
                 line-height: 1;
                 align-items: stretch;
                 position: relative;
-                transition: background-color .05s ease-in-out;
+                transition: background-color .12s ease-in-out, box-shadow .12s ease-in-out, transform .12s ease-in-out;
+                will-change: transform;
 
                 border: 1px solid #22232d;
                 margin-top: 4px;
 
                 border-radius: 4px;
                 box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+
+                &[data-dragging="true"] {
+                    opacity: 0.6;
+                    transform: scale(0.985);
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+                }
+
+                &[data-drop="before"],
+                &[data-drop="after"] {
+                    background-color: color.adjust($color-primary-standout, $lightness: 5%);
+                }
+
+                &[data-drop="before"] {
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25), inset 0 2px 0 $color-primary-standout-brighten;
+                }
+
+                &[data-drop="after"] {
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25), inset 0 -2px 0 $color-primary-standout-brighten;
+                }
 
                 &.dimmed {
                     opacity: 0.325;

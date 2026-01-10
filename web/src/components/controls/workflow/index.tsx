@@ -1,6 +1,6 @@
 import type { TWorkItem } from '@/data/types';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { WorkItemType } from '@/data/enums';
 
 import './index.scss';
@@ -24,6 +24,8 @@ type TWorkflowItemProps = {
     onDragOver?  : (e: React.DragEvent<HTMLDivElement>) => void;
     onDragEnd?   : (e: React.DragEvent<HTMLDivElement>) => void;
     onDrop?      : (e: React.DragEvent<HTMLDivElement>) => void;
+    isDragging?: boolean;
+    dropPosition?: 'before' | 'after' | null;
 };
 
 const WorkflowItem = ({
@@ -35,7 +37,9 @@ const WorkflowItem = ({
     onDragStart,
     onDragOver,
     onDragEnd,
-    onDrop
+    onDrop,
+    isDragging = false,
+    dropPosition = null
 }: TWorkflowItemProps) => {
     const type      = item.type === WorkItemType.mode ? "mode" : "effect";
     const isToggled = !!item.muted;
@@ -49,6 +53,8 @@ const WorkflowItem = ({
         <div
             data-index  = {index}
             className   = {classList.join(' ')}
+            data-dragging = {isDragging ? "true" : undefined}
+            data-drop = {dropPosition ?? undefined}
             draggable   = {draggable}
             onDragStart = {onDragStart}
             onDragOver  = {onDragOver}
@@ -81,8 +87,19 @@ const WorkflowItem = ({
  * Contains the active modes and effects that will be used to process the image
  */
 export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
-    const draggingId = useRef<TWorkItem['id'] | null>(null);
+    const draggingIdRef = useRef<TWorkItem['id'] | null>(null);
     const pendingIndexRef = useRef<number | null>(null);
+    const dropRafRef = useRef<number | null>(null);
+    const [draggingId, setDraggingId] = useState<TWorkItem['id'] | null>(null);
+    const [dropHint, setDropHint] = useState<{ index: number; position: 'before' | 'after' } | null>(null);
+
+    const clearDropHint = () => {
+        if (dropRafRef.current !== null) {
+            cancelAnimationFrame(dropRafRef.current);
+            dropRafRef.current = null;
+        }
+        setDropHint(null);
+    };
 
     const onRemove = (item: TWorkItem) => {
         setWorkflow((previous) => previous.filter((current) => {
@@ -102,18 +119,23 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
 
     const onDragStart = (e: React.DragEvent<HTMLDivElement>, id: TWorkItem['id']) => {
         if ((e.target as HTMLElement).closest('.options')) { e.preventDefault(); return; }
-        draggingId.current = id;
+        draggingIdRef.current = id;
+        setDraggingId(id);
+        clearDropHint();
         pendingIndexRef.current = null;
         e.dataTransfer.effectAllowed = 'move';
     };
 
     const onDragEnd = () => {
-        draggingId.current = null;
+        draggingIdRef.current = null;
+        setDraggingId(null);
         pendingIndexRef.current = null;
+        clearDropHint();
     };
 
     const onDragOver = (e: React.DragEvent<HTMLDivElement>, overIndex: number) => {
         e.preventDefault();
+        if (!draggingIdRef.current) return;
 
         const target = e.currentTarget as HTMLDivElement;
         const rect   = target.getBoundingClientRect();
@@ -121,6 +143,18 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
 
         const insertIndex = overIndex + (after ? 1 : 0);
         pendingIndexRef.current = insertIndex;
+
+        const nextHint = { index: overIndex, position: after ? 'after' : 'before' as const };
+
+        if (dropRafRef.current !== null) cancelAnimationFrame(dropRafRef.current);
+        dropRafRef.current = requestAnimationFrame(() => {
+            setDropHint((previous) => {
+                if (previous && previous.index === nextHint.index && previous.position === nextHint.position) {
+                    return previous;
+                }
+                return nextHint;
+            });
+        });
     };
 
     const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -131,7 +165,7 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
 
         setWorkflow((previous) => {
             let targetIndex = insertIndex;
-            const from = previous.findIndex(x => x.id === draggingId.current);
+            const from = previous.findIndex(x => x.id === draggingIdRef.current);
 
             if (from < 0) return previous;
             if (targetIndex > previous.length) targetIndex = previous.length;
@@ -147,6 +181,7 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
         });
 
         pendingIndexRef.current = null;
+        clearDropHint();
     };
 
     return (
@@ -160,6 +195,8 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
                                 {...{ item, index, onRemove, onToggle }}
                                 key={item.id}
                                 draggable
+                                isDragging={draggingId === item.id}
+                                dropPosition={dropHint?.index === index ? dropHint.position : null}
                                 onDragStart={(e) => onDragStart(e, item.id)}
                                 onDragOver={(e) => onDragOver(e, index)}
                                 onDragEnd={onDragEnd}
