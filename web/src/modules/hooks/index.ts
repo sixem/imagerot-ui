@@ -148,3 +148,5 @@ export const hooks = {
     unwatch,
     senders
 };
+
+export { useTimeouts } from './useTimeouts';

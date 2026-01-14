@@ -3,11 +3,10 @@ import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
 
 import { useEffect, useRef } from 'react';
-import { MessageType, WorkItemType, StorageKeys } from '@/data/enums';
+import { MessageType, StorageKeys } from '@/data/enums';
 import { Button, ButtonSet } from '@/components/';
 import { estimates, hooks, triggers } from '@/modules';
-import { debug, pick, uid, saveAsAdaptive, useStoredState } from '@/utils';
-import { listEffects, listModes } from 'imagerot/browser';
+import { debug, saveWorkflow, uid, useStoredState, workflowFromJson } from '@/utils';
 
 import Processor from '@/workers/processor?worker';
 
@@ -16,83 +15,7 @@ type TActionsSignature = TPaneSignature & {
     workflow: TWorkItem[];
 } & { setters: { workflow: Dispatch<SetStateAction<TWorkItem[]>> }};
 
-type TWorkflowExportItem = Pick<TWorkItem, 'key' | 'type' | 'muted' | 'config'>;
-
-type TWorkflowExport = {
-    items: TWorkflowExportItem[]
-};
-
 const log = debug('app:controls:actions');
-
-/**
- * Converts an array of workflow items into a JSON string for export
- * Returns null on invalid or empty data.
- */
-const workflowToJson = (data: TWorkItem[]): string | null => {
-    const items = data.map((item) => {
-        return pick(item, ['key', 'type', 'muted', 'config']);
-    });
-
-    return items.length > 0 ? JSON.stringify({ items } as TWorkflowExport) : null;
-};
-
-/**
- * Parses a JSON string containing workflow items into an array of `TWorkflowExportItem`
- * 
- * Returns null on invalid or empty data.
- */
-const workflowFromJson = (data: string): TWorkflowExportItem[] | null => {
-    try {
-        const parsed = JSON.parse(data) as TWorkflowExport;
-
-        if (!parsed.items) return null;
-
-        const effects = new Set(listEffects());
-        const modes   = new Set(listModes());
-        const types   = new Set(Object.values(WorkItemType));
-
-        return parsed.items.map((item) => {
-            const { key, type, muted, config } = item;
-
-            if (!types.has(type)) return null;
-
-            switch (type) {
-                case WorkItemType.effect: {
-                    return effects.has(key)
-                        ? { key, type, muted: muted ?? false, config: config || {} }
-                        : null
-                };
-
-                case WorkItemType.mode: {
-                    return modes.has(key)
-                        ? { key, type, muted: muted ?? false, config: null }
-                        : null
-                }
-
-                default: return null
-            }
-        }).filter((item) => item !== null);
-    } catch (error) {
-        log(error);
-        return null;
-    }
-};
-
-
-/**
- * Attempts to export and save the current workflow to a local .json file
-*/
-const saveWorkflow = async (workflow: TWorkItem[]) => {
-    const converted = workflowToJson(workflow);
-
-    if (converted) {
-        const blob = new Blob([converted], { type: 'application/json' });
-
-        if (await saveAsAdaptive(blob, 'workflowExport')) {
-            hooks.senders.notify(MessageType.ok, 'Workflow exported');
-        }
-    }
-};
 
 export const Actions = ({ current, setters, busy, estimated, workflow }: TActionsSignature) => {
     const [isReversed, setReversed] = useStoredState<boolean>(StorageKeys.uiReversed, false);

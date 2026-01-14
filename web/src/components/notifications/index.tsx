@@ -2,6 +2,7 @@ import type { TNotifyItem } from '@/data/types';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { hooks, triggers } from '@/modules';
+import { useTimeouts } from '@/modules/hooks';
 import { config } from '@/config';
 
 import './index.scss';
@@ -12,16 +13,7 @@ export const Notifications = () => {
     const [items, setItems] = useState<(TNotifyItem & { id: number; visible: boolean; })[]>([]);
     const idRef = useRef(0);
     const aliveRef = useRef(true);
-    const timeoutsRef = useRef(new Set<number>());
-
-    const scheduleTimeout = useCallback((fn: () => void, delay: number) => {
-        const id = window.setTimeout(() => {
-            timeoutsRef.current.delete(id);
-            if (aliveRef.current) fn();
-        }, delay);
-
-        timeoutsRef.current.add(id);
-    }, []);
+    const { scheduleTimeout, clearTimeouts } = useTimeouts();
 
     // Removes a notification by its ID
     const notificationRemove = useCallback((id: number) => {
@@ -29,7 +21,9 @@ export const Notifications = () => {
             if (item.id === id) {
                 const updatedItem = { ...item, visible: false };
                 scheduleTimeout(() => {
-                    setItems(previous => previous.filter((item) => item.id !== id));
+                    if (aliveRef.current) {
+                        setItems(previous => previous.filter((item) => item.id !== id));
+                    }
                 }, 500);
                 return updatedItem;
             }
@@ -52,7 +46,9 @@ export const Notifications = () => {
                 if (item.id === id) {
                     const updatedItem = { ...item, visible: true };
                     scheduleTimeout(() => {
-                        notificationRemove(item.id);
+                        if (aliveRef.current) {
+                            notificationRemove(item.id);
+                        }
                     }, duration || config.notifications.defaultDuration);
                     return updatedItem;
                 }
@@ -79,8 +75,7 @@ export const Notifications = () => {
     useEffect(() => {
         return () => {
             aliveRef.current = false;
-            timeoutsRef.current.forEach((id) => clearTimeout(id));
-            timeoutsRef.current.clear();
+            clearTimeouts();
         };
     }, []);
 
