@@ -1,6 +1,8 @@
 import type { TEffectItem, TEffectValue } from '@/data/types';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components';
 import { Effects } from '@/data/';
 import { listEffects } from 'imagerot/browser';
@@ -16,65 +18,68 @@ const EFFECT_DEFAULT = pickDefault(
     config?.selections?.defaults?.effect as typeof EFFECT_KEYS[number] | null | undefined
 );
 
+const DEFAULT_DESCRIPTION = 'Adds the selected effect to the workflow.';
+
 const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: string]: TEffectValue }) => void; }) => {
-    const selectionRef = useRef<HTMLSelectElement>(null);
-    const [selected, setSelected] = useState<{ key: string; value: TEffectItem; } | null>(null);
+    const [selectedKey, setSelectedKey] = useState<string>(EFFECT_DEFAULT);
     const [configState, setConfigState] = useState<{ [key: string]: TEffectValue }>({});
+
+    const selectedEffect = useMemo<TEffectItem | null>(() => {
+        return selectedKey && Effects[selectedKey] ? Effects[selectedKey] : null;
+    }, [selectedKey]);
+
+    const effectOptions = useMemo(() => {
+        return EFFECT_KEYS
+            .filter((key) => EFFECT_VALID.has(key))
+            .map((key) => ({ key, label: Effects[key]?.format || key }));
+    }, []);
 
     const handleConfigChange = useCallback((name: string, value: TEffectValue) => {
         setConfigState(previous => ({ ...previous, [name]: value }));
     }, []);
 
-    const handleEffectChange = useCallback(() => {
-        if (selectionRef.current) {
-            const value = selectionRef.current.value;
-
-            if (Effects[value]) {
-                setSelected({ key: value, value: Effects[value] });
-            }
-        }
+    const handleEffectChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedKey(event.currentTarget.value);
     }, []);
 
     useEffect(() => {
-        if (selected?.value?.config) {
-            setConfigState(readConfigDefaults(selected.value.config));
+        if (selectedEffect?.config) {
+            setConfigState(readConfigDefaults(selectedEffect.config));
         } else {
             setConfigState({});
         }
-    }, [selected]);
+    }, [selectedEffect]);
 
-    useEffect(() => handleEffectChange(), [handleEffectChange]);
+    const handleAdd = useCallback(() => {
+        if (selectedKey && selectedEffect) {
+            onAdd(selectedKey, configState);
+        }
+    }, [configState, onAdd, selectedEffect, selectedKey]);
 
     return (
         <div className="section selection-effect">
             <div className="sub-header">Available effects:</div>
 
-            <select name="effect-select" ref={selectionRef} onChange={handleEffectChange} value={selected?.key ?? EFFECT_DEFAULT}>
-                {(EFFECT_KEYS.map((key) => {
-                    return EFFECT_VALID.has(key) ? (
-                        <option key={key} value={key}>{Effects[key]?.format || key}</option>
-                    ) : null;
-                }))}
+            <select name="effect-select" onChange={handleEffectChange} value={selectedKey}>
+                {effectOptions.map(({ key, label }) => (
+                    <option key={key} value={key}>{label}</option>
+                ))}
             </select>
 
             <div className="description">
-                <span>{selected?.value?.description ?? "Adds the selected effect to the workflow."}</span>
+                <span>{selectedEffect?.description ?? DEFAULT_DESCRIPTION}</span>
             </div>
 
-            {selected?.value?.config ? (
+            {selectedEffect?.config ? (
                 <div className="configuration">
                     <SelectionEffectConfig
-                        config={selected.value.config}
+                        config={selectedEffect.config}
                         onChange={handleConfigChange}
                     />
                 </div>
             ) : null}
 
-            <Button text={"Add effect to workflow"} icon={"add"} onClick={() => {
-                if (selected) {
-                    onAdd(selected.key, configState);
-                }
-            }} />
+            <Button text={"Add effect to workflow"} icon={"add"} onClick={handleAdd} />
         </div>
     );
 };
