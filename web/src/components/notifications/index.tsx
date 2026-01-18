@@ -73,11 +73,13 @@ export const Notifications = () => {
     }, [onNotifyReceive]);
 
     useEffect(() => {
+        aliveRef.current = true;
+
         return () => {
             aliveRef.current = false;
             clearTimeouts();
         };
-    }, []);
+    }, [clearTimeouts]);
 
     return (
         <div className="notifier">

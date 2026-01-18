@@ -9,11 +9,13 @@ type TWorkflowItemProps = {
     draggable?: boolean;
     onRemove: (item: TWorkItem) => void;
     onToggle: (item: TWorkItem) => void;
+    onSelect: (item: TWorkItem) => void;
     onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
     onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
     onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
     onDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
     isDragging?: boolean;
+    isSelected?: boolean;
     dropPosition?: 'before' | 'after' | null;
 };
 
@@ -23,11 +25,13 @@ const WorkflowItem = ({
     draggable,
     onRemove,
     onToggle,
+    onSelect,
     onDragStart,
     onDragOver,
     onDragEnd,
     onDrop,
     isDragging = false,
+    isSelected = false,
     dropPosition = null
 }: TWorkflowItemProps) => {
     const type = item.type === WorkItemType.mode ? "mode" : "effect";
@@ -38,17 +42,27 @@ const WorkflowItem = ({
         classList.push('dimmed');
     }
 
+    if (isSelected) {
+        classList.push('selected');
+    }
+
     return (
         <div
             data-index={index}
             className={classList.join(' ')}
             data-dragging={isDragging ? "true" : undefined}
             data-drop={dropPosition ?? undefined}
+            data-selected={isSelected ? "true" : undefined}
             draggable={draggable}
             onDragStart={onDragStart}
             onDragOver={onDragOver}
             onDragEnd={onDragEnd}
             onDrop={onDrop}
+            onClick={() => {
+                if (item.type === WorkItemType.effect) {
+                    onSelect(item);
+                }
+            }}
         >
             <div className="text">
                 <div>{item.key}</div>
@@ -59,12 +73,16 @@ const WorkflowItem = ({
 
             <div className="options">
                 <Tooltip text={`${isToggled ? "Unmute" : "Mute"} this ${type} during processing`}>
-                    <div className={"toggle" + (isToggled ? " toggled" : "")} onClick={() => {
+                    <div className={"toggle" + (isToggled ? " toggled" : "")} onClick={(event) => {
+                        event.stopPropagation();
                         onToggle(item);
                     }} />
                 </Tooltip>
 
-                <div className="remove" onClick={() => onRemove(item)} />
+                <div className="remove" onClick={(event) => {
+                    event.stopPropagation();
+                    onRemove(item);
+                }} />
             </div>
         </div>
     );

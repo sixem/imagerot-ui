@@ -1,9 +1,9 @@
-import type { TEffectItem, TEffectValue } from '@/data/types';
+import type { TEffectItem, TEffectValue, TWorkItem } from '@/data/types';
 
 import type { ChangeEvent } from 'react';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button } from '@/components';
+import { Button, ButtonSet } from '@/components';
 import { Effects } from '@/data/';
 import { listEffects } from 'imagerot/browser';
 import { config } from '@/config';
@@ -18,11 +18,21 @@ const EFFECT_DEFAULT = pickDefault(
     config?.selections?.defaults?.effect as typeof EFFECT_KEYS[number] | null | undefined
 );
 
-const DEFAULT_DESCRIPTION = 'Adds the selected effect to the workflow.';
+const DEFAULT_DESCRIPTION = 'Adds this effect to the workflow.';
 
-const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: string]: TEffectValue }) => void; }) => {
+type TSelectionEffectProps = {
+    onAdd: (effect: string, config: { [key: string]: TEffectValue }) => void;
+    onUpdate: (id: string, config: { [key: string]: TEffectValue }) => void;
+    onCancelEdit: () => void;
+    editingEffect: TWorkItem | null;
+};
+
+const SelectionEffect = ({ onAdd, onUpdate, onCancelEdit, editingEffect }: TSelectionEffectProps) => {
     const [selectedKey, setSelectedKey] = useState<string>(EFFECT_DEFAULT);
-    const [configState, setConfigState] = useState<{ [key: string]: TEffectValue }>({});
+    const [draftConfig, setDraftConfig] = useState<{ [key: string]: TEffectValue }>({});
+    const isEditing = !!editingEffect;
+    const editingKey = editingEffect?.key ?? null;
+    const editingConfig = editingEffect?.config ?? null;
 
     const selectedEffect = useMemo<TEffectItem | null>(() => {
         return selectedKey && Effects[selectedKey] ? Effects[selectedKey] : null;
@@ -35,51 +45,83 @@ const SelectionEffect = ({ onAdd }: { onAdd: (effect: string, config: { [key: st
     }, []);
 
     const handleConfigChange = useCallback((name: string, value: TEffectValue) => {
-        setConfigState(previous => ({ ...previous, [name]: value }));
+        setDraftConfig(previous => ({ ...previous, [name]: value }));
     }, []);
 
     const handleEffectChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedKey(event.currentTarget.value);
     }, []);
 
+    // Merge saved values over defaults so new fields keep sensible defaults.
     useEffect(() => {
         if (selectedEffect?.config) {
-            setConfigState(readConfigDefaults(selectedEffect.config));
+            const defaults = readConfigDefaults(selectedEffect.config);
+            setDraftConfig(editingConfig ? { ...defaults, ...editingConfig } : defaults);
+        } else if (editingConfig) {
+            setDraftConfig({ ...editingConfig });
         } else {
-            setConfigState({});
+            setDraftConfig({});
         }
-    }, [selectedEffect]);
+    }, [selectedEffect, editingConfig]);
+
+    useEffect(() => {
+        if (editingKey) {
+            setSelectedKey(editingKey);
+        }
+    }, [editingKey]);
 
     const handleAdd = useCallback(() => {
         if (selectedKey && selectedEffect) {
-            onAdd(selectedKey, configState);
+            onAdd(selectedKey, draftConfig);
         }
-    }, [configState, onAdd, selectedEffect, selectedKey]);
+    }, [draftConfig, onAdd, selectedEffect, selectedKey]);
+
+    const handleSave = useCallback(() => {
+        if (editingEffect) {
+            onUpdate(editingEffect.id, draftConfig);
+        }
+    }, [draftConfig, editingEffect, onUpdate]);
+
+    const handleCancel = useCallback(() => {
+        onCancelEdit();
+        setSelectedKey(EFFECT_DEFAULT);
+    }, [onCancelEdit]);
+
+    const description = selectedEffect?.description ?? DEFAULT_DESCRIPTION;
+    const isConfigurable = !!selectedEffect?.config;
 
     return (
         <div className="section selection-effect">
-            <div className="sub-header">Available effects:</div>
+            <div className="sub-header">Choose effect:</div>
 
-            <select name="effect-select" onChange={handleEffectChange} value={selectedKey}>
+            <select name="effect-select" onChange={handleEffectChange} value={selectedKey} disabled={isEditing}>
                 {effectOptions.map(({ key, label }) => (
                     <option key={key} value={key}>{label}</option>
                 ))}
             </select>
 
             <div className="description">
-                <span>{selectedEffect?.description ?? DEFAULT_DESCRIPTION}</span>
+                <span>{description}</span>
             </div>
 
-            {selectedEffect?.config ? (
+            {isConfigurable ? (
                 <div className="configuration">
                     <SelectionEffectConfig
                         config={selectedEffect.config}
                         onChange={handleConfigChange}
+                        configValues={draftConfig}
                     />
                 </div>
             ) : null}
 
-            <Button text={"Add effect to workflow"} icon={"add"} onClick={handleAdd} />
+            {isEditing ? (
+                <ButtonSet items={[
+                    { text: 'Save changes', onClick: handleSave },
+                    { text: 'Cancel', onClick: handleCancel, style: { flex: '0 0 auto' } }
+                ]} />
+            ) : (
+                <Button text={"Add effect"} icon={"add"} onClick={handleAdd} />
+            )}
         </div>
     );
 };

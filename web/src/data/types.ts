@@ -85,10 +85,14 @@ export type TEffectChangeEvent = {
     onChange: (name: string, value: TEffectValue) => void;
 };
 
-export type TInputSignature<TItem extends TEffectConfigItem = TEffectConfigNumber> = {
+export type TInputSignature<
+    TItem extends TEffectConfigItem = TEffectConfigNumber,
+    TValue = TEffectValue
+> = {
     name: string;
     item: TItem;
     onChange: TEffectChangeEvent['onChange'];
+    value?: TValue;
 };
 
 export type TWorkItem = {

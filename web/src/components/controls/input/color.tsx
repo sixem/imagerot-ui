@@ -13,7 +13,12 @@ const pad = (n: number) => n.toString().padStart(3, '0');
 /**
  * Color input for color-based effect configurations
  */
-export const InputColor = ({ name, item, onChange }: TInputSignature<TEffectConfigColor>) => {
+export const InputColor = ({
+    name,
+    item,
+    onChange,
+    value
+}: TInputSignature<TEffectConfigColor, [number, number, number]>) => {
     const [color, setColor] = useState<TColorObject>({
         r: item.current[0],
         g: item.current[1],
@@ -23,6 +28,7 @@ export const InputColor = ({ name, item, onChange }: TInputSignature<TEffectConf
     const [isPicking, setPicking] = useState<boolean>(false);
 
     const pendingRef = useRef(false);
+    const syncTargetRef = useRef<TColorObject | null>(null);
     const colorRef = useRef<TColorObject>(color);
     const nameRef = useRef(name);
 
@@ -31,6 +37,28 @@ export const InputColor = ({ name, item, onChange }: TInputSignature<TEffectConf
     useEffect(() => { nameRef.current = name;}, [name]);
 
     useEffect(() => {
+        const nextColor = Array.isArray(value) && value.length === 3
+            ? { r: value[0], g: value[1], b: value[2] }
+            : { r: item.current[0], g: item.current[1], b: item.current[2] };
+
+        syncTargetRef.current = nextColor;
+        setColor(nextColor);
+    }, [item, value]);
+
+    useEffect(() => {
+        // Avoid re-firing onChange when syncing external values into local state.
+        if (syncTargetRef.current) {
+            if (
+                color.r === syncTargetRef.current.r
+                && color.g === syncTargetRef.current.g
+                && color.b === syncTargetRef.current.b
+            ) {
+                syncTargetRef.current = null;
+            }
+            colorRef.current = color;
+            return;
+        }
+
         debouncedOnChange(nameRef.current, [color.r, color.g, color.b]);
         colorRef.current = color;
     }, [color, debouncedOnChange]);

@@ -1,6 +1,6 @@
-import type { TPaneSignature, TWorkItem } from '@/data/types';
+import type { TEffectValue, TPaneSignature, TWorkItem } from '@/data/types';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InputFile } from './input/';
 import { createWorkItem, debug, getImageDimensions } from '@/utils';
 import { WorkItemType } from '@/data/enums';
@@ -24,6 +24,13 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
     const [estimated, setEstimated] = useState<number | null>(null);
     const [workflow, setWorkflow] = useState<TWorkItem[]>([]);
     const [dimensions, setDimensions] = useState<[number, number] | null>(null);
+    // Track the workflow effect currently being edited in the selector.
+    const [editingEffectId, setEditingEffectId] = useState<string | null>(null);
+
+    const editingEffect = useMemo(() => {
+        if (!editingEffectId) return null;
+        return workflow.find((item) => item.id === editingEffectId && item.type === WorkItemType.effect) ?? null;
+    }, [editingEffectId, workflow]);
 
     const activeWorkflow = useMemo(() => {
         const effects: string[] = [];
@@ -37,6 +44,36 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
 
         return { effects, modes };
     }, [workflow]);
+
+    useEffect(() => {
+        if (editingEffectId && !editingEffect) {
+            setEditingEffectId(null);
+        }
+    }, [editingEffect, editingEffectId]);
+
+    const handleSelectEffect = useCallback((item: TWorkItem) => {
+        if (item.type !== WorkItemType.effect) return;
+        setEditingEffectId((previous) => (previous === item.id ? null : item.id));
+    }, []);
+
+    const handleAddEffect = useCallback((effect: string, config: { [key: string]: TEffectValue }) => {
+        setWorkflow((previous) => [...previous, createWorkItem(
+            effect, WorkItemType.effect, config
+        )]);
+    }, []);
+
+    const handleUpdateEffect = useCallback((id: string, config: { [key: string]: TEffectValue }) => {
+        setWorkflow((previous) => previous.map((item) => {
+            if (item.id === id) {
+                return { ...item, config };
+            }
+            return item;
+        }));
+    }, []);
+
+    const handleCancelEdit = useCallback(() => {
+        setEditingEffectId(null);
+    }, []);
 
     useEffect(() => {
         let alive = true;
@@ -89,13 +126,19 @@ const Controls = ({ current, setters, busy }: TPaneSignature) => {
                     )]);
                 }} />
 
-                <SelectionEffect onAdd={(effect, config) => {
-                    setWorkflow((previous) => [...previous, createWorkItem(
-                        effect, WorkItemType.effect, config
-                    )]);
-                }} />
+                <SelectionEffect
+                    onAdd={handleAddEffect}
+                    onUpdate={handleUpdateEffect}
+                    onCancelEdit={handleCancelEdit}
+                    editingEffect={editingEffect}
+                />
 
-                <Workflow {...{ workflow, setWorkflow }} />
+                <Workflow
+                    workflow={workflow}
+                    setWorkflow={setWorkflow}
+                    selectedId={editingEffectId}
+                    onSelect={handleSelectEffect}
+                />
             </div>
             <div className="bottom">
                 <Actions

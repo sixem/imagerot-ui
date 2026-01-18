@@ -9,6 +9,8 @@ import './index.scss';
 type TWorkflowSignature = {
     workflow: TWorkItem[];
     setWorkflow: React.Dispatch<React.SetStateAction<TWorkItem[]>>;
+    selectedId: string | null;
+    onSelect: (item: TWorkItem) => void;
 };
 
 /**
@@ -16,7 +18,7 @@ type TWorkflowSignature = {
  * 
  * Contains the active modes and effects that will be used to process the image
  */
-export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
+export const Workflow = ({ workflow, setWorkflow, selectedId, onSelect }: TWorkflowSignature) => {
     const { draggingId, dropHint, onDragStart, onDragOver, onDragEnd, onDrop } = useWorkflowDrag(setWorkflow);
 
     const onRemove = useCallback((item: TWorkItem) => {
@@ -45,6 +47,8 @@ export const Workflow = ({ workflow, setWorkflow }: TWorkflowSignature) => {
                             <WorkflowItem
                                 {...{ item, index, onRemove, onToggle }}
                                 key={item.id}
+                                isSelected={selectedId === item.id}
+                                onSelect={onSelect}
                                 draggable
                                 isDragging={draggingId === item.id}
                                 dropPosition={dropHint?.index === index ? dropHint.position : null}

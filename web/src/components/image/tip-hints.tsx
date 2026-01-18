@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 const tipHints = [
-    'click and hold the image to see a zoomed view.',
-    'reverse the UI using the reverse button.',
-    'drag to reorder effects and modes.'
+    'you can click and hold the image to see a zoomed view',
+    'you can reverse the UI using the reverse button',
+    'you can drag to reorder effects and modes'
 ];
 
 const TipHints = () => {
