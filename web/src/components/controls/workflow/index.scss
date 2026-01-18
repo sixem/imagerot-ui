@@ -14,7 +14,6 @@
 
             scrollbar-color: #101118 #20212d;
             scrollbar-width: thin;
-            overflow-y: auto;
             overflow-x: hidden;
             outline: none;
 
@@ -88,7 +87,6 @@
                         }
 
                         &.config {
-                            white-space: nowrap;
                             color: #8e8ba7;
                             font-size: 0.9em;
                             letter-spacing: 1px;

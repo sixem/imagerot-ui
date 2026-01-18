@@ -1,4 +1,3 @@
-@use 'sass:color';
 @use '@/sass/variables' as *;
 
 #root>div.wrapper {
@@ -241,7 +240,7 @@
                     }
                 }
 
-                input {
+                input[type="file"] {
                     display: none;
                 }
 

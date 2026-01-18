@@ -43,14 +43,24 @@ div.button {
             min-width: var(--icon-size);
         }
 
+        &:not(.textless) {
+            padding-right: calc(10px + var(--icon-size) + 12px);
+        }
+
         &:not([data-disabled="true"]):hover::after {
             opacity: 1;
         }
 
         /* center-only icon variant */
         &.textless {
-            padding: 0 14px;
-            min-width: var(--icon-size);
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
             &::after {
                 inset: 0;
@@ -69,18 +79,28 @@ div.button {
             --icon-size: 14px;
         }
 
-        &.cog {
-            --icon-url: url('@/assets/cog.svg');
-            --icon-size: 20px;
-        }
-
         &.reverse {
             --icon-url: url('@/assets/reverse.svg');
             --icon-size: 14px;
         }
 
         &.export {
-            --icon-url: url('@/assets/export.svg');
+            --icon-url: url('@/assets/save.svg');
+            --icon-size: 16px;
+        }
+
+        &.presets {
+            --icon-url: url('@/assets/presets.svg');
+            --icon-size: 16px;
+        }
+
+        &.trash {
+            --icon-url: url('@/assets/trash.svg');
+            --icon-size: 16px;
+        }
+
+        &.check {
+            --icon-url: url('@/assets/check.svg');
             --icon-size: 16px;
         }
     }

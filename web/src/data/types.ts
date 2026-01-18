@@ -103,6 +103,15 @@ export type TWorkItem = {
     muted?: boolean;
 };
 
+export type TWorkflowPresetItem = Pick<TWorkItem, 'key' | 'type' | 'muted' | 'config'>;
+
+export type TWorkflowPreset = {
+    id: string;
+    name: string;
+    items: TWorkflowPresetItem[];
+    updatedAt: number;
+};
+
 export interface TProcessorInput {
     image: {
         buffer: ArrayBuffer;

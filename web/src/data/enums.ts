@@ -19,7 +19,8 @@ export const EffectType = {
 } as const;
 
 export const StorageKeys = {
-    uiReversed: 'uiReversed'
+    uiReversed: 'uiReversed',
+    workflowPresets: 'workflowPresets'
 } as const;
 
 export const BucketKeys = ['modes', 'effects'] as const satisfies readonly TBucketKeys[];

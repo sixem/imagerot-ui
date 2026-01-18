@@ -1,12 +1,13 @@
 
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
-import type { TWorkItem, TPaneSignature, TProcessorOutput } from '@/data/types';
+import type { TWorkItem, TPaneSignature, TProcessorOutput, TWorkflowPresetItem } from '@/data/types';
 
-import { useEffect, useRef } from 'react';
-import { MessageType, StorageKeys } from '@/data/enums';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { MessageType, StorageKeys, WorkItemType } from '@/data/enums';
 import { Button, ButtonSet } from '@/components/';
 import { estimates, hooks, triggers } from '@/modules';
 import { debug, saveWorkflow, uid, useStoredState, workflowFromJson } from '@/utils';
+import { PresetsModal } from '../presets';
 
 import Processor from '@/workers/processor?worker';
 
@@ -19,6 +20,7 @@ const log = debug('app:controls:actions');
 
 export const Actions = ({ current, setters, busy, estimated, workflow }: TActionsSignature) => {
     const [isReversed, setReversed] = useStoredState<boolean>(StorageKeys.uiReversed, false);
+    const [isPresetsOpen, setPresetsOpen] = useState(false);
 
     const inputRef     = useRef<HTMLInputElement>(null);
     const busyRef      = useRef(busy);
@@ -27,6 +29,24 @@ export const Actions = ({ current, setters, busy, estimated, workflow }: TAction
 
     useEffect(() => { busyRef.current = busy; }, [busy]);
     useEffect(() => { settersRef.current = setters; }, [setters]);
+
+    const toWorkItems = useCallback((items: TWorkflowPresetItem[]) => {
+        return items.map((item) => ({
+            id: uid(),
+            key: item.key,
+            type: item.type,
+            muted: item.muted ?? false,
+            config: item.type === WorkItemType.effect ? (item.config ?? {}) : null
+        }));
+    }, []);
+
+    const handlePresetLoad = useCallback((items: TWorkflowPresetItem[]) => {
+        setters.workflow(toWorkItems(items));
+    }, [setters, toWorkItems]);
+
+    const handlePresetAppend = useCallback((items: TWorkflowPresetItem[]) => {
+        setters.workflow((previous) => [...previous, ...toWorkItems(items)]);
+    }, [setters, toWorkItems]);
 
     // Called when starting a new image generation
     const onProcess = async () => {
@@ -164,10 +184,19 @@ export const Actions = ({ current, setters, busy, estimated, workflow }: TAction
             <input onChange={onImport} ref={inputRef} type="file" accept={'application/json'} />
 
             <ButtonSet style={{ marginTop: '10px' }} items={[
-                { text: 'Export workflow', disabled: workflow.length === 0, onClick: () => saveWorkflow(workflow)},
-                { text: 'Import workflow' , onClick: () => inputRef?.current?.click() },
+                { text: 'Export', tooltip: 'Export workflow', disabled: workflow.length === 0, onClick: () => saveWorkflow(workflow)},
+                { text: 'Import', tooltip: 'Import workflow', onClick: () => inputRef?.current?.click() },
+                { text: null, tooltip: 'Presets', icon: 'presets', onClick: () => setPresetsOpen(true) },
                 { text: null, tooltip: "Reverse the interface UI", icon: 'reverse', onClick: () => setReversed(!isReversed) }
             ]}/>
+
+            <PresetsModal
+                visible={isPresetsOpen}
+                onClose={() => setPresetsOpen(false)}
+                workflow={workflow}
+                onLoad={handlePresetLoad}
+                onAppend={handlePresetAppend}
+            />
         </div>
     );
 };

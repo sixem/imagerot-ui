@@ -79,8 +79,10 @@ const SelectionEffect = ({ onAdd, onUpdate, onCancelEdit, editingEffect }: TSele
     const handleSave = useCallback(() => {
         if (editingEffect) {
             onUpdate(editingEffect.id, draftConfig);
+            onCancelEdit();
+            setSelectedKey(EFFECT_DEFAULT);
         }
-    }, [draftConfig, editingEffect, onUpdate]);
+    }, [draftConfig, editingEffect, onCancelEdit, onUpdate]);
 
     const handleCancel = useCallback(() => {
         onCancelEdit();

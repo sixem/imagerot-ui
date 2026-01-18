@@ -65,10 +65,13 @@ This is a new project, and additional features are expected to be added over tim
 
 As for now, here are some potential features that may be implemented in the future:
 
-- Locally stored presets
-- More advanced saving options (conversion to other image types etc.)
 - Implementation of a simple keybind system
-- Image comparison slider for the unmodified and modified image
+- Image comparison functionality for the unmodified/modified image
+
+Roadmap items that have been completed:
+
+- ~~Locally stored presets~~ ✓
+- ~~More advanced saving options (conversion to other image types etc.)~~ ✓
 
 ## Disclaimers
 

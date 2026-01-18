@@ -3,3 +3,4 @@ export { Controls } from './controls';
 export { Notifications } from './notifications';
 export { TooltipDisplay, Tooltip } from './tooltips';
 export { Button, ButtonSet } from './button';
+export { Modal } from './modal';
