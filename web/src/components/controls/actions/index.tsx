@@ -25,10 +25,12 @@ export const Actions = ({ current, setters, busy, estimated, workflow }: TAction
     const inputRef     = useRef<HTMLInputElement>(null);
     const busyRef      = useRef(busy);
     const settersRef   = useRef(setters);
+    const currentRef   = useRef(current);
     const processorRef = useRef<Worker | null>(null);
 
     useEffect(() => { busyRef.current = busy; }, [busy]);
     useEffect(() => { settersRef.current = setters; }, [setters]);
+    useEffect(() => { currentRef.current = current; }, [current]);
 
     const toWorkItems = useCallback((items: TWorkflowPresetItem[]) => {
         return items.map((item) => ({
@@ -128,6 +130,17 @@ export const Actions = ({ current, setters, busy, estimated, workflow }: TAction
                 if (event.data.estimates && event.data.overhead) {
                     estimates.addRecord(event.data.estimates);
                     estimates.setOverhead(event.data.overhead);
+                }
+            }
+
+            if (event.data?.image) {
+                const activeId = currentRef.current.loaded?.id ?? null;
+                if (!activeId || event.data.image.id !== activeId) {
+                    if (event.data.image.url.startsWith('blob:')) {
+                        URL.revokeObjectURL(event.data.image.url);
+                        log("Revoked stale processed image URL", event.data.image.url);
+                    }
+                    return;
                 }
             }
 
