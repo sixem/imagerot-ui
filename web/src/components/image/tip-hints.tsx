@@ -24,18 +24,18 @@ const TipHints = () => {
 
         const scheduleNext = () => {
             setTipVisible(false);
-            tipTimeoutRef.current = window.setTimeout(() => {
+            tipTimeoutRef.current = setTimeout(() => {
                 setTipIndex((prev) => (prev + 1) % tipHints.length);
                 setTipVisible(true);
-                tipTimeoutRef.current = window.setTimeout(scheduleNext, holdMs);
+                tipTimeoutRef.current = setTimeout(scheduleNext, holdMs);
             }, fadeMs);
         };
 
-        tipTimeoutRef.current = window.setTimeout(scheduleNext, holdMs);
+        tipTimeoutRef.current = setTimeout(scheduleNext, holdMs);
 
         return () => {
             if (tipTimeoutRef.current) {
-                window.clearTimeout(tipTimeoutRef.current);
+                clearTimeout(tipTimeoutRef.current);
             }
         };
     }, []);

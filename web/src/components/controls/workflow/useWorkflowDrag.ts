@@ -48,8 +48,8 @@ const useWorkflowDrag = (setWorkflow: React.Dispatch<React.SetStateAction<TWorkI
 
         const insertIndex = overIndex + (after ? 1 : 0);
         pendingIndexRef.current = insertIndex;
-
-        const nextHint = { index: overIndex, position: after ? 'after' : 'before' as const };
+        const position: 'before' | 'after' = after ? 'after' : 'before';
+        const nextHint: Exclude<TDropHint, null> = { index: overIndex, position };
 
         if (dropRafRef.current !== null) cancelAnimationFrame(dropRafRef.current);
         dropRafRef.current = requestAnimationFrame(() => {

@@ -89,8 +89,8 @@ const SelectionEffect = ({ onAdd, onUpdate, onCancelEdit, editingEffect }: TSele
         setSelectedKey(EFFECT_DEFAULT);
     }, [onCancelEdit]);
 
+    const selectedConfig = selectedEffect?.config ?? null;
     const description = selectedEffect?.description ?? DEFAULT_DESCRIPTION;
-    const isConfigurable = !!selectedEffect?.config;
 
     return (
         <div className="section selection-effect">
@@ -106,10 +106,10 @@ const SelectionEffect = ({ onAdd, onUpdate, onCancelEdit, editingEffect }: TSele
                 <span>{description}</span>
             </div>
 
-            {isConfigurable ? (
+            {selectedConfig ? (
                 <div className="configuration">
                     <SelectionEffectConfig
-                        config={selectedEffect.config}
+                        config={selectedConfig}
                         onChange={handleConfigChange}
                         configValues={draftConfig}
                     />
